@@ -119,7 +119,66 @@
       padding: 24px 20px;
     }
 
-    /* ─── EN-TÊTE LIHTEA ─── */
+    /* ─── EN-TÊTE — UTILITY BAR FINTECH ─── */
+    .header-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--c-border);
+      padding: 0 28px;
+      transition: box-shadow 0.2s ease;
+    }
+    .header-sticky.scrolled {
+      box-shadow: 0 2px 20px rgba(15,43,70,0.10);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      gap: 16px;
+    }
+    .header-page-context {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .header-page-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--c-navy);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    .header-page-sep {
+      color: var(--c-border-strong);
+      font-size: 14px;
+    }
+    .header-page-sub {
+      font-size: 13px;
+      color: var(--c-text-3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
     .header {
       display: flex;
       align-items: flex-start;
@@ -138,18 +197,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       background: var(--c-navy);
-      border-radius: 10px;
+      border-radius: 8px;
       color: var(--c-gold);
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 800;
       letter-spacing: -0.04em;
       box-shadow: 0 2px 8px rgba(15,43,70,0.25);
+      flex-shrink: 0;
     }
     .header-logo-text {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--c-navy);
       letter-spacing: -0.02em;
@@ -163,12 +223,11 @@
       gap: 6px;
       background: var(--c-teal-bg);
       color: var(--c-teal);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 20px;
       border: 1px solid var(--c-teal-border);
-      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
@@ -190,7 +249,217 @@
       line-height: 1.7;
     }
 
-    
+    /* ─── MULTI-YEAR GAIN PROJECTION ─── */
+    .projection-section { margin-top: 16px; }
+    .projection-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .proj-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      border: 1px solid var(--c-border);
+      border-radius: 20px;
+      background: var(--c-surface);
+      color: var(--c-text-2);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .proj-btn:hover { background: var(--c-bg); }
+    .proj-btn.active {
+      background: var(--c-teal);
+      color: white;
+      border-color: var(--c-teal);
+    }
+    .proj-kpi-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .proj-kpi {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--c-border);
+      background: var(--c-surface);
+    }
+    .proj-kpi-label { font-size: 10px; color: var(--c-text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+    .proj-kpi-value { font-size: 20px; font-weight: 800; font-family: var(--font-mono); }
+    .proj-kpi-sub { font-size: 10px; color: var(--c-text-3); margin-top: 2px; }
+
+    /* ─── TOAST NOTIFICATIONS ─── */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      right: 16px;
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(15,43,70,0.2);
+      pointer-events: auto;
+      animation: toastIn 0.3s var(--ease-spring), toastOut 0.3s ease 2.7s forwards;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.success { background: var(--c-green); }
+    .toast.error { background: var(--c-red); }
+    .toast.warning { background: var(--c-amber); }
+    .toast.info { background: var(--c-navy); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+    /* ─── ONBOARDING GUIDED TOUR ─── */
+    .onboarding-overlay {
+      position: fixed; inset: 0; z-index: 10100;
+      background: rgba(15,43,70,0.7);
+      backdrop-filter: blur(4px);
+      transition: opacity 0.3s ease;
+    }
+    .onboarding-spotlight {
+      position: absolute;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 9999px rgba(15,43,70,0.72);
+      transition: all 0.4s var(--ease-out);
+      pointer-events: none;
+    }
+    .onboarding-card {
+      position: absolute;
+      background: var(--c-surface);
+      border-radius: 16px;
+      padding: 24px;
+      width: 340px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(15,43,70,0.3);
+      z-index: 10101;
+      animation: obCardIn 0.35s var(--ease-spring);
+    }
+    @keyframes obCardIn { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .onboarding-card .ob-step { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-teal); margin-bottom: 6px; }
+    .onboarding-card .ob-title { font-size: 17px; font-weight: 800; color: var(--c-navy); margin-bottom: 8px; }
+    .onboarding-card .ob-desc { font-size: 13px; color: var(--c-text-2); line-height: 1.6; margin-bottom: 18px; }
+    .onboarding-card .ob-dots { display: flex; gap: 6px; margin-bottom: 16px; }
+    .onboarding-card .ob-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-border); transition: all 0.2s; }
+    .onboarding-card .ob-dot.active { background: var(--c-teal); width: 20px; border-radius: 4px; }
+    .onboarding-card .ob-actions { display: flex; justify-content: space-between; align-items: center; }
+    .onboarding-card .ob-skip { font-size: 12px; color: var(--c-text-3); background: none; border: none; cursor: pointer; font-family: var(--font-body); }
+    .onboarding-card .ob-skip:hover { color: var(--c-text-2); }
+    .onboarding-card .ob-next { padding: 8px 20px; font-size: 13px; font-weight: 700; color: white; background: var(--c-teal); border: none; border-radius: 20px; cursor: pointer; font-family: var(--font-body); transition: background 0.15s; }
+    .onboarding-card .ob-next:hover { background: var(--c-teal-bright); }
+
+    /* ─── DARK MODE TOGGLE ─── */
+    .theme-toggle {
+      width: 34px; height: 20px;
+      border-radius: 10px;
+      background: var(--c-border);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s var(--ease-spring);
+    }
+    .theme-toggle.dark { background: var(--c-teal); }
+    .theme-toggle.dark::after { transform: translateX(14px); }
+    .theme-icon { font-size: 12px; line-height: 1; }
+
+    /* ─── DARK THEME VARIABLES ─── */
+    [data-theme="dark"] {
+      --c-bg: #0c1829;
+      --c-surface: #132035;
+      --c-border: #1e3352;
+      --c-border-strong: #2a4570;
+      --c-text: #e2e8f0;
+      --c-text-2: #94a3b8;
+      --c-text-3: #64748b;
+      --c-navy: #93c5fd;
+      --c-navy-light: #1e3a5f;
+      --c-navy-soft: #264a6a;
+      --c-teal-bg: rgba(13,148,136,0.12);
+      --c-teal-border: rgba(20,184,166,0.25);
+      --c-green-bg: rgba(5,150,105,0.12);
+      --c-blue-bg: rgba(37,99,235,0.12);
+      --c-amber-bg: rgba(217,119,6,0.12);
+      --c-red-bg: rgba(220,38,38,0.12);
+      --c-purple-bg: rgba(124,58,237,0.12);
+      --c-gold-light: rgba(212,168,67,0.12);
+      --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    [data-theme="dark"] body::before { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(13,148,136,0.06), transparent), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(15,43,70,0.06), transparent); }
+    [data-theme="dark"] .header-sticky { background: rgba(19,32,53,0.97); border-bottom-color: var(--c-border); }
+    [data-theme="dark"] .header-page-title { color: var(--c-text); }
+    [data-theme="dark"] .header-page-sep { color: var(--c-border); }
+    [data-theme="dark"] .sidebar { background: #0f1d30; border-right-color: var(--c-border); }
+    [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background: var(--c-bg); color: var(--c-text); border-color: var(--c-border); }
+    [data-theme="dark"] .tab-btn { background: var(--c-bg); color: var(--c-text-2); border-color: var(--c-border); }
+    [data-theme="dark"] .tab-btn.active { background: var(--c-teal); color: white; }
+    [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
+    [data-theme="dark"] .scoring-aide { background: var(--c-surface); border-color: var(--c-border); }
+    [data-theme="dark"] .export-bar { background: rgba(19,32,53,0.95); border-top-color: var(--c-border); }
+
+    /* ─── CONFIDENCE INDICATORS ─── */
+    .confidence-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .confidence-badge.high { background: var(--c-green-bg); color: var(--c-green); }
+    .confidence-badge.medium { background: var(--c-amber-bg); color: var(--c-amber); }
+    .confidence-badge.estimated { background: var(--c-purple-bg); color: var(--c-purple); }
+    .confidence-tip { font-size: 11px; color: var(--c-text-3); font-style: italic; margin-top: 4px; }
+
+    /* ─── NOTIFICATION BADGE ─── */
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      min-width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800;
+      color: white; background: var(--c-red);
+      border-radius: 8px;
+      padding: 0 4px;
+      box-shadow: 0 2px 6px rgba(220,38,38,0.4);
+      animation: notifPulse 2s infinite;
+    }
+    @keyframes notifPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+    /* ─── RADAR CHART ─── */
+    .radar-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--c-border); }
+    .radar-wrap { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+    .radar-chart-container { flex: 1; min-width: 280px; max-width: 400px; }
+    .radar-legend { flex: 1; min-width: 200px; }
+    .radar-legend-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+    .radar-legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+
 
     /* ─── CARTES ─── */
     .card {
@@ -495,18 +764,18 @@
       font-weight: 600;
       font-family: var(--font-body);
       border: 1px solid var(--c-border);
-      border-radius: var(--radius-sm);
+      border-radius: 20px;
       background: var(--c-surface);
       color: var(--c-text-2);
       cursor: pointer;
       transition: all 0.2s var(--ease-out);
     }
-    .tab-btn:hover { background: var(--c-bg); }
+    .tab-btn:hover { background: var(--c-bg); color: var(--c-navy); }
     .tab-btn.active {
-      background: var(--c-navy);
+      background: var(--c-teal);
       color: white;
-      border-color: var(--c-navy);
-      box-shadow: 0 2px 8px rgba(15,43,70,0.25);
+      border-color: var(--c-teal);
+      box-shadow: 0 2px 8px rgba(13,148,136,0.3);
     }
 
     /* ─── BLOC LOYER ─── */
@@ -2126,58 +2395,61 @@
       margin-bottom: 10px;
     }
 
-    /* ─── BREADCRUMB ─── */
+    /* ─── BREADCRUMB — Integrated in sticky header ─── */
     .breadcrumb-bar {
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: 10px 28px;
-      background: var(--c-surface);
-      border-bottom: 1px solid var(--c-border);
       overflow-x: auto;
       white-space: nowrap;
-      max-width: 100%;
+      flex: 1;
+      min-width: 0;
+      scrollbar-width: none;
     }
+    .breadcrumb-bar::-webkit-scrollbar { display: none; }
 
     .bc-step {
       display: inline-flex;
       align-items: center;
-      font-size: 11px;
+      gap: 5px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--c-text-3);
-      padding: 4px 10px;
-      border-radius: 20px;
+      padding: 6px 14px;
+      border-radius: 8px;
       text-decoration: none;
       cursor: pointer;
       transition: all 0.15s ease;
       font-family: var(--font-body);
+      flex-shrink: 0;
     }
 
     .bc-step:hover {
       background: var(--c-bg);
-      color: var(--c-navy);
+      color: var(--c-text);
     }
 
     .bc-step.bc-active {
       background: var(--c-navy);
       color: white;
       font-weight: 700;
+      box-shadow: 0 2px 8px rgba(15,43,70,0.2);
     }
 
     .bc-step.bc-past {
       color: var(--c-teal);
       font-weight: 600;
-    }
-
-    .bc-step.bc-past:hover {
       background: var(--c-teal-bg);
     }
 
+    .bc-step.bc-past:hover {
+      background: rgba(13,148,136,0.12);
+    }
+
     .bc-sep {
-      font-size: 12px;
-      color: var(--c-text-3);
-      opacity: 0.4;
-      margin: 0 2px;
+      font-size: 11px;
+      color: var(--c-border-strong);
+      margin: 0 1px;
       user-select: none;
     }
 
@@ -2511,12 +2783,16 @@
       .header-badge { font-size: 9px; }
       .header-meta.expert-only { display: none; }
       .header-brand { margin-bottom: 2px; }
-      .header-logo { width: 28px; height: 28px; font-size: 12px; }
-      .header-logo-text { font-size: 14px; }
-      .pitch-toggle { font-size: 10px; padding: 5px 10px; }
+      .pitch-toggle { font-size: 10px; padding: 4px 10px; }
 
-      /* ─── BREADCRUMB: Hide on mobile (bottom nav replaces it) ─── */
-      .breadcrumb-bar { display: none; }
+      /* ─── HEADER: Compact on mobile ─── */
+      .header-sticky { padding: 0 12px; }
+      .header-inner { height: 44px; gap: 10px; }
+      .header-page-title { font-size: 14px; }
+      .header-page-sub { display: none; }
+      .header-page-sep { display: none !important; }
+      .proj-kpi-row { flex-direction: column; }
+      .proj-kpi { min-width: 100%; }
 
       /* ─── SPLIT VIEW: On mobile, no grid — stack and hide sim ─── */
       .split-container {
@@ -3167,33 +3443,26 @@
   <main class="main-content" id="main-content">
 
     <!-- ═════════════════════════════════
-         EN-TÊTE LIHTEA
+         EN-TÊTE STICKY LIHTEA
     ═══════════════════════════════════ -->
-    <div class="header">
-      <div>
-        <div class="header-brand">
-          <div class="header-logo">L</div>
-          <div class="header-logo-text">Lihtea<span>.</span></div>
+    <div class="header-sticky" id="header-sticky">
+      <div class="header-inner">
+        <div class="header-page-context">
+          <div class="header-page-title" id="header-page-title">Dashboard</div>
+          <span class="header-page-sep" id="header-page-sep" style="display:none;">/</span>
+          <div class="header-page-sub" id="header-page-sub"></div>
         </div>
-        <div class="header-badge">◆ Equipment Finance &amp; Advisory</div>
-        <h1>Simulateur de gain net client</h1>
-        <p>Remplacement d'équipements industriels — CEE &amp; subventions 2026-2030 (P6)</p>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;">
-        <button class="pitch-toggle" id="pitch-toggle-btn" onclick="togglePitchMode()" title="Basculer en mode simplifié pour présentation client">
-          <span class="toggle-dot"></span>
-          Mode pitch
-        </button>
-        <div class="header-meta expert-only">
-          Données : P6 CEE 2026<br>
-          ADEME · Bpifrance · FEDER<br>
-          <strong>Usage commercial interne</strong>
+        <div class="header-actions">
+          <button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="Mode sombre"></button>
+          <span class="theme-icon" id="theme-icon">☀️</span>
+          <button class="pitch-toggle" id="pitch-toggle-btn" onclick="togglePitchMode()" title="Mode présentation client" style="font-size:11px;padding:5px 12px;">
+            <span class="toggle-dot"></span>
+            Pitch
+          </button>
         </div>
       </div>
+      <div id="breadcrumb" class="breadcrumb-bar" style="display:none;"></div>
     </div>
-
-    <!-- BREADCRUMB -->
-    <div id="breadcrumb" class="breadcrumb-bar"></div>
 
     <!-- ════════════════════════════════════════════════════════════
          PAGES
@@ -3560,6 +3829,25 @@
           </div>
         </div>
 
+        <!-- ═══ Projection gains multi-années ═══ -->
+        <div class="card projection-section" id="projection-section">
+          <div class="section-label" style="margin-bottom:4px;">Projection de gains accélérés</div>
+          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:12px;">Visualisez le gain cumulé au-delà du contrat de location — l'équipement continue de générer des économies.</p>
+
+          <div class="projection-controls">
+            <span style="font-size:11px;color:var(--c-text-3);font-weight:600;">Horizon :</span>
+            <button class="proj-btn" onclick="setProjectionHorizon(7, this)">7 ans</button>
+            <button class="proj-btn" onclick="setProjectionHorizon(10, this)">10 ans</button>
+            <button class="proj-btn active" onclick="setProjectionHorizon(15, this)">15 ans</button>
+            <button class="proj-btn" onclick="setProjectionHorizon(20, this)">20 ans</button>
+            <button class="proj-btn" onclick="setProjectionHorizon(25, this)">25 ans</button>
+          </div>
+
+          <div class="proj-kpi-row" id="proj-kpis"></div>
+          <div id="proj-chart"></div>
+          <div class="chart-legend" id="proj-legend"></div>
+        </div>
+
         <!-- Insight box -->
         <div id="insight-box" class="insight"></div>
       </div>
@@ -3689,12 +3977,12 @@
 <div class="section-label" style="margin-bottom:6px;">Aides & subventions disponibles</div>
         <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">Dispositifs français et européens pour le remplacement d'équipements industriels énergivores.</p>
 
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-          <button class="tab-btn active" onclick="filterOrganismes('all', this)" style="font-size:11px;padding:5px 10px;">Tous</button>
-          <button class="tab-btn" onclick="filterOrganismes('calculable', this)" style="font-size:11px;padding:5px 10px;">⚡ Calculables</button>
-          <button class="tab-btn" onclick="filterOrganismes('informatif', this)" style="font-size:11px;padding:5px 10px;">📋 Informatifs</button>
-          <button class="tab-btn" onclick="filterOrganismes('france', this)" style="font-size:11px;padding:5px 10px;">🇫🇷 France</button>
-          <button class="tab-btn" onclick="filterOrganismes('europe', this)" style="font-size:11px;padding:5px 10px;">🇪🇺 Europe</button>
+        <div id="tab-organismes" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="tab-btn active" onclick="filterOrganismes('all', this)">Tous</button>
+          <button class="tab-btn" onclick="filterOrganismes('calculable', this)">⚡ Calculables</button>
+          <button class="tab-btn" onclick="filterOrganismes('informatif', this)">📋 Informatifs</button>
+          <button class="tab-btn" onclick="filterOrganismes('france', this)">🇫🇷 France</button>
+          <button class="tab-btn" onclick="filterOrganismes('europe', this)">🇪🇺 Europe</button>
         </div>
 
         <div id="organismes-list">
@@ -3724,6 +4012,14 @@
               <div style="font-size:12px;color:var(--c-text-3);max-width:340px;margin:0 auto;line-height:1.6;">
                 Ajustez les paramètres dans la colonne de gauche (montant, durée, aides activées…), puis cliquez sur « Capturer l'actuel ». Répétez avec d'autres configurations pour comparer.
               </div>
+            </div>
+          </div>
+          <!-- RADAR COMPARATEUR -->
+          <div class="radar-section" id="radar-section" style="display:none;">
+            <div class="section-label">Comparaison visuelle</div>
+            <div class="radar-wrap">
+              <div class="radar-chart-container" id="radar-chart"></div>
+              <div class="radar-legend" id="radar-legend"></div>
             </div>
           </div>
         </div>
@@ -4389,7 +4685,7 @@ function toggleMobileSimulator() {
 // All pages show the simulator panel in split-view
 const ALL_PAGES = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
 
-// Breadcrumb labels per page
+// Page labels and subtitles
 const PAGE_LABELS = {
   dashboard: 'Dashboard',
   resultats: 'Simulateur',
@@ -4402,23 +4698,47 @@ const PAGE_LABELS = {
   saved: 'Mes simulations',
 };
 
-// Breadcrumb step order
+const PAGE_SUBTITLES = {
+  dashboard: 'Vue d\'ensemble',
+  resultats: 'Paramètres & résultats',
+  eligibilite: 'Scoring par dispositif',
+  aides: 'Dispositifs activés',
+  organismes: 'Aides & subventions disponibles',
+  scenarios: 'Comparateur multi-scénarios',
+  dossier: 'Parcours de montage',
+  propositions: 'Propositions archivées',
+  saved: 'Historique des simulations',
+};
+
+// Breadcrumb step order (kept for internal logic)
 const BREADCRUMB_STEPS = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
 
 function updateBreadcrumb(pageName) {
+  // Update page title in header
+  const titleEl = document.getElementById('header-page-title');
+  if (titleEl) titleEl.textContent = PAGE_LABELS[pageName] || pageName;
+
+  // Update subtitle
+  const subEl = document.getElementById('header-page-sub');
+  const sepEl = document.getElementById('header-page-sep');
+  const subtitle = PAGE_SUBTITLES[pageName] || '';
+  if (subEl) subEl.textContent = subtitle;
+  if (sepEl) sepEl.style.display = subtitle ? '' : 'none';
+
+  // Keep hidden breadcrumb DOM updated for notification badge system
   const bc = document.getElementById('breadcrumb');
-  if (!bc) return;
-  const currentIdx = BREADCRUMB_STEPS.indexOf(pageName);
-  let html = '';
-  BREADCRUMB_STEPS.forEach((step, i) => {
-    const label = PAGE_LABELS[step] || step;
-    const isActive = step === pageName;
-    const isPast = i < currentIdx;
-    const cls = isActive ? 'bc-step bc-active' : (isPast ? 'bc-step bc-past' : 'bc-step');
-    html += `<a class="${cls}" onclick="switchPage('${step}', document.querySelector('[data-page=&quot;${step}&quot;]'))">${isPast ? '✓ ' : ''}${label}</a>`;
-    if (i < BREADCRUMB_STEPS.length - 1) html += '<span class="bc-sep">›</span>';
-  });
-  bc.innerHTML = html;
+  if (bc) {
+    const currentIdx = BREADCRUMB_STEPS.indexOf(pageName);
+    let html = '';
+    BREADCRUMB_STEPS.forEach((step, i) => {
+      const label = PAGE_LABELS[step] || step;
+      const isActive = step === pageName;
+      const isPast = i < currentIdx;
+      const cls = isActive ? 'bc-step bc-active' : (isPast ? 'bc-step bc-past' : 'bc-step');
+      html += `<a class="${cls}" data-page="${step}">${label}</a>`;
+    });
+    bc.innerHTML = html;
+  }
 }
 
 function switchPage(pageName, navItem) {
@@ -4483,10 +4803,13 @@ function switchPage(pageName, navItem) {
     }
   }
 
-  // Update active sidebar item
+  // Update active sidebar item — always sync by pageName for reliability
   const navItems = document.querySelectorAll('.sidebar-item');
   navItems.forEach(item => item.classList.remove('active'));
-  if (navItem) {
+  const sidebarTarget = document.querySelector('.sidebar-item[data-page="' + pageName + '"]');
+  if (sidebarTarget) {
+    sidebarTarget.classList.add('active');
+  } else if (navItem && navItem.classList.contains('sidebar-item')) {
     navItem.classList.add('active');
   }
 
@@ -4796,6 +5119,9 @@ function renderDashboard(inv, a, ecoAn, duree, roiNet, fluxCumule) {
   renderDashLoyerEco(a, ecoAn);
   renderDashDonut(inv, a);
   renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule);
+  // Cache data for projection
+  projCache = { ecoAn, mensNette: a.mensNette, duree, inv, totalAides: a.totalAides };
+  renderProjection();
 }
 
 // ── Loyer vs Économies (SVG horizontal bars) ──
@@ -4983,6 +5309,145 @@ function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule) {
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#059669"></div>Gain pur (post-contrat)</div>
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#d97706;border-radius:50%"></div>Flux cumulé</div>
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dc2626;border-radius:50%"></div>ROI cumulé</div>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MULTI-YEAR GAIN PROJECTION
+// ═══════════════════════════════════════════════════════════
+
+let projHorizon = 15;
+let projCache = {};
+
+function setProjectionHorizon(years, btn) {
+  projHorizon = years;
+  document.querySelectorAll('.proj-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderProjection();
+}
+
+function renderProjection() {
+  if (!projCache.ecoAn || !projCache.mensNette || !projCache.duree) return;
+
+  const { ecoAn, mensNette, duree, inv, totalAides } = projCache;
+  const HORIZON = projHorizon;
+  const mensAn = Math.round(mensNette * 12);
+  const ecoAnR = Math.round(ecoAn);
+
+  const fk = n => { const v=Math.round(n); if(Math.abs(v)>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(Math.abs(v)>=1000) return Math.round(v/1000)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
+
+  // Build data
+  const data = [];
+  let loyerCum = 0, ecoCum = 0;
+  for (let y = 1; y <= HORIZON; y++) {
+    const loyer = y <= duree ? mensAn : 0;
+    loyerCum += loyer;
+    ecoCum += ecoAnR;
+    data.push({ year: y, loyer, eco: ecoAnR, loyerCum, ecoCum, gain: ecoCum - loyerCum, isPost: y > duree });
+  }
+
+  const last = data[data.length - 1];
+  const contractGain = data[duree - 1]?.gain || 0;
+  const multiplier = contractGain > 0 ? (last.gain / contractGain).toFixed(1) : '—';
+  const breakEven = data.findIndex(d => d.gain >= 0) + 1;
+
+  // KPIs
+  const kpiEl = document.getElementById('proj-kpis');
+  if (kpiEl) {
+    kpiEl.innerHTML = `
+      <div class="proj-kpi">
+        <div class="proj-kpi-label">Gain cumulé à ${HORIZON} ans</div>
+        <div class="proj-kpi-value" style="color:var(--c-green);">${fk(last.gain)}</div>
+        <div class="proj-kpi-sub">Économies - Loyers</div>
+      </div>
+      <div class="proj-kpi">
+        <div class="proj-kpi-label">Économies totales</div>
+        <div class="proj-kpi-value" style="color:var(--c-teal);">${fk(last.ecoCum)}</div>
+        <div class="proj-kpi-sub">${HORIZON} ans d'exploitation</div>
+      </div>
+      <div class="proj-kpi">
+        <div class="proj-kpi-label">Multiplicateur de gain</div>
+        <div class="proj-kpi-value" style="color:var(--c-purple);">×${multiplier}</div>
+        <div class="proj-kpi-sub">vs fin de contrat (${duree} ans)</div>
+      </div>
+      <div class="proj-kpi">
+        <div class="proj-kpi-label">${breakEven > 0 ? 'Rentabilité atteinte' : 'Point d\'équilibre'}</div>
+        <div class="proj-kpi-value" style="color:var(--c-navy);">${breakEven > 0 ? 'An ' + breakEven : '> '+HORIZON+' ans'}</div>
+        <div class="proj-kpi-sub">Gain cumulé &gt; 0</div>
+      </div>
+    `;
+  }
+
+  // Chart
+  const el = document.getElementById('proj-chart');
+  if (!el) return;
+
+  const W = 600, H = 220, M = { l:55, r:20, t:20, b:30 };
+  const pw = W - M.l - M.r, ph = H - M.t - M.b;
+  const allVals = data.flatMap(d => [d.gain, d.ecoCum, d.loyerCum]);
+  const yMin = Math.min(0, ...allVals);
+  const yMax = Math.max(...allVals);
+  const yRange = yMax - yMin || 1;
+  const xStep = pw / HORIZON;
+  const yScale = v => M.t + ph - ((v - yMin) / yRange * ph);
+  const xScale = i => M.l + (i + 0.5) * xStep;
+  const y0 = yScale(0);
+
+  // Grid
+  let grid = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + (yRange / 4) * i;
+    const y = yScale(v);
+    grid += '<line x1="'+M.l+'" y1="'+y+'" x2="'+(W-M.r)+'" y2="'+y+'" class="grid-line"/>';
+    grid += '<text x="'+(M.l-4)+'" y="'+(y+3)+'" text-anchor="end" font-size="8" fill="#8896a7">'+fk(v)+'</text>';
+  }
+
+  // Contract end marker
+  const cxLine = M.l + duree * xStep;
+  const contractZone = '<rect x="'+M.l+'" y="'+M.t+'" width="'+(duree * xStep)+'" height="'+ph+'" fill="#0f2b46" opacity="0.03" rx="4"/>';
+  const postZone = duree < HORIZON ? '<rect x="'+cxLine+'" y="'+M.t+'" width="'+((HORIZON-duree)*xStep)+'" height="'+ph+'" fill="#059669" opacity="0.04" rx="4"/>' : '';
+  const cLine = duree < HORIZON ? '<line x1="'+cxLine+'" y1="'+M.t+'" x2="'+cxLine+'" y2="'+(M.t+ph)+'" stroke="#0d9488" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/><text x="'+cxLine+'" y="'+(M.t-4)+'" text-anchor="middle" font-size="8" fill="#0d9488" font-weight="600">Fin contrat</text>' : '';
+
+  // Area fill for gain (green when positive)
+  let gainArea = 'M '+xScale(0)+','+y0;
+  data.forEach((d,i) => gainArea += ' L '+xScale(i)+','+yScale(d.gain));
+  gainArea += ' L '+xScale(data.length-1)+','+y0+' Z';
+
+  // Lines
+  const ecoLine = data.map((d,i) => (i===0?'M':'L')+' '+xScale(i)+','+yScale(d.ecoCum)).join(' ');
+  const loyerLine = data.map((d,i) => (i===0?'M':'L')+' '+xScale(i)+','+yScale(d.loyerCum)).join(' ');
+  const gainLine = data.map((d,i) => (i===0?'M':'L')+' '+xScale(i)+','+yScale(d.gain)).join(' ');
+
+  // X labels
+  let xLabels = '';
+  data.forEach((d,i) => {
+    const show = HORIZON <= 15 || i % 2 === 0 || i === data.length-1;
+    if (show) xLabels += '<text x="'+xScale(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="'+(HORIZON>15?'7':'8')+'" fill="'+(d.isPost?'#059669':'#8896a7')+'" font-weight="'+(d.isPost?'600':'400')+'">'+d.year+'</text>';
+  });
+
+  // End value labels
+  const lx = xScale(data.length-1);
+  const endLabels = '<text x="'+(lx+8)+'" y="'+(yScale(last.ecoCum)+3)+'" font-size="9" font-weight="700" fill="#0d9488">'+fk(last.ecoCum)+'</text><text x="'+(lx+8)+'" y="'+(yScale(last.gain)+3)+'" font-size="9" font-weight="700" fill="#059669">'+fk(last.gain)+'</text>';
+
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" class="dash-svg" style="max-height:240px;">'+
+    grid+
+    contractZone+postZone+cLine+
+    '<path d="'+gainArea+'" fill="#059669" opacity="0.08"/>'+
+    '<path d="'+ecoLine+'" fill="none" stroke="#0d9488" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="'+loyerLine+'" fill="none" stroke="#0f2b46" stroke-width="2" stroke-dasharray="5,3" opacity="0.5" stroke-linejoin="round"/>'+
+    '<path d="'+gainLine+'" fill="none" stroke="#059669" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<line x1="'+M.l+'" y1="'+y0+'" x2="'+(W-M.r)+'" y2="'+y0+'" stroke="#0f2b46" stroke-width="0.5" opacity="0.2"/>'+
+    xLabels+endLabels+
+  '</svg>';
+
+  const legendEl = document.getElementById('proj-legend');
+  if (legendEl) {
+    legendEl.innerHTML = `
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#0d9488"></div>Économies cumulées</div>
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#0f2b46;opacity:0.5"></div>Loyers cumulés (${duree} ans)</div>
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#059669"></div>Gain net cumulé</div>
+      <div class="chart-legend-item" style="color:var(--c-teal);font-weight:600;">Zone verte = gain pur post-contrat</div>
     `;
   }
 }
@@ -5333,11 +5798,13 @@ function loadSimulation(id) {
   document.querySelector('.tab-btn').click();
 }
 
-function deleteSimulation(id) {
-  if (!confirm('Supprimer cette simulation ?')) return;
+async function deleteSimulation(id) {
+  const ok = await showFintechModal({ mode:'confirm', title:'Supprimer cette simulation ?', message:'Cette action est irréversible.', icon:'🗑️', iconBg:'var(--c-red-bg)', iconColor:'var(--c-red)', confirmText:'Supprimer', confirmColor:'#dc2626' });
+  if (!ok) return;
   const sims = getSavedSimulations().filter(s => s.id !== id);
   saveSims(sims);
   renderSavedSimulations();
+  showToast('Simulation supprimée', 'success');
 }
 
 function renderSavedSimulations() {
@@ -5407,7 +5874,7 @@ function evaluerEligibilite() {
   const results = {};
 
   // CEE
-  results.cee = { name: 'Prime CEE (P6 2026-2030)', criteria: [
+  results.cee = { name: 'Prime CEE (P6 2026-2030)', type: 'calculable', criteria: [
     { label: 'Fiche CEE standardisée identifiée', pass: hasFiche, detail: hasFiche ? (typeLabel.match(/\(([^)]+)\)/)||[])[1] || 'Oui' : 'Sélectionnez un équipement avec fiche IND-UT/BAT-TH' },
     { label: 'Volume kWh cumac > 0', pass: kwh > 0, detail: kwh > 0 ? (kwh/1e6).toFixed(2) + ' GWh cumac' : 'Renseignez le volume estimé' },
     { label: 'Gain énergétique documenté (> 10%)', pass: gain >= 10, warn: gain >= 5 && gain < 10, detail: gain + '% — ' + (gain >= 10 ? 'Conforme' : gain >= 5 ? 'Faible, à justifier' : 'Insuffisant') },
@@ -5417,7 +5884,7 @@ function evaluerEligibilite() {
   results.cee.score = Math.round(results.cee.criteria.filter(c => c.pass).length / results.cee.criteria.length * 100);
 
   // ADEME
-  results.ademe = { name: 'Fonds Chaleur / DECARB FLASH ADEME', criteria: [
+  results.ademe = { name: 'Fonds Chaleur / DECARB FLASH ADEME', type: 'calculable', criteria: [
     { label: 'Investissement > 100 000 €', pass: inv >= 100000, warn: inv >= 50000 && inv < 100000, detail: inv >= 100000 ? 'Éligible Fonds Chaleur / DECARB FLASH' : inv >= 50000 ? 'Tremplin PME possible (50-200k€)' : 'Projet trop petit pour ADEME industrie' },
     { label: 'Production EnR estimée > 1 200 MWh', pass: mwhEco * 10 >= 1200, warn: mwhEco * 10 >= 500, detail: Math.round(mwhEco * 10) + ' MWh estimés sur durée de vie' },
     { label: 'Temps de retour brut > 36 mois', pass: true, detail: 'Critère vérifié par l\'ADEME lors de l\'instruction' },
@@ -5427,7 +5894,7 @@ function evaluerEligibilite() {
   results.ademe.score = Math.round(results.ademe.criteria.filter(c => c.pass).length / results.ademe.criteria.length * 100);
 
   // BPI
-  results.bpi = { name: 'Prêt Vert Bpifrance', criteria: [
+  results.bpi = { name: 'Prêt Vert Bpifrance', type: 'calculable', criteria: [
     { label: 'Projet à caractère environnemental', pass: true, detail: 'Remplacement d\'équipement énergivore = éligible' },
     { label: 'Montant entre 10 000 € et 1 000 000 €', pass: inv >= 10000 && inv <= 1000000, warn: inv > 1000000, detail: inv <= 1000000 ? 'Dans les limites' : 'Dépasse le plafond Prêt Vert (1 M€)' },
     { label: 'Entreprise < 5 000 salariés (PME/ETI)', pass: taille !== 'ge', detail: taille === 'ge' ? 'Grandes entreprises non éligibles' : 'Éligible' },
@@ -5436,7 +5903,7 @@ function evaluerEligibilite() {
   results.bpi.score = Math.round(results.bpi.criteria.filter(c => c.pass).length / results.bpi.criteria.length * 100);
 
   // FEDER
-  results.feder = { name: 'FEDER régional', criteria: [
+  results.feder = { name: 'FEDER régional', type: 'calculable', criteria: [
     { label: 'Zone éligible (appels à projets régionaux)', pass: false, warn: true, detail: 'Dépend de la région — consulter le site de la préfecture' },
     { label: 'Appel à projets ouvert', pass: false, warn: true, detail: 'Les calendriers varient par région et par axe' },
     { label: 'Investissement > 50 000 €', pass: inv >= 50000, detail: inv >= 50000 ? 'Montant suffisant' : 'Projet trop petit' },
@@ -5444,6 +5911,26 @@ function evaluerEligibilite() {
     { label: 'PME/TPE (intensité aide majorée)', pass: isPME, detail: isPME ? 'PME : plafond 80%' : 'GE/ETI : plafond 70%' },
   ]};
   results.feder.score = Math.round(results.feder.criteria.filter(c => c.pass).length / results.feder.criteria.length * 100);
+
+  // Dynamic: add informatif organismes from organismesData
+  var allOrgs = (typeof organismesData !== 'undefined') ? organismesData : [];
+  var scoredIds = ['cee','ademe_fc','ademe_tremplin','ademe_decarb','bpi_vert','feder'];
+  allOrgs.filter(function(o) { return o.active && !scoredIds.includes(o.id) && !results[o.id]; }).forEach(function(o) {
+    var isCalc = o.type === 'calculable';
+    results[o.id] = {
+      name: o.shortName || o.name,
+      type: o.type || 'informatif',
+      criteria: isCalc ? [
+        { label: 'Investissement suffisant', pass: inv >= 10000, detail: inv >= 10000 ? 'Montant éligible' : 'Vérifier le seuil minimum' },
+        { label: 'Entreprise éligible', pass: true, detail: isPME ? 'PME/TPE' : 'ETI/GE' },
+        { label: 'Conditions spécifiques', pass: false, warn: true, detail: o.conditions ? o.conditions.substring(0,80)+'...' : 'Consultez les conditions détaillées' },
+      ] : [
+        { label: 'Dispositif actif', pass: true, detail: o.description ? o.description.substring(0,80)+'...' : 'Actif' },
+        { label: 'Conditions d\'éligibilité', pass: false, warn: true, detail: 'Vérification manuelle requise — consultez l\'onglet Aides & Subventions' },
+      ],
+    };
+    results[o.id].score = Math.round(results[o.id].criteria.filter(function(c) { return c.pass; }).length / results[o.id].criteria.length * 100);
+  });
 
   return results;
 }
@@ -5458,11 +5945,12 @@ function renderScoring() {
 
   container.innerHTML = Object.entries(results).map(([key, r]) => {
     const l = lvl(r.score);
+    const isInfo = r.type === 'informatif';
     return `<div class="scoring-aide" id="scoring-${key}" onclick="this.classList.toggle('open')">
       <div class="scoring-aide-header">
         <div class="scoring-dot ${l}"></div>
-        <div class="scoring-aide-name">${r.name}</div>
-        <div class="scoring-badge ${l}">${r.score}% — ${lvlTxt(r.score)}</div>
+        <div class="scoring-aide-name">${r.name}${isInfo ? ' <span style="font-size:9px;padding:2px 6px;border-radius:10px;background:var(--c-amber-bg);color:var(--c-amber);font-weight:700;vertical-align:middle;margin-left:6px;">INFORMATIF</span>' : ''}</div>
+        <div class="scoring-badge ${l}">${isInfo ? 'Manuel' : r.score+'% — '+lvlTxt(r.score)}</div>
       </div>
       <div class="scoring-aide-body">
         <div class="scoring-criteria">
@@ -5506,7 +5994,7 @@ const MAX_SCENARIOS = 4;
 function toggleScenariosPanel() { /* deprecated — now uses tab system */ }
 
 function captureScenario() {
-  if (scenarios.length >= MAX_SCENARIOS) { alert('Maximum ' + MAX_SCENARIOS + ' scénarios.'); return; }
+  if (scenarios.length >= MAX_SCENARIOS) { showToast('Maximum ' + MAX_SCENARIOS + ' scénarios atteint', 'warning'); return; }
 
   const inv = parseFloat(document.getElementById('inv').value);
   const conso = parseFloat(document.getElementById('conso').value);
@@ -5545,7 +6033,7 @@ function captureScenario() {
 }
 
 function removeScenario(idx) { scenarios.splice(idx, 1); renderScenarios(); }
-function clearScenarios() { if (!confirm('Effacer tous les scénarios ?')) return; scenarios = []; renderScenarios(); }
+async function clearScenarios() { const ok = await showFintechModal({ mode:'confirm', title:'Effacer les scénarios', message:'Tous les scénarios seront supprimés. Cette action est irréversible.', icon:'🗑️', iconBg:'var(--c-red-bg)', iconColor:'var(--c-red)', confirmText:'Effacer tout', confirmColor:'#dc2626' }); if (!ok) return; scenarios = []; renderScenarios(); showToast('Scénarios effacés', 'success'); }
 
 function renderScenarios() {
   const wrap = document.getElementById('scenarios-table-wrap');
@@ -5716,7 +6204,7 @@ async function exporterPDF() {
 
     const W = 210, H = 297, MARG = 14, CONTENU = W - MARG * 2;
     let Y = 0;
-    let pageNum = 1;
+    let pageNum = 0; // cover is page 0
 
     const rect = (x, y, w, h, c) => { doc.setFillColor(...c); doc.rect(x, y, w, h, 'F'); };
     const txt = (t, x, y, s, c, b, a) => {
@@ -5726,14 +6214,14 @@ async function exporterPDF() {
       doc.text(String(t), x, y, { align: a || 'left' });
     };
     const ligne = (y, c) => { doc.setDrawColor(...(c || PDF_COLORS.bordure)); doc.setLineWidth(0.3); doc.line(MARG, y, W - MARG, y); };
-    
+
     const fe = n => {
       const s = Math.round(n).toLocaleString('fr-FR');
       return s.replace(/[\u00a0\u202f\u2009]/g, ' ') + ' EUR';
     };
 
     // Gestion saut de page automatique
-    const FOOTER_ZONE = 22; // réserve pour le footer
+    const FOOTER_ZONE = 22;
     const checkPageBreak = (needed) => {
       if (Y + needed > H - FOOTER_ZONE) {
         drawFooter();
@@ -5751,7 +6239,75 @@ async function exporterPDF() {
       txt('Lihtea — Equipment Finance & Advisory — ' + d.date + ' — Confidentiel — Page ' + pageNum, MARG, fy + 5, 6.5, PDF_COLORS.gris);
     };
 
+    // ═══ PAGE DE COUVERTURE PREMIUM ═══
+    // Full navy background
+    rect(0, 0, W, H, PDF_COLORS.navy);
+
+    // Top gold accent line
+    rect(0, 0, W, 3, PDF_COLORS.gold);
+
+    // Logo block
+    rect(W/2 - 16, 55, 32, 32, PDF_COLORS.gold);
+    doc.setFontSize(28); doc.setTextColor(...PDF_COLORS.navy); doc.setFont('helvetica', 'bold');
+    doc.text('L', W/2, 77, { align: 'center' });
+
+    // Brand name
+    txt('LIHTEA', W/2, 105, 32, PDF_COLORS.blanc, true, 'center');
+    txt('Equipment Finance & Advisory', W/2, 115, 12, PDF_COLORS.tealLight, false, 'center');
+
+    // Separator line
+    rect(W/2 - 30, 125, 60, 0.5, PDF_COLORS.gold);
+
+    // Document title
+    txt('PROPOSITION FINANCIERE', W/2, 145, 18, PDF_COLORS.blanc, true, 'center');
+    txt('Simulation de gain net — Location financiere Green', W/2, 155, 11, PDF_COLORS.tealLight, false, 'center');
+
+    // Client info box
+    rect(MARG + 20, 175, CONTENU - 40, 40, PDF_COLORS.navyLight);
+    rect(MARG + 20, 175, 3, 40, PDF_COLORS.gold);
+    txt('Client', MARG + 30, 188, 9, PDF_COLORS.tealLight);
+    txt(d.nomClient, MARG + 30, 198, 16, PDF_COLORS.blanc, true);
+    txt(d.typeLabel.substring(0, 50), MARG + 30, 208, 10, PDF_COLORS.tealLight);
+
+    // Key figures strip
+    const stripY = 230;
+    const stripW = (CONTENU - 40) / 3;
+    const stripLabels = [
+      ['Investissement', fe(d.inv)],
+      ['Aides mobilisees', fe(d.totalAides) + ' (' + d.pctCouvert + '%)'],
+      ['Gain net', (d.roi >= 0 ? '+' : '') + fe(d.roi)],
+    ];
+    stripLabels.forEach(([label, val], i) => {
+      const sx = MARG + 20 + i * stripW;
+      if (i > 0) { rect(sx, stripY + 3, 0.5, 20, PDF_COLORS.navyLight); }
+      txt(label, sx + 8, stripY + 10, 8, PDF_COLORS.tealLight);
+      txt(val, sx + 8, stripY + 20, 11, PDF_COLORS.blanc, true);
+    });
+
+    // QR Code placeholder (simple generated pattern — links to app.lihtea.com)
+    const qrY = 258;
+    const qrSize = 16;
+    rect(W/2 - qrSize/2, qrY, qrSize, qrSize, PDF_COLORS.blanc);
+    // Mini QR pattern simulation
+    for (let qx = 0; qx < 8; qx++) {
+      for (let qy = 0; qy < 8; qy++) {
+        const isCorner = (qx < 3 && qy < 3) || (qx >= 5 && qy < 3) || (qx < 3 && qy >= 5);
+        const isFilled = isCorner || ((qx + qy) % 3 === 0);
+        if (isFilled) rect(W/2 - qrSize/2 + qx * 2, qrY + qy * 2, 2, 2, PDF_COLORS.navy);
+      }
+    }
+    txt('app.lihtea.com', W/2, qrY + qrSize + 6, 8, PDF_COLORS.tealLight, false, 'center');
+
+    // Footer on cover
+    txt(d.date + ' — Document confidentiel', W/2, H - 18, 8, PDF_COLORS.gris, false, 'center');
+    txt('P6 CEE 2026-2030', W/2, H - 12, 7, PDF_COLORS.gris, false, 'center');
+
+    // Bottom gold accent
+    rect(0, H - 3, W, 3, PDF_COLORS.gold);
+
     // ═══ PAGE 1 : SYNTHÈSE ═══
+    doc.addPage();
+    pageNum = 1;
 
     // En-tête navy Lihtea (compact: 36mm)
     rect(0, 0, W, 36, PDF_COLORS.navy);
@@ -6190,7 +6746,7 @@ async function exporterPDF() {
 
   } catch (err) {
     console.error('Erreur PDF :', err);
-    alert('Erreur lors de la generation du PDF.');
+    showToast('Erreur lors de la génération du PDF', 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Synthese PDF';
@@ -6304,7 +6860,7 @@ async function exporterExcel() {
 
   } catch(err) {
     console.error('Erreur Excel :', err);
-    alert('Erreur lors de la generation Excel.');
+    showToast('Erreur lors de la génération Excel', 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> Export Excel';
@@ -6377,7 +6933,7 @@ async function syncEquipementsFromAdmin() {
     console.warn('[Sync] Failed to sync equipements from admin:', e);
   }
 }
-syncEquipementsFromAdmin();
+// syncEquipementsFromAdmin() is called after auth in onAuthSuccess()
 
 </script>
 
@@ -6911,6 +7467,22 @@ function filterOrganismes(mode, btn) {
   document.querySelectorAll('#tab-organismes .tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderOrganismesFront();
+  // Update counter on active button
+  const allOrgs = organismesData.filter(o => o.active);
+  let count = allOrgs.length;
+  if (mode === 'calculable') count = allOrgs.filter(o => o.type === 'calculable').length;
+  if (mode === 'informatif') count = allOrgs.filter(o => o.type === 'informatif').length;
+  if (mode === 'france') count = allOrgs.filter(o => o.scope === 'france').length;
+  if (mode === 'europe') count = allOrgs.filter(o => o.scope === 'europe').length;
+  if (btn) {
+    const existingBadge = btn.querySelector('.tab-count');
+    if (existingBadge) existingBadge.remove();
+    const badge = document.createElement('span');
+    badge.className = 'tab-count';
+    badge.style.cssText = 'font-size:9px;background:rgba(255,255,255,0.3);padding:1px 5px;border-radius:10px;margin-left:4px;';
+    badge.textContent = count;
+    btn.appendChild(badge);
+  }
 }
 
 function renderOrganismesFront() {
@@ -7059,7 +7631,7 @@ function restaurerParametres(prop) {
 function regenererPDF(id) {
   const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
   const prop = propositions.find(p => p.id === id);
-  if (!prop) { alert('Proposition introuvable.'); return; }
+  if (!prop) { showToast('Proposition introuvable', 'error'); return; }
 
   // Save current state
   const backup = {
@@ -7078,7 +7650,7 @@ function regenererPDF(id) {
   };
 
   if (!prop.fullParams) {
-    alert('Cette proposition a été créée avant la mise à jour. Les données complètes ne sont pas disponibles pour régénérer le fichier.');
+    showFintechModal({ mode:'alert', title:'Données manquantes', message:'Cette proposition a été créée avant la mise à jour. Les données complètes ne sont pas disponibles pour régénérer le fichier.', icon:'📄', iconBg:'var(--c-amber-bg)', iconColor:'var(--c-amber)' });
     return;
   }
 
@@ -7103,7 +7675,7 @@ function regenererPDF(id) {
 function regenererExcel(id) {
   const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
   const prop = propositions.find(p => p.id === id);
-  if (!prop) { alert('Proposition introuvable.'); return; }
+  if (!prop) { showToast('Proposition introuvable', 'error'); return; }
 
   const backup = {
     inv: document.getElementById('inv')?.value,
@@ -7121,7 +7693,7 @@ function regenererExcel(id) {
   };
 
   if (!prop.fullParams) {
-    alert('Cette proposition a été créée avant la mise à jour. Les données complètes ne sont pas disponibles pour régénérer le fichier.');
+    showFintechModal({ mode:'alert', title:'Données manquantes', message:'Cette proposition a été créée avant la mise à jour. Les données complètes ne sont pas disponibles pour régénérer le fichier.', icon:'📄', iconBg:'var(--c-amber-bg)', iconColor:'var(--c-amber)' });
     return;
   }
 
@@ -7142,23 +7714,27 @@ function regenererExcel(id) {
 }
 
 function genererProposition() {
-  alert('Utilisez les boutons PDF ou Excel dans la barre en bas de page pour générer une proposition. Elle sera automatiquement archivée ici.');
+  showFintechModal({ mode:'alert', title:'Créer une proposition', message:'Utilisez les boutons PDF ou Excel dans la barre en bas de page pour générer une proposition. Elle sera automatiquement archivée ici.', icon:'📋', iconBg:'var(--c-teal-bg)', iconColor:'var(--c-teal)' });
 }
 
-function supprimerProposition(id) {
-  if (!confirm('Supprimer cette proposition ?')) return;
+async function supprimerProposition(id) {
+  const ok = await showFintechModal({ mode:'confirm', title:'Supprimer cette proposition ?', message:'Cette action est irréversible.', icon:'🗑️', iconBg:'var(--c-red-bg)', iconColor:'var(--c-red)', confirmText:'Supprimer', confirmColor:'#dc2626' });
+  if (!ok) return;
   const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
   const filtered = propositions.filter(p => p.id !== id);
   localStorage.setItem('gef_propositions', JSON.stringify(filtered));
   renderPropositions();
+  showToast('Proposition supprimée', 'success');
 }
 
-function supprimerPropositionsClient(clientName) {
-  if (!confirm('Supprimer toutes les propositions de ' + clientName + ' ?')) return;
+async function supprimerPropositionsClient(clientName) {
+  const ok = await showFintechModal({ mode:'confirm', title:'Supprimer les propositions', message:'Supprimer toutes les propositions de ' + clientName + ' ? Cette action est irréversible.', icon:'🗑️', iconBg:'var(--c-red-bg)', iconColor:'var(--c-red)', confirmText:'Tout supprimer', confirmColor:'#dc2626' });
+  if (!ok) return;
   const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
   const filtered = propositions.filter(p => p.clientName !== clientName);
   localStorage.setItem('gef_propositions', JSON.stringify(filtered));
   renderPropositions();
+  showToast('Propositions de ' + clientName + ' supprimées', 'success');
 }
 
 
@@ -7405,6 +7981,118 @@ function makeFieldValuesEditable() {
 // FEATURE 3: ENHANCED SCENARIO COMPARATOR
 // ═══════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════
+// STICKY HEADER SCROLL EFFECT
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const headerEl = document.getElementById('header-sticky');
+  const mainContent = document.getElementById('main-content');
+  if (headerEl && mainContent) {
+    mainContent.addEventListener('scroll', function() {
+      if (this.scrollTop > 10) headerEl.classList.add('scrolled');
+      else headerEl.classList.remove('scrolled');
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════
+// TOAST NOTIFICATION SYSTEM
+// ═══════════════════════════════════════════════════════════
+(function() {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  window.showToast = function(message, type) {
+    type = type || 'info';
+    const icons = { success:'✓', error:'✗', warning:'⚠', info:'ℹ' };
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = '<span>' + (icons[type]||'') + '</span> ' + message;
+    container.appendChild(t);
+    setTimeout(function() { if (t.parentNode) t.remove(); }, 3200);
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════
+// UNIFIED FINTECH MODAL SYSTEM (extends showModal)
+// ═══════════════════════════════════════════════════════════
+function showFintechModal(options) {
+  return new Promise(function(resolve) {
+    var existing = document.getElementById('lihtea-modal');
+    if (existing) existing.remove();
+
+    var mode = options.mode || 'input';
+    var bodyHTML = '';
+    if (mode === 'input') {
+      bodyHTML = '<label class="modal-input-label">'+(options.inputLabel||'Nom')+'</label>' +
+        '<input class="modal-input" id="modal-input" type="text" value="'+(options.defaultValue||'')+'" placeholder="'+(options.placeholder||'')+'" autocomplete="off" spellcheck="false" />' +
+        (options.hint ? '<div class="modal-hint">💡 '+options.hint+'</div>' : '') +
+        (options.preview || '');
+    } else if (mode === 'confirm') {
+      bodyHTML = '<p style="font-size:13px;color:var(--c-text-2);line-height:1.6;">'+(options.message||'Êtes-vous sûr ?')+'</p>';
+    } else {
+      bodyHTML = '<p style="font-size:13px;color:var(--c-text-2);line-height:1.6;">'+(options.message||'')+'</p>';
+    }
+
+    var confirmColor = options.confirmColor || 'var(--c-navy)';
+    var footerHTML = mode === 'alert'
+      ? '<button class="modal-btn modal-btn-confirm" id="modal-confirm" style="background:'+confirmColor+';">'+(options.confirmText||'OK')+'</button>'
+      : '<button class="modal-btn modal-btn-cancel" id="modal-cancel">'+(options.cancelText||'Annuler')+'</button>' +
+        '<button class="modal-btn modal-btn-confirm" id="modal-confirm" style="background:'+confirmColor+';">'+(options.confirmText||(mode==='confirm'?'Confirmer':'Capturer'))+'</button>';
+
+    var overlay = document.createElement('div');
+    overlay.id = 'lihtea-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = '<div class="modal-card">' +
+      '<div class="modal-header">' +
+        '<div class="modal-header-icon" style="background:'+(options.iconBg||'var(--c-teal-bg)')+';color:'+(options.iconColor||'var(--c-teal)')+';">'+(options.icon||'ℹ')+'</div>' +
+        '<div class="modal-header-text"><h3>'+(options.title||'Information')+'</h3>'+(options.subtitle?'<p>'+options.subtitle+'</p>':'')+'</div>' +
+      '</div>' +
+      '<div class="modal-body">'+bodyHTML+'</div>' +
+      '<div class="modal-footer">'+footerHTML+'</div>' +
+    '</div>';
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { overlay.classList.add('visible'); });
+    });
+
+    if (mode === 'input') {
+      var inp = document.getElementById('modal-input');
+      if (inp) { inp.focus(); inp.select(); }
+    }
+
+    var close = function(value) {
+      overlay.classList.remove('visible');
+      setTimeout(function() { overlay.remove(); }, 250);
+      resolve(value);
+    };
+
+    var cancelBtn = document.getElementById('modal-cancel');
+    var confirmBtn = document.getElementById('modal-confirm');
+    if (cancelBtn) cancelBtn.addEventListener('click', function() { close(null); });
+    if (confirmBtn) confirmBtn.addEventListener('click', function() {
+      if (mode === 'input') close(document.getElementById('modal-input').value);
+      else if (mode === 'confirm') close(true);
+      else close(true);
+    });
+    if (mode === 'input') {
+      var inp2 = document.getElementById('modal-input');
+      if (inp2) inp2.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') close(inp2.value);
+        if (e.key === 'Escape') close(null);
+      });
+    }
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(null); });
+    document.addEventListener('keydown', function handler(e) {
+      if (e.key === 'Escape') { close(null); document.removeEventListener('keydown', handler); }
+    });
+  });
+}
+
 // Override captureScenario with enhanced modal version
 const _origCaptureScenario = captureScenario;
 
@@ -7475,7 +8163,7 @@ function showModal(options) {
 
 captureScenario = async function() {
   if (scenarios.length >= MAX_SCENARIOS) {
-    alert('Maximum ' + MAX_SCENARIOS + ' scénarios.');
+    showToast('Maximum ' + MAX_SCENARIOS + ' scénarios atteint', 'warning');
     return;
   }
 
@@ -7792,6 +8480,11 @@ function onAuthSuccess() {
   }
   updateUserUI();
   initApp();
+
+  // Post-auth syncs — only run once authenticated
+  syncEquipementsFromAdmin();
+  startNotifPolling();
+
   // Resolve internal user_id then log connexion
   resolveInternalUserId().then(() => {
     syncLogActivity('note', 'Connexion au simulateur', null, null);
@@ -8015,7 +8708,7 @@ function showUserProfile() {
         </div>
       </div>
       <div class="modal-footer" style="justify-content:space-between;">
-        <button class="modal-btn" style="color:#dc2626;background:none;border:none;font-size:12px;padding:8px 0;" onclick="if(confirm('Voulez-vous vous déconnecter ?')) logout();">Déconnexion</button>
+        <button class="modal-btn" style="color:#dc2626;background:none;border:none;font-size:12px;padding:8px 0;" onclick="showFintechModal({ mode:'confirm', title:'Déconnexion', message:'Voulez-vous vous déconnecter ?', icon:'🚪', iconBg:'var(--c-red-bg)', iconColor:'var(--c-red)', confirmText:'Se déconnecter', confirmColor:'#dc2626' }).then(ok=>{ if(ok) logout(); });">Déconnexion</button>
         <div style="display:flex;gap:10px;">
           <button class="modal-btn modal-btn-cancel" id="profile-cancel">Annuler</button>
           <button class="modal-btn modal-btn-confirm" id="profile-save">Enregistrer</button>
@@ -8066,10 +8759,351 @@ function showUserProfile() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// A — ONBOARDING GUIDED TOUR
+// ═══════════════════════════════════════════════════════════════════
+
+const ONBOARDING_STEPS = [
+  { target: '.form-card, .card:first-child', title: 'Renseignez votre équipement', desc: 'Sélectionnez le type d\'équipement, renseignez le montant d\'investissement et les paramètres énergétiques de votre client.', icon: '🏗️' },
+  { target: '.input-group, .form-group', title: 'Ajustez les paramètres', desc: 'Durée du contrat, taux de financement, gains énergétiques… Tous les curseurs mettent à jour le calcul en temps réel.', icon: '⚙️' },
+  { target: '[data-page="scoring"]', title: 'Consultez l\'éligibilité', desc: 'Le scoring vous montre automatiquement les aides et subventions auxquelles votre client est éligible, avec un niveau de confiance.', icon: '📊', sidebar: true },
+  { target: '.export-bar', title: 'Exportez votre proposition', desc: 'Générez un PDF premium ou un Excel détaillé à partager avec le DAF de votre client. Le branding Lihtea est intégré.', icon: '📤' },
+];
+
+function shouldShowOnboarding() {
+  return !localStorage.getItem('gef_onboarding_done');
+}
+
+function startOnboarding() {
+  let step = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'onboarding-overlay';
+  overlay.id = 'onboarding-overlay';
+  document.body.appendChild(overlay);
+
+  function showStep(idx) {
+    step = idx;
+    const s = ONBOARDING_STEPS[idx];
+    const el = document.querySelector(s.target);
+    const existingCard = document.querySelector('.onboarding-card');
+    const existingSpot = document.querySelector('.onboarding-spotlight');
+    if (existingCard) existingCard.remove();
+    if (existingSpot) existingSpot.remove();
+
+    // Spotlight
+    if (el) {
+      const r = el.getBoundingClientRect();
+      const spot = document.createElement('div');
+      spot.className = 'onboarding-spotlight';
+      spot.style.cssText = `top:${r.top - 8}px;left:${r.left - 8}px;width:${r.width + 16}px;height:${r.height + 16}px;`;
+      overlay.appendChild(spot);
+    }
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'onboarding-card';
+    card.innerHTML = `
+      <div class="ob-step">${s.icon} Étape ${idx + 1}/${ONBOARDING_STEPS.length}</div>
+      <div class="ob-title">${s.title}</div>
+      <div class="ob-desc">${s.desc}</div>
+      <div class="ob-dots">${ONBOARDING_STEPS.map((_, i) => `<div class="ob-dot${i === idx ? ' active' : ''}"></div>`).join('')}</div>
+      <div class="ob-actions">
+        <button class="ob-skip" onclick="endOnboarding()">Passer</button>
+        <button class="ob-next" onclick="nextOnboardingStep()">${idx === ONBOARDING_STEPS.length - 1 ? 'Commencer !' : 'Suivant →'}</button>
+      </div>
+    `;
+
+    // Position card near target
+    if (el) {
+      const r = el.getBoundingClientRect();
+      const top = Math.min(r.bottom + 16, window.innerHeight - 280);
+      const left = Math.min(Math.max(r.left, 16), window.innerWidth - 360);
+      card.style.top = top + 'px';
+      card.style.left = left + 'px';
+    } else {
+      card.style.top = '50%';
+      card.style.left = '50%';
+      card.style.transform = 'translate(-50%, -50%)';
+    }
+    overlay.appendChild(card);
+  }
+
+  window.nextOnboardingStep = function() {
+    if (step < ONBOARDING_STEPS.length - 1) {
+      showStep(step + 1);
+    } else {
+      endOnboarding();
+    }
+  };
+
+  window.endOnboarding = function() {
+    localStorage.setItem('gef_onboarding_done', '1');
+    const ov = document.getElementById('onboarding-overlay');
+    if (ov) { ov.style.opacity = '0'; setTimeout(() => ov.remove(), 300); }
+  };
+
+  showStep(0);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// B — DARK MODE
+// ═══════════════════════════════════════════════════════════════════
+
+function toggleDarkMode() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('gef_theme', isDark ? 'light' : 'dark');
+  updateThemeUI(!isDark);
+}
+
+function updateThemeUI(isDark) {
+  const btn = document.getElementById('theme-toggle');
+  const icon = document.getElementById('theme-icon');
+  if (btn) { btn.classList.toggle('dark', isDark); }
+  if (icon) { icon.textContent = isDark ? '🌙' : '☀️'; }
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('gef_theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    updateThemeUI(true);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// C — NOTIFICATION BADGES (proposition views tracking)
+// ═══════════════════════════════════════════════════════════════════
+
+let propositionViews = {};
+
+function checkPropositionViews() {
+  // Check Supabase for proposition view events
+  const token = localStorage.getItem('gef_auth_token');
+  if (!token) return;
+
+  // Fetch proposition view events from Supabase
+  const url = SU + '/rest/v1/proposition_events?select=*&type=eq.view&seen=eq.false&order=created_at.desc';
+  fetch(url, {
+    headers: { 'apikey': AK, 'Authorization': 'Bearer ' + token }
+  }).then(r => r.ok ? r.json() : []).then(events => {
+    if (events && events.length > 0) {
+      propositionViews = {};
+      events.forEach(ev => {
+        if (!propositionViews[ev.proposition_id]) propositionViews[ev.proposition_id] = [];
+        propositionViews[ev.proposition_id].push(ev);
+      });
+      updateNotifBadges(events.length);
+    }
+  }).catch(() => {});
+}
+
+function updateNotifBadges(count) {
+  // Add badge to propositions breadcrumb step
+  document.querySelectorAll('.bc-step').forEach(el => {
+    if (el.textContent.includes('Proposition') || el.textContent.includes('Dossier')) {
+      let badge = el.querySelector('.notif-badge');
+      if (count > 0) {
+        if (!badge) {
+          el.style.position = 'relative';
+          badge = document.createElement('span');
+          badge.className = 'notif-badge';
+          el.appendChild(badge);
+        }
+        badge.textContent = count > 9 ? '9+' : count;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+  });
+}
+
+// Poll every 60s for new views (lightweight alternative to websocket)
+function startNotifPolling() {
+  checkPropositionViews();
+  setInterval(checkPropositionViews, 60000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// D — RADAR CHART COMPARATOR
+// ═══════════════════════════════════════════════════════════════════
+
+const RADAR_AXES = [
+  { key: 'totalAides', label: 'Aides totales', unit: '€' },
+  { key: 'ecoAn', label: 'Économie/an', unit: '€' },
+  { key: 'roiNet', label: 'Gain net', unit: '€' },
+  { key: 'pctCouvert', label: 'Couverture %', unit: '%' },
+  { key: 'mensNette', label: 'Loyer net', unit: '€', invert: true },
+];
+
+const RADAR_COLORS = [
+  { stroke: '#0d9488', fill: 'rgba(13,148,136,0.15)' },
+  { stroke: '#2563eb', fill: 'rgba(37,99,235,0.15)' },
+  { stroke: '#d97706', fill: 'rgba(217,119,6,0.15)' },
+  { stroke: '#7c3aed', fill: 'rgba(124,58,237,0.15)' },
+];
+
+function renderRadarChart() {
+  const container = document.getElementById('radar-chart');
+  const legend = document.getElementById('radar-legend');
+  const section = document.getElementById('radar-section');
+  if (!container || !section) return;
+
+  if (scenarios.length < 2) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  const W = 360, H = 320, CX = W / 2, CY = H / 2 - 10, R = 120;
+  const axes = RADAR_AXES;
+  const N = axes.length;
+
+  // Compute max for each axis across scenarios
+  const maxVals = axes.map(ax => {
+    const vals = scenarios.map(s => Math.abs(s[ax.key] || 0));
+    return Math.max(...vals, 1);
+  });
+
+  // Build SVG
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;">`;
+
+  // Grid circles
+  for (let level = 1; level <= 4; level++) {
+    const r = R * level / 4;
+    svg += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="var(--c-border)" stroke-width="0.5" stroke-dasharray="${level < 4 ? '3,3' : 'none'}"/>`;
+  }
+
+  // Axis lines and labels
+  for (let i = 0; i < N; i++) {
+    const angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+    const x = CX + R * Math.cos(angle);
+    const y = CY + R * Math.sin(angle);
+    svg += `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="var(--c-border)" stroke-width="0.5"/>`;
+
+    const lx = CX + (R + 22) * Math.cos(angle);
+    const ly = CY + (R + 22) * Math.sin(angle);
+    const anchor = Math.abs(angle) < 0.1 || Math.abs(angle - Math.PI) < 0.1 ? 'middle' : lx > CX ? 'start' : 'end';
+    svg += `<text x="${lx}" y="${ly + 4}" text-anchor="${anchor}" font-size="10" font-family="var(--font-body)" font-weight="600" fill="var(--c-text-2)">${axes[i].label}</text>`;
+  }
+
+  // Scenario polygons
+  scenarios.forEach((s, si) => {
+    const color = RADAR_COLORS[si % RADAR_COLORS.length];
+    const points = axes.map((ax, i) => {
+      let val = Math.abs(s[ax.key] || 0);
+      let norm = val / maxVals[i];
+      if (ax.invert) norm = 1 - norm; // lower is better for loyer
+      norm = Math.max(0.05, Math.min(1, norm));
+      const angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+      return [CX + R * norm * Math.cos(angle), CY + R * norm * Math.sin(angle)];
+    });
+    const path = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + ' Z';
+    svg += `<path d="${path}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>`;
+    points.forEach(p => {
+      svg += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="${color.stroke}" stroke="white" stroke-width="1.5"/>`;
+    });
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  // Legend
+  if (legend) {
+    legend.innerHTML = scenarios.map((s, i) => {
+      const c = RADAR_COLORS[i % RADAR_COLORS.length];
+      return `<div class="radar-legend-item">
+        <div class="radar-legend-swatch" style="background:${c.stroke};"></div>
+        <span style="font-weight:600;color:var(--c-text);">${s.label}</span>
+      </div>`;
+    }).join('') + `<div style="margin-top:12px;font-size:11px;color:var(--c-text-3);line-height:1.5;">
+      💡 Le loyer est inversé : plus le polygone est grand, mieux c'est (loyer bas = meilleur).
+    </div>`;
+  }
+}
+
+// Patch renderScenarios to also render radar
+const _baseRenderScenarios = renderScenarios;
+renderScenarios = function() {
+  _baseRenderScenarios.apply(this, arguments);
+  renderRadarChart();
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// F — CONFIDENCE INDICATORS
+// ═══════════════════════════════════════════════════════════════════
+
+function getConfidenceLevel(key) {
+  const inv = parseFloat(document.getElementById('inv').value) || 0;
+  const kwh = parseFloat(document.getElementById('kwh').value) || 0;
+  const gain = parseFloat(document.getElementById('gain').value) || 0;
+  const conso = parseFloat(document.getElementById('conso').value) || 0;
+  const typeEl = document.getElementById('equip-type');
+  const typeLabel = typeEl?.options[typeEl.selectedIndex]?.text || '';
+  const hasFiche = typeLabel.includes('IND-UT') || typeLabel.includes('BAT-TH');
+
+  const levels = {
+    cee: {
+      level: (hasFiche && kwh > 0 && gain >= 10) ? 'high' : (kwh > 0 ? 'medium' : 'estimated'),
+      tip: kwh <= 0 ? 'Renseignez le volume kWh cumac pour affiner' : (!hasFiche ? 'Sélectionnez un équipement avec fiche CEE' : ''),
+    },
+    ademe: {
+      level: (inv >= 100000 && conso > 0) ? 'high' : (inv >= 50000 ? 'medium' : 'estimated'),
+      tip: inv < 100000 ? 'Montant minimal ADEME : 100 000 €' : '',
+    },
+    bpi: {
+      level: (inv >= 10000 && inv <= 1000000) ? 'high' : 'medium',
+      tip: inv > 1000000 ? 'Plafond Prêt Vert dépassé (1 M€)' : '',
+    },
+    feder: {
+      level: 'estimated',
+      tip: 'Éligibilité FEDER variable selon la région — vérification manuelle requise',
+    },
+  };
+
+  return levels[key] || { level: 'estimated', tip: 'Consultez les conditions détaillées' };
+}
+
+const CONFIDENCE_LABELS = { high: '● Fiable', medium: '◐ À vérifier', estimated: '○ Estimé' };
+
+// Patch renderScoring to inject confidence badges
+const _baseRenderScoring = renderScoring;
+renderScoring = function() {
+  _baseRenderScoring.apply(this, arguments);
+
+  // Inject confidence badges into each scoring card header
+  const mainKeys = ['cee', 'ademe', 'bpi', 'feder'];
+  mainKeys.forEach(key => {
+    const el = document.getElementById('scoring-' + key);
+    if (!el) return;
+    const conf = getConfidenceLevel(key);
+    const header = el.querySelector('.scoring-aide-header');
+    if (!header || header.querySelector('.confidence-badge')) return;
+
+    const badge = document.createElement('span');
+    badge.className = 'confidence-badge ' + conf.level;
+    badge.textContent = CONFIDENCE_LABELS[conf.level];
+    badge.title = conf.tip || '';
+    header.appendChild(badge);
+
+    if (conf.tip) {
+      const body = el.querySelector('.scoring-aide-body');
+      if (body && !body.querySelector('.confidence-tip')) {
+        const tip = document.createElement('div');
+        tip.className = 'confidence-tip';
+        tip.textContent = '💡 ' + conf.tip;
+        body.appendChild(tip);
+      }
+    }
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // INITIALIZATION
 // ═══════════════════════════════════════════════════════════════════
 
 function initApp() {
+  initTheme();
   initSidebar();
   const restored = autoRestoreState();
   makeFieldValuesEditable();
@@ -8088,6 +9122,9 @@ function initApp() {
     requestAnimationFrame(() => indicator.style.opacity = '1');
     setTimeout(() => { indicator.style.opacity = '0'; setTimeout(() => indicator.remove(), 300); }, 3000);
   }
+
+  // Onboarding tour for first-time users
+  setTimeout(() => { if (shouldShowOnboarding()) startOnboarding(); }, 800);
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
