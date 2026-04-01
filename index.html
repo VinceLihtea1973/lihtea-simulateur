@@ -2419,6 +2419,39 @@
       grid-template-columns: unset;
     }
 
+    /* ═══════════════════════════════════════════════
+       DASHBOARD COMPONENT STYLES (class-based)
+    ═══════════════════════════════════════════════ */
+    .dash-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .dash-kpi-card { padding: 16px 18px; }
+    .dash-kpi-inner { display: flex; align-items: center; justify-content: space-between; }
+    .dash-kpi-text { min-width: 0; flex: 1; }
+    .dash-kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-3); font-weight: 600; }
+    .dash-kpi-value { font-size: 26px; font-weight: 800; font-family: var(--font-mono); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dash-kpi-sub { font-size: 11px; color: var(--c-text-3); margin-top: 2px; }
+    .dash-kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+
+    .dash-row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .dash-main-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .dash-side-stack { display: flex; flex-direction: column; gap: 14px; }
+    .dash-section-card { padding: 14px 16px; }
+    .dash-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .dash-link-btn { font-size: 10px; padding: 4px 10px; border: 1px solid var(--c-border); border-radius: 6px; background: var(--c-surface); color: var(--c-text-2); cursor: pointer; font-family: var(--font-body); }
+    .dash-stats-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .dash-stat-big { font-size: 24px; font-weight: 800; color: var(--c-navy); font-family: var(--font-mono); }
+    .dash-stat-med { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
+    .dash-stat-label { font-size: 10px; color: var(--c-text-3); text-transform: uppercase; }
+    .dash-stat-sep { width: 1px; height: 30px; background: var(--c-border); }
+    .dash-actions { padding: 14px 16px; }
+    .dash-actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .dash-action-btn { padding: 10px 14px; background: var(--c-surface); color: var(--c-navy); border: 1px solid var(--c-border); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); display: flex; align-items: center; gap: 5px; }
+    .dash-action-primary { background: var(--c-navy); color: white; border: none; }
+
     /* ─── FLOATING SIMULATOR BUTTON (default hidden) ─── */
     .mobile-sim-fab { display: none; }
 
@@ -2533,35 +2566,78 @@
         width: 100% !important;
       }
 
-      /* ─── DASHBOARD: Responsive grid — 2x2 KPIs ─── */
-      #dash-global-kpis {
+      /* ─── DASHBOARD: All grids single column on mobile ─── */
+      .dash-kpi-grid {
         grid-template-columns: 1fr 1fr !important;
         gap: 8px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
       }
 
-      #dash-global-kpis > .card,
-      #dash-global-kpis > div {
-        padding: 10px !important;
+      .dash-kpi-card {
+        padding: 10px 12px !important;
         min-width: 0 !important;
         overflow: hidden !important;
-        box-sizing: border-box !important;
       }
 
-      /* KPI text sizing */
-      #dash-global-kpis div[style*="font-size:26px"] {
-        font-size: 18px !important;
+      .dash-kpi-value {
+        font-size: 16px !important;
       }
 
-      #dash-global-kpis div[style*="font-size:10px"] {
+      .dash-kpi-label {
+        font-size: 8px !important;
+        letter-spacing: 0.05em !important;
+      }
+
+      .dash-kpi-sub {
         font-size: 9px !important;
       }
 
-      #dash-global-kpis div[style*="width:40px"] {
-        width: 30px !important;
-        height: 30px !important;
-        font-size: 14px !important;
+      .dash-kpi-icon {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+      }
+
+      .dash-row-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .dash-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .dash-section-card {
+        padding: 12px !important;
+      }
+
+      .dash-stats-row {
+        gap: 10px !important;
+      }
+
+      .dash-stat-big {
+        font-size: 20px !important;
+      }
+
+      .dash-stat-med {
+        font-size: 16px !important;
+      }
+
+      .dash-stat-sep {
+        height: 24px !important;
+      }
+
+      .dash-actions-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+      }
+
+      .dash-action-btn {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+        justify-content: center !important;
       }
 
       .dashboard-grid {
@@ -3139,91 +3215,91 @@
       </div>
 
       <!-- KPI cards -->
-      <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin-bottom:20px;" id="dash-global-kpis">
-        <div class="card" style="padding:18px 20px;border-left:4px solid var(--c-teal);">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-text-3);font-weight:600;">Simulations</div>
-              <div style="font-size:26px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);margin-top:4px;" id="dk-count">0</div>
-              <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">sauvegardées</div>
+      <div class="dash-kpi-grid" id="dash-global-kpis">
+        <div class="card dash-kpi-card" style="border-left:4px solid var(--c-teal);">
+          <div class="dash-kpi-inner">
+            <div class="dash-kpi-text">
+              <div class="dash-kpi-label">Simulations</div>
+              <div class="dash-kpi-value" style="color:var(--c-navy);" id="dk-count">0</div>
+              <div class="dash-kpi-sub">sauvegardées</div>
             </div>
-            <div style="width:40px;height:40px;border-radius:10px;background:var(--c-teal-bg);display:flex;align-items:center;justify-content:center;font-size:18px;">◫</div>
+            <div class="dash-kpi-icon" style="background:var(--c-teal-bg);">◫</div>
           </div>
         </div>
-        <div class="card" style="padding:18px 20px;border-left:4px solid var(--c-navy);">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-text-3);font-weight:600;">Volume simulé</div>
-              <div style="font-size:26px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);margin-top:4px;" id="dk-volume">0 €</div>
-              <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">investissements HT</div>
+        <div class="card dash-kpi-card" style="border-left:4px solid var(--c-navy);">
+          <div class="dash-kpi-inner">
+            <div class="dash-kpi-text">
+              <div class="dash-kpi-label">Volume simulé</div>
+              <div class="dash-kpi-value" style="color:var(--c-navy);" id="dk-volume">0 €</div>
+              <div class="dash-kpi-sub">investissements HT</div>
             </div>
-            <div style="width:40px;height:40px;border-radius:10px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:18px;">💰</div>
+            <div class="dash-kpi-icon" style="background:#dbeafe;">💰</div>
           </div>
         </div>
-        <div class="card" style="padding:18px 20px;border-left:4px solid #059669;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-text-3);font-weight:600;">Aides identifiées</div>
-              <div style="font-size:26px;font-weight:800;color:#059669;font-family:var(--font-mono);margin-top:4px;" id="dk-aides">0 €</div>
-              <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">subventions cumulées</div>
+        <div class="card dash-kpi-card" style="border-left:4px solid #059669;">
+          <div class="dash-kpi-inner">
+            <div class="dash-kpi-text">
+              <div class="dash-kpi-label">Aides identifiées</div>
+              <div class="dash-kpi-value" style="color:#059669;" id="dk-aides">0 €</div>
+              <div class="dash-kpi-sub">subventions cumulées</div>
             </div>
-            <div style="width:40px;height:40px;border-radius:10px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;font-size:18px;">🎯</div>
+            <div class="dash-kpi-icon" style="background:#ecfdf5;">🎯</div>
           </div>
         </div>
-        <div class="card" style="padding:18px 20px;border-left:4px solid #d97706;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-text-3);font-weight:600;">Économie énergie</div>
-              <div style="font-size:26px;font-weight:800;color:#d97706;font-family:var(--font-mono);margin-top:4px;" id="dk-eco">0 €</div>
-              <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">moyenne par an</div>
+        <div class="card dash-kpi-card" style="border-left:4px solid #d97706;">
+          <div class="dash-kpi-inner">
+            <div class="dash-kpi-text">
+              <div class="dash-kpi-label">Économie énergie</div>
+              <div class="dash-kpi-value" style="color:#d97706;" id="dk-eco">0 €</div>
+              <div class="dash-kpi-sub">moyenne par an</div>
             </div>
-            <div style="width:40px;height:40px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:18px;">⚡</div>
+            <div class="dash-kpi-icon" style="background:#fef3c7;">⚡</div>
           </div>
         </div>
       </div>
 
       <!-- Propositions + Scenarios count row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
-        <div class="card" style="padding:16px 20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="dash-row-grid">
+        <div class="card dash-section-card">
+          <div class="dash-section-header">
             <div class="section-label" style="margin-bottom:0;font-size:13px;">Propositions générées</div>
-            <button onclick="switchPage('propositions', document.querySelector('[data-page=&quot;propositions&quot;]'))" style="font-size:10px;padding:4px 10px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);color:var(--c-text-2);cursor:pointer;font-family:var(--font-body);">Voir tout →</button>
+            <button onclick="switchPage('propositions', document.querySelector('[data-page=&quot;propositions&quot;]'))" class="dash-link-btn">Voir tout →</button>
           </div>
           <div id="dash-propositions-summary">
-            <div style="display:flex;gap:20px;align-items:center;">
+            <div class="dash-stats-row">
               <div style="text-align:center;">
-                <div style="font-size:28px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);" id="dk-prop-count">0</div>
-                <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;">Total</div>
+                <div class="dash-stat-big" id="dk-prop-count">0</div>
+                <div class="dash-stat-label">Total</div>
               </div>
-              <div style="width:1px;height:36px;background:var(--c-border);"></div>
+              <div class="dash-stat-sep"></div>
               <div style="text-align:center;">
-                <div style="font-size:20px;font-weight:700;color:#dc2626;font-family:var(--font-mono);" id="dk-prop-pdf">0</div>
-                <div style="font-size:10px;color:var(--c-text-3);">PDF</div>
+                <div class="dash-stat-med" style="color:#dc2626;" id="dk-prop-pdf">0</div>
+                <div class="dash-stat-label">PDF</div>
               </div>
               <div style="text-align:center;">
-                <div style="font-size:20px;font-weight:700;color:#059669;font-family:var(--font-mono);" id="dk-prop-xls">0</div>
-                <div style="font-size:10px;color:var(--c-text-3);">Excel</div>
+                <div class="dash-stat-med" style="color:#059669;" id="dk-prop-xls">0</div>
+                <div class="dash-stat-label">Excel</div>
               </div>
-              <div style="width:1px;height:36px;background:var(--c-border);"></div>
+              <div class="dash-stat-sep"></div>
               <div style="text-align:center;">
-                <div style="font-size:20px;font-weight:700;color:var(--c-navy);font-family:var(--font-mono);" id="dk-prop-clients">0</div>
-                <div style="font-size:10px;color:var(--c-text-3);">Clients</div>
+                <div class="dash-stat-med" style="color:var(--c-navy);" id="dk-prop-clients">0</div>
+                <div class="dash-stat-label">Clients</div>
               </div>
             </div>
           </div>
         </div>
-        <div class="card" style="padding:16px 20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card dash-section-card">
+          <div class="dash-section-header">
             <div class="section-label" style="margin-bottom:0;font-size:13px;">Scénarios en mémoire</div>
-            <button onclick="switchPage('scenarios', document.querySelector('[data-page=&quot;scenarios&quot;]'))" style="font-size:10px;padding:4px 10px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);color:var(--c-text-2);cursor:pointer;font-family:var(--font-body);">Comparer →</button>
+            <button onclick="switchPage('scenarios', document.querySelector('[data-page=&quot;scenarios&quot;]'))" class="dash-link-btn">Comparer →</button>
           </div>
           <div id="dash-scenarios-summary">
-            <div style="display:flex;gap:20px;align-items:center;">
+            <div class="dash-stats-row">
               <div style="text-align:center;">
-                <div style="font-size:28px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);" id="dk-scen-count">0</div>
-                <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;">Capturés</div>
+                <div class="dash-stat-big" id="dk-scen-count">0</div>
+                <div class="dash-stat-label">Capturés</div>
               </div>
-              <div style="width:1px;height:36px;background:var(--c-border);"></div>
+              <div class="dash-stat-sep"></div>
               <div style="flex:1;" id="dk-scen-best">
                 <div style="font-size:11px;color:var(--c-text-3);">Aucun scénario capturé</div>
               </div>
@@ -3233,46 +3309,46 @@
       </div>
 
       <!-- Main grid: recent sims + aides chart -->
-      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:20px;">
+      <div class="dash-main-grid">
         <div class="card" style="padding:0;overflow:hidden;">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--c-border);">
+          <div class="dash-section-header" style="padding:14px 16px;border-bottom:1px solid var(--c-border);">
             <div class="section-label" style="margin-bottom:0;font-size:13px;">Dernières simulations</div>
-            <button onclick="switchPage('saved', document.querySelector('[data-page=&quot;saved&quot;]'))" style="font-size:10px;padding:4px 10px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);color:var(--c-text-2);cursor:pointer;font-family:var(--font-body);">Voir tout →</button>
+            <button onclick="switchPage('saved', document.querySelector('[data-page=&quot;saved&quot;]'))" class="dash-link-btn">Voir tout →</button>
           </div>
           <div id="dash-recent-sims" style="padding:0;">
-            <div style="text-align:center;padding:40px 20px;color:var(--c-text-3);">
-              <div style="font-size:28px;margin-bottom:8px;opacity:0.4;">◫</div>
-              <div style="font-size:13px;font-weight:500;">Aucune simulation enregistrée</div>
+            <div style="text-align:center;padding:30px 16px;color:var(--c-text-3);">
+              <div style="font-size:24px;margin-bottom:8px;opacity:0.4;">◫</div>
+              <div style="font-size:12px;font-weight:500;">Aucune simulation enregistrée</div>
               <div style="font-size:11px;margin-top:4px;">Lancez une simulation puis sauvegardez-la.</div>
             </div>
           </div>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div class="card" style="flex:1;padding:16px 20px;">
+        <div class="dash-side-stack">
+          <div class="card dash-section-card">
             <div class="section-label" style="font-size:13px;margin-bottom:10px;">Répartition des aides</div>
             <div id="dash-global-aides-chart">
-              <div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Sauvegardez des simulations pour voir les statistiques.</div>
+              <div style="text-align:center;padding:16px;color:var(--c-text-3);font-size:12px;">Sauvegardez des simulations pour voir les statistiques.</div>
             </div>
           </div>
-          <div class="card" style="flex:1;padding:16px 20px;">
+          <div class="card dash-section-card">
             <div class="section-label" style="font-size:13px;margin-bottom:10px;">Organismes actifs</div>
             <div id="dash-global-orgs">
-              <div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Chargement...</div>
+              <div style="text-align:center;padding:16px;color:var(--c-text-3);font-size:12px;">Chargement...</div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Quick actions -->
-      <div class="card" style="padding:16px 20px;background:var(--c-bg);">
+      <div class="card dash-actions" style="background:var(--c-bg);">
         <div class="section-label" style="font-size:13px;margin-bottom:12px;">Actions rapides</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button onclick="switchPage('resultats', document.querySelector('[data-page=&quot;resultats&quot;]'))" style="padding:10px 16px;background:var(--c-navy);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;">⚙ Simuler</button>
-          <button onclick="switchPage('eligibilite', document.querySelector('[data-page=&quot;eligibilite&quot;]'))" style="padding:10px 16px;background:var(--c-surface);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;">✓ Vérifier éligibilité</button>
-          <button onclick="switchPage('scenarios', document.querySelector('[data-page=&quot;scenarios&quot;]'))" style="padding:10px 16px;background:var(--c-surface);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;">⚖ Comparer scénarios</button>
-          <button onclick="exporterPDF()" style="padding:10px 16px;background:var(--c-surface);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;">📕 Exporter PDF</button>
-          <button onclick="showUserProfile()" style="padding:10px 16px;background:var(--c-surface);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;">👤 Mon profil</button>
+        <div class="dash-actions-row">
+          <button onclick="switchPage('resultats', document.querySelector('[data-page=&quot;resultats&quot;]'))" class="dash-action-btn dash-action-primary">⚙ Simuler</button>
+          <button onclick="switchPage('eligibilite', document.querySelector('[data-page=&quot;eligibilite&quot;]'))" class="dash-action-btn">✓ Éligibilité</button>
+          <button onclick="switchPage('scenarios', document.querySelector('[data-page=&quot;scenarios&quot;]'))" class="dash-action-btn">⚖ Scénarios</button>
+          <button onclick="exporterPDF()" class="dash-action-btn">📕 PDF</button>
+          <button onclick="showUserProfile()" class="dash-action-btn">👤 Profil</button>
         </div>
       </div>
 
