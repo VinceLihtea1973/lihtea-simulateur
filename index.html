@@ -6353,6 +6353,32 @@ function appliquerParamAdmin() {
 }
 appliquerParamAdmin();
 
+// Sync equipment from Supabase admin
+async function syncEquipementsFromAdmin() {
+  try {
+    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
+    const res = await fetch(SUPABASE_URL + '/rest/v1/equipements?select=*,categories_equipements(nom,icone),fiches_cee(code)&actif=eq.true&order=libelle', { headers });
+    if (!res.ok) return;
+    const equips = await res.json();
+    if (!equips || !equips.length) return;
+    const mapped = equips.map(eq => ({
+      libelle: eq.libelle || '',
+      fiche: eq.fiches_cee?.code || '',
+      taux: Number(eq.gain_energetique_typique) || 15,
+      gain: Number(eq.gain_energetique_typique) || 25,
+      tooltip: eq.categories_equipements?.nom ? eq.categories_equipements.icone + ' ' + eq.categories_equipements.nom : '',
+      categorie: eq.categories_equipements?.nom || ''
+    }));
+    adminEquipements = mapped;
+    sauverLS('gef_equipements', mapped);
+    appliquerParamAdmin();
+    console.log('[Sync] Equipements loaded from admin:', mapped.length);
+  } catch(e) {
+    console.warn('[Sync] Failed to sync equipements from admin:', e);
+  }
+}
+syncEquipementsFromAdmin();
+
 </script>
 
 <script>
