@@ -2446,83 +2446,139 @@
         transform: translateX(0);
       }
 
+      /* GLOBAL: Prevent horizontal overflow on mobile */
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+      }
+
+      .app-layout {
+        overflow-x: hidden;
+        width: 100%;
+      }
+
       /* Main content takes full width on mobile */
       .main-content {
         margin-left: 0;
         padding-bottom: 70px;
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
       }
 
       /* ─── HEADER: Compact on mobile ─── */
       .header {
         flex-direction: column;
         gap: 8px;
-        padding: 14px 16px !important;
+        padding: 12px 14px !important;
       }
-      .header h1 { font-size: 16px; }
-      .header p { font-size: 11px; display: none; }
+      .header h1 { font-size: 15px; margin: 0; }
+      .header p { display: none; }
       .header-badge { font-size: 9px; }
       .header-meta.expert-only { display: none; }
       .header-brand { margin-bottom: 2px; }
-      .header-logo-text { font-size: 16px; }
-      .pitch-toggle { font-size: 10px; padding: 6px 10px; }
+      .header-logo { width: 28px; height: 28px; font-size: 12px; }
+      .header-logo-text { font-size: 14px; }
+      .pitch-toggle { font-size: 10px; padding: 5px 10px; }
 
       /* ─── BREADCRUMB: Hide on mobile (bottom nav replaces it) ─── */
       .breadcrumb-bar { display: none; }
 
-      /* ─── SPLIT VIEW: Hide simulator panel on mobile ─── */
+      /* ─── SPLIT VIEW: On mobile, no grid — stack and hide sim ─── */
       .split-container {
         display: block !important;
-        grid-template-columns: 1fr !important;
+        grid-template-columns: unset !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden;
       }
 
       .main-content.split-view .split-container #page-simulateur {
         display: none !important;
+        max-height: none !important;
+        position: static !important;
+        border-right: none !important;
+        overflow: visible !important;
       }
 
-      /* Show simulateur page only when directly navigated to */
-      .main-content.split-view .split-container #page-simulateur.mobile-show {
+      /* Show simulateur page ONLY when toggled via mobile button */
+      .main-content.split-view .split-container #page-simulateur.mobile-show,
+      #page-simulateur.mobile-show {
         display: block !important;
         border-right: none;
-        border-bottom: none;
+        border-bottom: 1px solid var(--c-border);
         max-height: none;
         position: static;
         overflow: visible;
       }
 
-      /* ─── PAGES: Full width, proper padding ─── */
+      /* ─── PAGES: Full width, proper padding, no overflow ─── */
       .page {
-        padding: 14px 12px !important;
+        padding: 12px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
       }
 
       .main-content > .header,
       .page {
-        padding: 14px 12px;
+        padding: 12px;
       }
 
-      /* ─── DASHBOARD: Responsive grid ─── */
+      .main-content.split-view .split-container .page {
+        padding: 12px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      /* ─── DASHBOARD: Responsive grid — 2x2 KPIs ─── */
       #dash-global-kpis {
         grid-template-columns: 1fr 1fr !important;
         gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
 
-      #dash-global-kpis .card {
-        padding: 12px !important;
+      #dash-global-kpis > .card,
+      #dash-global-kpis > div {
+        padding: 10px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
       }
 
-      #dash-global-kpis .card div[style*="font-size:26px"] {
-        font-size: 20px !important;
+      /* KPI text sizing */
+      #dash-global-kpis div[style*="font-size:26px"] {
+        font-size: 18px !important;
+      }
+
+      #dash-global-kpis div[style*="font-size:10px"] {
+        font-size: 9px !important;
+      }
+
+      #dash-global-kpis div[style*="width:40px"] {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 14px !important;
       }
 
       .dashboard-grid {
         grid-template-columns: 1fr !important;
-        gap: 12px;
+        gap: 10px;
       }
 
-      /* Welcome banner */
+      /* Welcome banner — stack vertically, no overflow */
       #page-dashboard > div:first-child {
         flex-direction: column !important;
-        padding: 16px !important;
-        gap: 12px !important;
+        padding: 14px !important;
+        gap: 10px !important;
+        border-radius: 12px !important;
+      }
+
+      #page-dashboard > div:first-child div[style*="font-size:20px"] {
+        font-size: 16px !important;
       }
 
       #page-dashboard > div:first-child > div:last-child {
@@ -2532,6 +2588,18 @@
       #page-dashboard > div:first-child button {
         width: 100%;
         text-align: center;
+      }
+
+      /* ─── FOOTER: Small and compact on mobile ─── */
+      .footer {
+        font-size: 10px !important;
+        padding: 12px 14px 90px !important;
+        line-height: 1.5 !important;
+      }
+
+      .main-content > .footer {
+        font-size: 10px !important;
+        padding: 12px 14px 90px !important;
       }
 
       /* ─── METRICS GRID ─── */
@@ -2576,21 +2644,31 @@
         border-radius: 10px;
       }
 
-      /* ─── EXPORT BAR ─── */
+      /* ─── EXPORT BAR: Above bottom nav, no shift ─── */
       .export-input { width: 100%; }
 
       .export-bar-sticky {
-        left: 0;
-        padding: 8px 12px;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        bottom: 60px;
+        left: 0 !important;
+        right: 0;
+        padding: 6px 10px !important;
+        bottom: 56px !important;
+        z-index: 1400 !important;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 4px;
+        position: fixed !important;
+      }
+
+      .export-bar-inner {
+        gap: 8px;
+      }
+
+      .export-label {
+        font-size: 11px !important;
       }
 
       .export-btn {
-        padding: 8px 12px;
-        font-size: 11px;
+        padding: 6px 10px;
+        font-size: 10px;
         flex: 1;
         min-width: 0;
         text-align: center;
@@ -2661,12 +2739,6 @@
       }
 
       .sidebar-collapse-btn { display: none; }
-
-      /* ─── FOOTER ─── */
-      .footer {
-        padding-bottom: 80px !important;
-        font-size: 10px;
-      }
 
       /* ─── AUTH: Registration form stacked ─── */
       #auth-fields-register > div[style*="grid-template-columns"] {
@@ -2751,7 +2823,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 56px;
+        height: calc(56px + env(safe-area-inset-bottom, 0px));
         background: var(--c-navy);
         border-top: 1px solid rgba(255,255,255,0.1);
         z-index: 1500;
@@ -2759,6 +2831,10 @@
         padding-bottom: env(safe-area-inset-bottom, 0);
         justify-content: space-around;
         align-items: center;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
       }
 
       .mobile-nav-item {
@@ -4215,15 +4291,21 @@ function updateMobileNav(pageName) {
 
 function toggleMobileSimulator() {
   const simPage = document.getElementById('page-simulateur');
+  const fab = document.getElementById('mobile-sim-fab');
   if (!simPage) return;
-  const isShowing = simPage.classList.contains('mobile-show');
-  if (isShowing) {
-    simPage.classList.remove('mobile-show');
-    document.getElementById('mobile-sim-fab').innerHTML = '⚙ Simulateur';
+  const isShowing = simPage.classList.contains('active') && simPage.style.display !== 'none';
+  if (isShowing && pageCourante !== 'resultats') {
+    // Hide simulator, show current page
+    simPage.classList.remove('active');
+    const currentPage = document.getElementById('page-' + pageCourante);
+    if (currentPage) currentPage.classList.add('active');
+    if (fab) fab.innerHTML = '⚙ Simulateur';
   } else {
-    simPage.classList.add('mobile-show');
-    document.getElementById('mobile-sim-fab').innerHTML = '✕ Fermer';
-    simPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Show simulator, hide current page
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    simPage.classList.add('active');
+    if (fab) fab.innerHTML = '✕ Fermer';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
@@ -4268,14 +4350,32 @@ function switchPage(pageName, navItem) {
   ongletCourant = pageName; // backward compat
 
   const mainContent = document.getElementById('main-content');
-  const isFullWidth = (pageName === 'dashboard'); // Dashboard = full width, no simulator panel
+  const isMobile = window.innerWidth <= 768;
+  const isFullWidth = (pageName === 'dashboard');
 
   // Hide all pages
   const pages = document.querySelectorAll('.page');
-  pages.forEach(p => p.classList.remove('active'));
+  pages.forEach(p => { p.classList.remove('active'); p.classList.remove('mobile-show'); });
 
-  if (isFullWidth) {
-    // Full-width mode: no split-view
+  if (isMobile) {
+    // ─── MOBILE: No split-view, show one page at a time ───
+    mainContent.classList.remove('split-view');
+    let container = document.getElementById('split-container');
+    if (container) {
+      while (container.firstChild) mainContent.insertBefore(container.firstChild, container);
+      container.remove();
+    }
+
+    if (pageName === 'resultats') {
+      // Show simulator page directly
+      const simPage = document.getElementById('page-simulateur');
+      if (simPage) { simPage.classList.add('active'); }
+    } else {
+      const pageEl = document.getElementById('page-' + pageName);
+      if (pageEl) pageEl.classList.add('active');
+    }
+  } else if (isFullWidth) {
+    // ─── DESKTOP: Full-width mode (dashboard) ───
     mainContent.classList.remove('split-view');
     let container = document.getElementById('split-container');
     if (container) {
@@ -4285,7 +4385,7 @@ function switchPage(pageName, navItem) {
     const pageEl = document.getElementById('page-' + pageName);
     if (pageEl) pageEl.classList.add('active');
   } else {
-    // Split-view mode: simulator + content
+    // ─── DESKTOP: Split-view mode — simulator + content ───
     mainContent.classList.add('split-view');
     let container = document.getElementById('split-container');
     if (!container) {
@@ -4341,21 +4441,14 @@ function switchPage(pageName, navItem) {
   // Update mobile navigation (closes sidebar and updates active state)
   updateMobileNav(pageName);
 
-  // Mobile: manage floating sim button & hide sim panel
+  // Mobile: manage floating sim button
   const simFab = document.getElementById('mobile-sim-fab');
-  const simPage = document.getElementById('page-simulateur');
-  if (window.innerWidth <= 768) {
+  if (isMobile) {
     if (pageName !== 'dashboard' && pageName !== 'resultats') {
-      if (simFab) simFab.style.display = 'flex';
-      if (simPage) simPage.classList.remove('mobile-show');
-      if (simFab) simFab.innerHTML = '⚙ Simulateur';
+      // Show floating button to access simulator
+      if (simFab) { simFab.style.display = 'flex'; simFab.innerHTML = '⚙ Simulateur'; }
     } else {
       if (simFab) simFab.style.display = 'none';
-      if (simPage) simPage.classList.remove('mobile-show');
-    }
-    // For resultats page on mobile, show simulator directly (no split)
-    if (pageName === 'resultats' && simPage) {
-      simPage.classList.add('mobile-show');
     }
   } else {
     if (simFab) simFab.style.display = 'none';
