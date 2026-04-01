@@ -2352,11 +2352,12 @@
       inset: 0;
       background: linear-gradient(135deg, var(--c-navy) 0%, #1a4a6e 50%, #0d3b56 100%);
       z-index: 20000;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       transition: opacity 0.4s ease;
     }
+    .auth-gate.visible { display: flex; }
     .auth-gate.hidden { opacity: 0; pointer-events: none; }
     .auth-card {
       background: white;
@@ -2418,6 +2419,9 @@
       grid-template-columns: unset;
     }
 
+    /* ─── FLOATING SIMULATOR BUTTON (default hidden) ─── */
+    .mobile-sim-fab { display: none; }
+
     /* ═══════════════════════════════════════════════════════════
        COMPREHENSIVE MOBILE-FIRST RESPONSIVE SYSTEM (3 BREAKPOINTS)
        Mobile: <768px | Tablet: 768px-1024px | Desktop: >1024px
@@ -2428,7 +2432,7 @@
       /* Sidebar — slide out drawer on mobile */
       .sidebar {
         position: fixed;
-        width: 260px;
+        width: 280px;
         height: 100vh;
         left: 0;
         top: 0;
@@ -2445,21 +2449,92 @@
       /* Main content takes full width on mobile */
       .main-content {
         margin-left: 0;
-        padding-bottom: 60px;
+        padding-bottom: 70px;
       }
 
-      /* App padding */
-      .app {
-        padding: 12px 10px;
-      }
-
-      /* Header stacking */
+      /* ─── HEADER: Compact on mobile ─── */
       .header {
         flex-direction: column;
+        gap: 8px;
+        padding: 14px 16px !important;
+      }
+      .header h1 { font-size: 16px; }
+      .header p { font-size: 11px; display: none; }
+      .header-badge { font-size: 9px; }
+      .header-meta.expert-only { display: none; }
+      .header-brand { margin-bottom: 2px; }
+      .header-logo-text { font-size: 16px; }
+      .pitch-toggle { font-size: 10px; padding: 6px 10px; }
+
+      /* ─── BREADCRUMB: Hide on mobile (bottom nav replaces it) ─── */
+      .breadcrumb-bar { display: none; }
+
+      /* ─── SPLIT VIEW: Hide simulator panel on mobile ─── */
+      .split-container {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+      }
+
+      .main-content.split-view .split-container #page-simulateur {
+        display: none !important;
+      }
+
+      /* Show simulateur page only when directly navigated to */
+      .main-content.split-view .split-container #page-simulateur.mobile-show {
+        display: block !important;
+        border-right: none;
+        border-bottom: none;
+        max-height: none;
+        position: static;
+        overflow: visible;
+      }
+
+      /* ─── PAGES: Full width, proper padding ─── */
+      .page {
+        padding: 14px 12px !important;
+      }
+
+      .main-content > .header,
+      .page {
+        padding: 14px 12px;
+      }
+
+      /* ─── DASHBOARD: Responsive grid ─── */
+      #dash-global-kpis {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+      }
+
+      #dash-global-kpis .card {
+        padding: 12px !important;
+      }
+
+      #dash-global-kpis .card div[style*="font-size:26px"] {
+        font-size: 20px !important;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr !important;
         gap: 12px;
       }
 
-      /* Metrics grid single column */
+      /* Welcome banner */
+      #page-dashboard > div:first-child {
+        flex-direction: column !important;
+        padding: 16px !important;
+        gap: 12px !important;
+      }
+
+      #page-dashboard > div:first-child > div:last-child {
+        width: 100%;
+      }
+
+      #page-dashboard > div:first-child button {
+        width: 100%;
+        text-align: center;
+      }
+
+      /* ─── METRICS GRID ─── */
       .metrics-grid {
         grid-template-columns: 1fr;
         gap: 8px;
@@ -2474,15 +2549,19 @@
       }
 
       .metric.highlight[style*="grid-column:span 2"] {
-        grid-column: span 1;
+        grid-column: span 1 !important;
       }
 
-      /* Tabs overflow on mobile */
+      /* ─── TABS: Horizontal scroll ─── */
       .tabs {
         overflow-x: auto;
         white-space: nowrap;
         gap: 3px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
       }
+      .tabs::-webkit-scrollbar { display: none; }
 
       .tab-btn {
         font-size: 11px;
@@ -2491,166 +2570,76 @@
         flex-shrink: 0;
       }
 
-      /* Export input responsive */
-      .export-input {
-        width: 100%;
-      }
-
-      .export-bar-sticky {
-        left: 0;
-        padding: 8px 12px;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        bottom: 56px;
-      }
-
-      /* Split view stacking on mobile */
-      .split-container {
-        grid-template-columns: 1fr;
-      }
-
-      .main-content.split-view .split-container #page-simulateur {
-        border-right: none;
-        border-bottom: 1px solid var(--c-border);
-        max-height: auto;
-        position: static;
-      }
-
-      /* Dashboard grid single column */
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-
-      /* Admin form grids */
-      .admin-form-grid,
-      .admin-baremes-grid {
-        grid-template-columns: 1fr;
-      }
-
-      #admin-panel {
-        margin: 0;
-        border-radius: 0;
-      }
-
-      #admin-overlay {
-        padding: 0;
-      }
-
-      /* Card sizing */
+      /* ─── CARDS ─── */
       .card {
         padding: 14px;
         border-radius: 10px;
       }
 
-      /* Typography adjustments */
-      .header h1 {
-        font-size: 18px;
-      }
+      /* ─── EXPORT BAR ─── */
+      .export-input { width: 100%; }
 
-      .field-value {
-        font-size: 13px;
-      }
-
-      .loyer-val {
-        font-size: 16px;
-      }
-
-      .waterfall-row {
-        height: 28px;
-      }
-
-      .waterfall-label {
-        width: 80px;
-        font-size: 9px;
-      }
-
-      .waterfall-bar {
-        height: 16px;
-      }
-
-      .waterfall-bar-text {
-        font-size: 9px;
-      }
-
-      .pitch-card {
-        padding: 20px;
-      }
-
-      .pitch-metrics {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .pitch-metric-value {
-        font-size: 16px;
-      }
-
-      .pitch-headline {
-        font-size: 11px;
-      }
-
-      .pitch-verdict {
-        font-size: 12px;
-      }
-
-      .scoring-aide-header {
-        padding: 10px 12px;
-      }
-
-      .scoring-aide-name {
-        font-size: 12px;
-      }
-
-      .scoring-badge {
-        font-size: 10px;
-        padding: 3px 8px;
-      }
-
-      .timeline {
-        padding-left: 24px;
-      }
-
-      .timeline-dot {
-        width: 18px;
-        height: 18px;
-        font-size: 9px;
-        left: -24px;
-      }
-
-      .timeline-title {
-        font-size: 12px;
-      }
-
-      .saved-sim-card {
-        padding: 10px 12px;
-      }
-
-      .saved-sim-amount {
-        font-size: 12px;
-      }
-
-      .saved-sim-actions {
-        opacity: 1;
+      .export-bar-sticky {
+        left: 0;
+        padding: 8px 12px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        bottom: 60px;
+        flex-wrap: wrap;
+        gap: 6px;
       }
 
       .export-btn {
         padding: 8px 12px;
-        font-size: 12px;
+        font-size: 11px;
+        flex: 1;
+        min-width: 0;
+        text-align: center;
       }
 
-      .flux-chart {
-        height: 100px;
-      }
+      /* ─── WATERFALL CHART ─── */
+      .waterfall-row { height: 28px; }
+      .waterfall-label { width: 80px; font-size: 9px; }
+      .waterfall-bar { height: 16px; }
+      .waterfall-bar-text { font-size: 9px; }
 
-      .breadcrumb-bar {
-        padding: 8px 12px;
+      /* ─── PITCH CARD ─── */
+      .pitch-card { padding: 16px; }
+      .pitch-metrics {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
       }
+      .pitch-metric-value { font-size: 16px; }
+      .pitch-headline { font-size: 11px; }
+      .pitch-verdict { font-size: 12px; }
 
+      /* ─── SCORING / ELIGIBILITY ─── */
+      .scoring-aide-header { padding: 10px 12px; }
+      .scoring-aide-name { font-size: 12px; }
+      .scoring-badge { font-size: 10px; padding: 3px 8px; }
+
+      /* ─── TIMELINE / DOSSIER ─── */
+      .timeline { padding-left: 24px; }
+      .timeline-dot { width: 18px; height: 18px; font-size: 9px; left: -24px; }
+      .timeline-title { font-size: 12px; }
+
+      /* ─── SAVED SIMULATIONS ─── */
+      .saved-sim-card { padding: 10px 12px; }
+      .saved-sim-amount { font-size: 12px; }
+      .saved-sim-actions { opacity: 1; }
+
+      /* ─── FLUX CHART ─── */
+      .flux-chart { height: 100px; }
+
+      /* ─── COPILOT ─── */
       .copilot-fab {
-        bottom: 70px;
+        bottom: 74px;
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
       }
 
       .copilot-panel {
-        bottom: 70px;
+        bottom: 74px;
         right: 8px;
         left: 8px;
         width: auto;
@@ -2658,18 +2647,7 @@
         border-radius: 12px;
       }
 
-      .copilot-fab {
-        width: 46px;
-        height: 46px;
-        font-size: 16px;
-      }
-
-      /* Hide sidebar collapse button on mobile */
-      .sidebar-collapse-btn {
-        display: none;
-      }
-
-      /* Mobile overlay for sidebar */
+      /* ─── SIDEBAR OVERLAY ─── */
       .sidebar-overlay {
         display: none;
         position: fixed;
@@ -2682,14 +2660,82 @@
         display: block;
       }
 
-      /* Footer padding for bottom nav */
+      .sidebar-collapse-btn { display: none; }
+
+      /* ─── FOOTER ─── */
       .footer {
-        padding-bottom: 120px;
+        padding-bottom: 80px !important;
+        font-size: 10px;
       }
 
-      /* Auth registration form — stacked on mobile */
+      /* ─── AUTH: Registration form stacked ─── */
       #auth-fields-register > div[style*="grid-template-columns"] {
         grid-template-columns: 1fr !important;
+      }
+
+      /* ─── ADMIN PANEL ─── */
+      .admin-form-grid,
+      .admin-baremes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #admin-panel { margin: 0; border-radius: 0; }
+      #admin-overlay { padding: 0; }
+
+      /* ─── TABLES: Horizontal scroll wrapper ─── */
+      .scenarios-table {
+        font-size: 10px;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .scenarios-table th,
+      .scenarios-table td {
+        padding: 6px 8px;
+        white-space: nowrap;
+      }
+
+      /* ─── FIELD VALUE ─── */
+      .field-value { font-size: 13px; }
+      .loyer-val { font-size: 16px; }
+
+      /* ─── MODAL ─── */
+      .modal-card {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-card div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* ─── FLOATING SIMULATOR BUTTON ─── */
+      .mobile-sim-fab {
+        display: flex;
+        position: fixed;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--c-navy);
+        color: white;
+        border: 2px solid var(--c-gold);
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font-body);
+        cursor: pointer;
+        z-index: 1400;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+      }
+      .mobile-sim-fab:active {
+        transform: translateX(-50%) scale(0.95);
       }
     }
 
@@ -2903,6 +2949,11 @@
       <span class="mobile-nav-icon">☰</span>Menu
     </a>
   </nav>
+
+  <!-- FLOATING SIMULATOR ACCESS BUTTON (mobile only) -->
+  <button class="mobile-sim-fab" id="mobile-sim-fab" onclick="toggleMobileSimulator()" style="display:none;">
+    ⚙ Simulateur
+  </button>
 
   <!-- ════════════════════════════════════════════════════════════
        NAVIGATION SIDEBAR
@@ -4162,6 +4213,20 @@ function updateMobileNav(pageName) {
   closeMobileSidebar();
 }
 
+function toggleMobileSimulator() {
+  const simPage = document.getElementById('page-simulateur');
+  if (!simPage) return;
+  const isShowing = simPage.classList.contains('mobile-show');
+  if (isShowing) {
+    simPage.classList.remove('mobile-show');
+    document.getElementById('mobile-sim-fab').innerHTML = '⚙ Simulateur';
+  } else {
+    simPage.classList.add('mobile-show');
+    document.getElementById('mobile-sim-fab').innerHTML = '✕ Fermer';
+    simPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 // ─── NAVIGATION ───
 // All pages show the simulator panel in split-view
 const ALL_PAGES = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
@@ -4275,6 +4340,26 @@ function switchPage(pageName, navItem) {
 
   // Update mobile navigation (closes sidebar and updates active state)
   updateMobileNav(pageName);
+
+  // Mobile: manage floating sim button & hide sim panel
+  const simFab = document.getElementById('mobile-sim-fab');
+  const simPage = document.getElementById('page-simulateur');
+  if (window.innerWidth <= 768) {
+    if (pageName !== 'dashboard' && pageName !== 'resultats') {
+      if (simFab) simFab.style.display = 'flex';
+      if (simPage) simPage.classList.remove('mobile-show');
+      if (simFab) simFab.innerHTML = '⚙ Simulateur';
+    } else {
+      if (simFab) simFab.style.display = 'none';
+      if (simPage) simPage.classList.remove('mobile-show');
+    }
+    // For resultats page on mobile, show simulator directly (no split)
+    if (pageName === 'resultats' && simPage) {
+      simPage.classList.add('mobile-show');
+    }
+  } else {
+    if (simFab) simFab.style.display = 'none';
+  }
 }
 
 // Keep backward compatibility with old switchTab calls
@@ -7508,7 +7593,7 @@ function onAuthSuccess() {
   const gate = document.getElementById('auth-gate');
   if (gate) {
     gate.classList.add('hidden');
-    setTimeout(() => gate.style.display = 'none', 400);
+    setTimeout(() => { gate.classList.remove('visible'); gate.classList.remove('hidden'); }, 400);
   }
   updateUserUI();
   initApp();
@@ -7616,6 +7701,56 @@ function checkAuth() {
     return true;
   }
   return false;
+}
+
+async function validateToken() {
+  const token = localStorage.getItem('gef_auth_token');
+  if (!token) return false;
+  try {
+    const resp = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'apikey': SUPABASE_ANON,
+      },
+    });
+    if (resp.ok) {
+      const userData = await resp.json();
+      currentUser = userData;
+      localStorage.setItem('gef_auth_user', JSON.stringify(userData));
+      return true;
+    }
+    // Token expired — try refresh
+    const refresh = localStorage.getItem('gef_auth_refresh');
+    if (refresh) {
+      const refreshResp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify({ refresh_token: refresh }),
+      });
+      if (refreshResp.ok) {
+        const refreshData = await refreshResp.json();
+        localStorage.setItem('gef_auth_token', refreshData.access_token);
+        localStorage.setItem('gef_auth_refresh', refreshData.refresh_token || refresh);
+        currentUser = refreshData.user;
+        localStorage.setItem('gef_auth_user', JSON.stringify(refreshData.user));
+        return true;
+      }
+    }
+    // All failed — clear tokens
+    localStorage.removeItem('gef_auth_token');
+    localStorage.removeItem('gef_auth_refresh');
+    localStorage.removeItem('gef_auth_user');
+    localStorage.removeItem('gef_internal_user_id');
+    currentUser = null;
+    return false;
+  } catch (e) {
+    console.warn('[Auth] Token validation error:', e);
+    // Network error — if we have cached user, allow offline access
+    return !!currentUser;
+  }
 }
 
 function updateUserUI() {
@@ -7760,14 +7895,21 @@ function initApp() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Check if user is already authenticated
+document.addEventListener('DOMContentLoaded', async function() {
+  const gate = document.getElementById('auth-gate');
+
   if (checkAuth()) {
-    onAuthSuccess();
+    // Token exists — validate it async
+    const isValid = await validateToken();
+    if (isValid) {
+      onAuthSuccess();
+    } else {
+      // Token invalid — show auth gate
+      if (gate) { gate.classList.add('visible'); }
+    }
   } else {
-    // Show auth gate
-    const gate = document.getElementById('auth-gate');
-    if (gate) gate.style.display = 'flex';
+    // No token — show auth gate
+    if (gate) { gate.classList.add('visible'); }
   }
 
   // Enter key on auth fields
