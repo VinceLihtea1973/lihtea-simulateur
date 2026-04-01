@@ -614,6 +614,7 @@
       background: var(--c-bg);
       color: var(--c-text);
       width: 220px;
+      max-width: 100%;
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
@@ -669,84 +670,8 @@
       color: var(--c-navy);
     }
 
-    /* ─── RESPONSIVE TABLETTE (≤860px) ─── */
-    @media (max-width: 860px) {
-      .layout { grid-template-columns: 1fr; }
-      .header { flex-direction: column; gap: 12px; }
-      .header-meta { text-align: left; }
-      .tabs { flex-wrap: wrap; gap: 4px; }
-      .tab-btn { font-size: 12px; padding: 6px 10px; }
-      .metrics-grid { grid-template-columns: 1fr 1fr; }
-      .metric.highlight[style*="grid-column:span 2"] { grid-column: span 2; }
-      .waterfall-label { width: 100px; font-size: 10px; }
-      .pitch-metrics { gap: 12px; }
-      .pitch-metric-value { font-size: 18px; }
-      .scenarios-table { font-size: 11px; }
-      .scenarios-table th, .scenarios-table td { padding: 7px 10px; }
-    }
-
-    /* ─── RESPONSIVE MOBILE (≤600px) ─── */
-    @media (max-width: 600px) {
-      .app { padding: 12px 10px; }
-      .header h1 { font-size: 20px; }
-      .header p { font-size: 12px; }
-      .header-brand { gap: 8px; }
-      .header-logo { width: 32px; height: 32px; font-size: 14px; }
-      .header-logo-text { font-size: 15px; }
-      .card { padding: 16px; border-radius: 10px; }
-
-      .tabs { gap: 3px; }
-      .tab-btn { font-size: 11px; padding: 5px 8px; border-radius: 6px; }
-
-      .metrics-grid { grid-template-columns: 1fr; gap: 8px; }
-      .metric { padding: 12px; }
-      .metric-val { font-size: 18px; }
-      .metric.highlight[style*="grid-column:span 2"] { grid-column: span 1; }
-
-      .field-value { font-size: 13px; }
-      .loyer-val { font-size: 16px; }
-
-      .waterfall-row { height: 28px; }
-      .waterfall-label { width: 80px; font-size: 9px; }
-      .waterfall-bar { height: 16px; }
-      .waterfall-bar-text { font-size: 9px; }
-
-      .pitch-card { padding: 20px; }
-      .pitch-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .pitch-metric-value { font-size: 16px; }
-      .pitch-headline { font-size: 11px; }
-      .pitch-verdict { font-size: 12px; }
-
-      .scoring-aide-header { padding: 10px 12px; }
-      .scoring-aide-name { font-size: 12px; }
-      .scoring-badge { font-size: 10px; padding: 3px 8px; }
-
-      .timeline { padding-left: 24px; }
-      .timeline-dot { width: 18px; height: 18px; font-size: 9px; left: -24px; }
-      .timeline-title { font-size: 12px; }
-
-      .saved-sim-card { padding: 10px 12px; }
-      .saved-sim-amount { font-size: 12px; }
-      .saved-sim-actions { opacity: 1; }
-
-      .export-bar-sticky { padding: 8px 12px; left: 0 !important; }
-      .export-btn { padding: 8px 12px; font-size: 12px; }
-
-      .flux-chart { height: 100px; }
-
-      .admin-baremes-grid { grid-template-columns: 1fr; }
-      .admin-form-grid { grid-template-columns: 1fr; }
-      #admin-panel { border-radius: 0; }
-      #admin-overlay { padding: 0; }
-    }
-
-    /* ─── RESPONSIVE PETIT MOBILE (≤400px) ─── */
-    @media (max-width: 400px) {
-      .tabs { gap: 2px; }
-      .tab-btn { font-size: 10px; padding: 4px 6px; }
-      .pitch-metrics { grid-template-columns: 1fr; }
-      .export-bar-left { display: none; }
-    }
+    /* ─── RESPONSIVE UNIFIED SYSTEM ─── */
+    /* Placeholder - will be replaced with comprehensive system */
 
     /* ─── TOTAUX ─── */
     .total-row {
@@ -1063,12 +988,6 @@
     .org-card-actions .btn-toggle-off { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
     .org-card-actions .btn-del { color: #dc2626; }
     .org-card-actions .btn-del:hover { background: #fef2f2; }
-
-    @media (max-width: 700px) {
-      .admin-form-grid, .admin-baremes-grid { grid-template-columns: 1fr; }
-      #admin-panel { margin: 0; border-radius: 0; }
-      #admin-overlay { padding: 0; }
-    }
 
     /* ─── SCORING D'ÉLIGIBILITÉ ─── */
     .scoring-grid {
@@ -1883,18 +1802,6 @@
       flex-shrink: 0;
     }
 
-    @media (max-width: 600px) {
-      .copilot-panel {
-        bottom: 70px;
-        right: 8px;
-        left: 8px;
-        width: auto;
-        height: calc(100vh - 150px);
-        border-radius: 12px;
-      }
-      .copilot-fab { bottom: 60px; right: 12px; width: 46px; height: 46px; font-size: 16px; }
-    }
-
     /* ─── TABLEAU DE BORD GRAPHIQUE ─── */
     .dashboard-grid {
       display: grid;
@@ -1902,7 +1809,6 @@
       gap: 12px;
       margin-bottom: 16px;
     }
-    @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
     .dashboard-chart-card {
       background: var(--c-surface);
       border: 1px solid var(--c-border);
@@ -2220,18 +2126,6 @@
       margin-bottom: 10px;
     }
 
-    @media (max-width: 900px) {
-      .main-content.split-view .split-container {
-        grid-template-columns: 1fr;
-      }
-      .main-content.split-view .split-container #page-simulateur {
-        border-right: none;
-        border-bottom: 1px solid var(--c-border);
-        max-height: 50vh;
-        position: static;
-      }
-    }
-
     /* ─── BREADCRUMB ─── */
     .breadcrumb-bar {
       display: flex;
@@ -2524,35 +2418,390 @@
       grid-template-columns: unset;
     }
 
-    /* Responsive */
+    /* ═══════════════════════════════════════════════════════════
+       COMPREHENSIVE MOBILE-FIRST RESPONSIVE SYSTEM (3 BREAKPOINTS)
+       Mobile: <768px | Tablet: 768px-1024px | Desktop: >1024px
+    ═══════════════════════════════════════════════════════════ */
+
+    /* ─── A) MOBILE-FIRST BASE OVERRIDES (< 768px) ─── */
     @media (max-width: 768px) {
+      /* Sidebar — slide out drawer on mobile */
       .sidebar {
         position: fixed;
-        width: 240px;
+        width: 260px;
+        height: 100vh;
+        left: 0;
+        top: 0;
         z-index: 2000;
         transform: translateX(-100%);
         transition: transform 0.3s var(--ease-out);
+        overflow-y: auto;
       }
 
       .sidebar.mobile-open {
         transform: translateX(0);
       }
 
+      /* Main content takes full width on mobile */
       .main-content {
         margin-left: 0;
+        padding-bottom: 60px;
       }
 
-      .sidebar.collapsed {
-        width: 240px;
-      }
-
-      .sidebar.collapsed ~ .main-content {
-        margin-left: 0;
-      }
-
+      /* App padding */
       .app {
-        padding: 16px 12px;
+        padding: 12px 10px;
       }
+
+      /* Header stacking */
+      .header {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* Metrics grid single column */
+      .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .metric {
+        padding: 12px;
+      }
+
+      .metric-val {
+        font-size: 18px;
+      }
+
+      .metric.highlight[style*="grid-column:span 2"] {
+        grid-column: span 1;
+      }
+
+      /* Tabs overflow on mobile */
+      .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 3px;
+      }
+
+      .tab-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        flex-shrink: 0;
+      }
+
+      /* Export input responsive */
+      .export-input {
+        width: 100%;
+      }
+
+      .export-bar-sticky {
+        left: 0;
+        padding: 8px 12px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        bottom: 56px;
+      }
+
+      /* Split view stacking on mobile */
+      .split-container {
+        grid-template-columns: 1fr;
+      }
+
+      .main-content.split-view .split-container #page-simulateur {
+        border-right: none;
+        border-bottom: 1px solid var(--c-border);
+        max-height: auto;
+        position: static;
+      }
+
+      /* Dashboard grid single column */
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Admin form grids */
+      .admin-form-grid,
+      .admin-baremes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #admin-panel {
+        margin: 0;
+        border-radius: 0;
+      }
+
+      #admin-overlay {
+        padding: 0;
+      }
+
+      /* Card sizing */
+      .card {
+        padding: 14px;
+        border-radius: 10px;
+      }
+
+      /* Typography adjustments */
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .field-value {
+        font-size: 13px;
+      }
+
+      .loyer-val {
+        font-size: 16px;
+      }
+
+      .waterfall-row {
+        height: 28px;
+      }
+
+      .waterfall-label {
+        width: 80px;
+        font-size: 9px;
+      }
+
+      .waterfall-bar {
+        height: 16px;
+      }
+
+      .waterfall-bar-text {
+        font-size: 9px;
+      }
+
+      .pitch-card {
+        padding: 20px;
+      }
+
+      .pitch-metrics {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .pitch-metric-value {
+        font-size: 16px;
+      }
+
+      .pitch-headline {
+        font-size: 11px;
+      }
+
+      .pitch-verdict {
+        font-size: 12px;
+      }
+
+      .scoring-aide-header {
+        padding: 10px 12px;
+      }
+
+      .scoring-aide-name {
+        font-size: 12px;
+      }
+
+      .scoring-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .timeline {
+        padding-left: 24px;
+      }
+
+      .timeline-dot {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+        left: -24px;
+      }
+
+      .timeline-title {
+        font-size: 12px;
+      }
+
+      .saved-sim-card {
+        padding: 10px 12px;
+      }
+
+      .saved-sim-amount {
+        font-size: 12px;
+      }
+
+      .saved-sim-actions {
+        opacity: 1;
+      }
+
+      .export-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .flux-chart {
+        height: 100px;
+      }
+
+      .breadcrumb-bar {
+        padding: 8px 12px;
+      }
+
+      .copilot-fab {
+        bottom: 70px;
+      }
+
+      .copilot-panel {
+        bottom: 70px;
+        right: 8px;
+        left: 8px;
+        width: auto;
+        height: calc(100vh - 150px);
+        border-radius: 12px;
+      }
+
+      .copilot-fab {
+        width: 46px;
+        height: 46px;
+        font-size: 16px;
+      }
+
+      /* Hide sidebar collapse button on mobile */
+      .sidebar-collapse-btn {
+        display: none;
+      }
+
+      /* Mobile overlay for sidebar */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1999;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      /* Footer padding for bottom nav */
+      .footer {
+        padding-bottom: 120px;
+      }
+
+      /* Auth registration form — stacked on mobile */
+      #auth-fields-register > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* ─── B) BOTTOM NAVIGATION BAR FOR MOBILE ─── */
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        background: var(--c-navy);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        z-index: 1500;
+        padding: 0 8px;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        color: rgba(255,255,255,0.5);
+        font-size: 9px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-decoration: none;
+        font-family: var(--font-body);
+      }
+
+      .mobile-nav-item.active {
+        color: var(--c-teal-bright);
+        background: rgba(13,148,136,0.15);
+      }
+
+      .mobile-nav-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+    }
+
+    /* ─── C) TABLET ADJUSTMENTS (768px - 1024px) ─── */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .sidebar {
+        width: 64px;
+      }
+
+      .sidebar .sidebar-logo-text {
+        display: none;
+      }
+
+      .sidebar .sidebar-item span:not(.sidebar-icon) {
+        display: none;
+      }
+
+      .sidebar .sidebar-item {
+        justify-content: center;
+        padding: 14px 0;
+      }
+
+      .main-content {
+        margin-left: 64px;
+      }
+
+      .split-container {
+        grid-template-columns: 1fr;
+      }
+
+      .main-content.split-view .split-container #page-simulateur {
+        border-right: none;
+        border-bottom: 1px solid var(--c-border);
+        max-height: auto;
+        position: static;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .main-content > .header,
+      .page {
+        padding: 20px 16px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .scenarios-table {
+        font-size: 11px;
+      }
+
+      .scenarios-table th,
+      .scenarios-table td {
+        padding: 7px 10px;
+      }
+    }
+
+    /* ─── D) DESKTOP (> 1024px) — Keep current layout ─── */
+    @media (min-width: 1025px) {
+      /* Desktop uses the default non-media-query styles */
     }
 
   </style>
@@ -2632,6 +2881,28 @@
 </div>
 
 <div class="app-layout">
+
+  <!-- ════════════════════════════════════════════════════════════
+       MOBILE BOTTOM NAVIGATION
+  ════════════════════════════════════════════════════════════ -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <a class="mobile-nav-item active" onclick="switchPage('dashboard', document.querySelector('[data-page=&quot;dashboard&quot;]'))" data-page="dashboard">
+      <span class="mobile-nav-icon">◫</span>Dashboard
+    </a>
+    <a class="mobile-nav-item" onclick="switchPage('resultats', document.querySelector('[data-page=&quot;resultats&quot;]'))" data-page="resultats">
+      <span class="mobile-nav-icon">⚙</span>Simulateur
+    </a>
+    <a class="mobile-nav-item" onclick="switchPage('eligibilite', document.querySelector('[data-page=&quot;eligibilite&quot;]'))" data-page="eligibilite">
+      <span class="mobile-nav-icon">✓</span>Éligibilité
+    </a>
+    <a class="mobile-nav-item" onclick="switchPage('aides', document.querySelector('[data-page=&quot;aides&quot;]'))" data-page="aides">
+      <span class="mobile-nav-icon">💰</span>Offres
+    </a>
+    <a class="mobile-nav-item" onclick="openMobileSidebar()" data-page="menu">
+      <span class="mobile-nav-icon">☰</span>Menu
+    </a>
+  </nav>
 
   <!-- ════════════════════════════════════════════════════════════
        NAVIGATION SIDEBAR
@@ -3871,6 +4142,26 @@ function calculerAides(params) {
   };
 }
 
+// ─── MOBILE NAVIGATION HELPERS ───
+function openMobileSidebar() {
+  document.querySelector('.sidebar')?.classList.add('mobile-open');
+  document.getElementById('sidebar-overlay')?.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+  document.querySelector('.sidebar')?.classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function updateMobileNav(pageName) {
+  document.querySelectorAll('.mobile-nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === pageName);
+  });
+  closeMobileSidebar();
+}
+
 // ─── NAVIGATION ───
 // All pages show the simulator panel in split-view
 const ALL_PAGES = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
@@ -3981,6 +4272,9 @@ function switchPage(pageName, navItem) {
   } else if (pageName === 'scenarios') {
     renderScenarios();
   }
+
+  // Update mobile navigation (closes sidebar and updates active state)
+  updateMobileNav(pageName);
 }
 
 // Keep backward compatibility with old switchTab calls
