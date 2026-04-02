@@ -326,43 +326,41 @@
     @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
 
-    /* ─── ONBOARDING GUIDED TOUR ─── */
+    /* ─── ONBOARDING WELCOME MODAL ─── */
     .onboarding-overlay {
       position: fixed; inset: 0; z-index: 10100;
-      background: rgba(15,43,70,0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(15,43,70,0.6);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
       transition: opacity 0.3s ease;
     }
-    .onboarding-spotlight {
-      position: absolute;
-      border-radius: var(--radius);
-      box-shadow: 0 0 0 9999px rgba(15,43,70,0.72);
-      transition: all 0.4s var(--ease-out);
-      pointer-events: none;
-    }
     .onboarding-card {
-      position: absolute;
       background: var(--c-surface);
-      border-radius: 16px;
-      padding: 24px;
-      width: 340px;
-      max-width: 90vw;
-      box-shadow: 0 20px 60px rgba(15,43,70,0.3);
-      z-index: 10101;
-      animation: obCardIn 0.35s var(--ease-spring);
+      border-radius: 20px;
+      padding: 0;
+      width: 440px;
+      max-width: 92vw;
+      box-shadow: 0 24px 80px rgba(15,43,70,0.35);
+      animation: obCardIn 0.4s var(--ease-spring);
+      overflow: hidden;
     }
-    @keyframes obCardIn { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .onboarding-card .ob-step { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-teal); margin-bottom: 6px; }
-    .onboarding-card .ob-title { font-size: 17px; font-weight: 800; color: var(--c-navy); margin-bottom: 8px; }
-    .onboarding-card .ob-desc { font-size: 13px; color: var(--c-text-2); line-height: 1.6; margin-bottom: 18px; }
-    .onboarding-card .ob-dots { display: flex; gap: 6px; margin-bottom: 16px; }
-    .onboarding-card .ob-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-border); transition: all 0.2s; }
-    .onboarding-card .ob-dot.active { background: var(--c-teal); width: 20px; border-radius: 4px; }
-    .onboarding-card .ob-actions { display: flex; justify-content: space-between; align-items: center; }
-    .onboarding-card .ob-skip { font-size: 12px; color: var(--c-text-3); background: none; border: none; cursor: pointer; font-family: var(--font-body); }
-    .onboarding-card .ob-skip:hover { color: var(--c-text-2); }
-    .onboarding-card .ob-next { padding: 8px 20px; font-size: 13px; font-weight: 700; color: white; background: var(--c-teal); border: none; border-radius: 20px; cursor: pointer; font-family: var(--font-body); transition: background 0.15s; }
-    .onboarding-card .ob-next:hover { background: var(--c-teal-bright); }
+    @keyframes obCardIn { from { opacity: 0; transform: scale(0.92) translateY(16px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .ob-header { background: var(--c-navy); padding: 28px 32px 24px; text-align: center; }
+    .ob-header-icon { font-size: 36px; margin-bottom: 10px; }
+    .ob-header-title { font-size: 20px; font-weight: 800; color: white; margin-bottom: 4px; }
+    .ob-header-sub { font-size: 13px; color: rgba(204,251,241,0.8); }
+    .ob-body { padding: 24px 32px 28px; }
+    .ob-step-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--c-border); }
+    .ob-step-row:last-of-type { border-bottom: none; }
+    .ob-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--c-teal-bg); color: var(--c-teal); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ob-step-row.done .ob-step-num { background: var(--c-teal); color: white; }
+    .ob-step-text { font-size: 14px; font-weight: 600; color: var(--c-text); }
+    .ob-step-desc { font-size: 12px; color: var(--c-text-3); margin-top: 2px; }
+    .ob-actions { display: flex; justify-content: space-between; align-items: center; padding: 0 32px 24px; }
+    .ob-skip { font-size: 12px; color: var(--c-text-3); background: none; border: none; cursor: pointer; font-family: var(--font-body); }
+    .ob-skip:hover { color: var(--c-text-2); }
+    .ob-next { padding: 10px 28px; font-size: 14px; font-weight: 700; color: white; background: var(--c-teal); border: none; border-radius: 10px; cursor: pointer; font-family: var(--font-body); transition: background 0.15s; }
+    .ob-next:hover { background: var(--c-teal-bright); }
 
     /* ─── DARK MODE TOGGLE ─── */
     .theme-toggle {
@@ -3796,9 +3794,9 @@
             <div class="metric-sub" id="r-eco-sub">0 MWh</div>
           </div>
           <div class="metric highlight" style="grid-column:span 2;">
-            <div class="metric-label">Gain net total sur la durée du contrat</div>
+            <div class="metric-label">Économie nette cumulée (économies − coût financement)</div>
             <div class="metric-val" id="r-roi">—</div>
-            <div class="metric-sub">économies − loyers nets</div>
+            <div class="metric-sub" id="r-roi-sub">sur la durée d'analyse</div>
           </div>
           <div class="metric warn">
             <div class="metric-label">Délai de retour</div>
@@ -3824,6 +3822,7 @@
           <!-- Reste à charge cumulé + ROI (line chart multi-séries sur toute la durée) -->
           <div class="dashboard-chart-card full">
             <div class="dashboard-chart-title">Tableau de bord annuel — Loyers, Économies, Reste à charge cumulé & ROI</div>
+            <p style="font-size:11px;color:var(--c-text-3);margin:0 0 6px 0;">Barres : flux annuels | Ligne orange : flux cumulé | Tirets rouges : rendement net (économies − loyers cumulés). Le repère vert marque le seuil de rentabilité.</p>
             <div id="dash-annual-chart"></div>
             <div class="chart-legend" id="dash-annual-legend"></div>
           </div>
@@ -3849,6 +3848,7 @@
         </div>
 
         <!-- Insight box -->
+        <div style="font-size:11px;color:var(--c-text-3);margin:0 0 4px 4px;">💡 Analyse automatique basée sur vos paramètres — décomposition par phase, sensibilité énergie et synthèse pour la direction.</div>
         <div id="insight-box" class="insight"></div>
       </div>
     </div>
@@ -4327,6 +4327,22 @@ async function resolveInternalUserId() {
     const users = data?.data || [];
     if (users.length > 0 && users[0].id) {
       localStorage.setItem('gef_internal_user_id', users[0].id);
+      // Sync profile name from admin users table
+      const u = users[0];
+      const profile = JSON.parse(localStorage.getItem('gef_user_profile') || '{}');
+      if (u.prenom || u.nom || u.full_name) {
+        if (u.prenom) profile.prenom = u.prenom;
+        if (u.nom) profile.nom = u.nom;
+        if (u.full_name && !u.prenom) {
+          const parts = u.full_name.split(' ');
+          profile.prenom = parts[0] || profile.prenom;
+          profile.nom = parts.slice(1).join(' ') || profile.nom;
+        }
+        if (u.entreprise) profile.entreprise = u.entreprise;
+        if (u.telephone) profile.telephone = u.telephone;
+        localStorage.setItem('gef_user_profile', JSON.stringify(profile));
+        updateUserUI();
+      }
       console.log('[Sync] Internal user_id resolved:', users[0].id);
     }
   } catch(e) {
@@ -5054,7 +5070,7 @@ function recalculer() {
     ecoLineEl.style.background = 'var(--c-teal-bg)';
     ecoLineEl.style.color = 'var(--c-teal)';
     ecoLineEl.style.borderTopColor = 'var(--c-teal-border)';
-    ecoLineEl.textContent = '✔ Économies (' + ecoMensLoyer.toLocaleString('fr-FR') + ' €/mois) ≥ loyer → projet autofinancé';
+    ecoLineEl.textContent = '✔ Cash-flow positif : économies (' + ecoMensLoyer.toLocaleString('fr-FR') + ' €/mois) ≥ loyer — marge ' + (Math.round((ecoMensLoyer - Math.round(a.mensNette)) / ecoMensLoyer * 100)) + '%';
   } else {
     ecoLineEl.style.background = 'var(--c-amber-bg)';
     ecoLineEl.style.color = 'var(--c-amber)';
@@ -5091,24 +5107,99 @@ function recalculer() {
   const mensNet = Math.round(a.mensNette);
   const ecoMens = Math.round(ecoAn / 12);
   const soldeNet = ecoMens - mensNet;
+  const margePct = ecoMens > 0 ? Math.round(soldeNet / ecoMens * 100) : 0;
+  const anneesPostContrat = HORIZON > duree ? (HORIZON - duree) : 0;
+
+  // Phase 1/Phase 2 decomposition
+  const ecoCumulPhase1 = Math.round(ecoAn * duree);
+  const coutFinancement = Math.round(totalLoyers);
+  const gainPhase1 = ecoCumulPhase1 - coutFinancement;
+  const gainPhase2 = Math.round(ecoAn * anneesPostContrat);
+  const gainTotal = gainPhase1 + gainPhase2;
+
+  // Sensitivity: energy price -20% / +20%
+  const ecoAnLow = ecoAn * 0.8;
+  const ecoAnHigh = ecoAn * 1.2;
+  const roiLow = Math.round(ecoAnLow * HORIZON - totalLoyers);
+  const roiHigh = Math.round(ecoAnHigh * HORIZON - totalLoyers);
+  const soldeLow = Math.round(ecoAnLow / 12) - mensNet;
+  const soldeHigh = Math.round(ecoAnHigh / 12) - mensNet;
+
+  // Safety margin ratio
+  const margeSecu = ecoMens > 0 ? Math.round((ecoMens / mensNet - 1) * 100) : 0;
+  const margeCouleur = margeSecu >= 20 ? 'var(--c-green)' : margeSecu >= 10 ? 'var(--c-amber)' : 'var(--c-red)';
+
+  // Update ROI sub label
+  const roiSubEl = document.getElementById('r-roi-sub');
+  if (roiSubEl) roiSubEl.textContent = `Phase 1 : ${gainPhase1 >= 0 ? '+' : ''}${formaterEuros(gainPhase1, true)} | Phase 2 : +${formaterEuros(gainPhase2, true)}`;
+
   const insightEl = document.getElementById('insight-box');
-  if (soldeNet >= 0) {
-    insightEl.className = 'insight';
-    const gainPur = HORIZON > duree ? (HORIZON - duree) : 0;
-    insightEl.innerHTML = `<div class="insight-title">Projet autofinancé dès le 1er mois</div>
-      Les économies mensuelles (${ecoMens.toLocaleString('fr-FR')} €) couvrent la mensualité (${mensNet.toLocaleString('fr-FR')} €).
-      Solde positif : <strong>+${soldeNet.toLocaleString('fr-FR')} €/mois</strong>.
-      ${gainPur > 0 ? `Après le contrat de ${duree} ans, <strong>${gainPur} années de gain pur</strong> à ${formaterEuros(ecoAn, true)}/an sans loyer.` : ''}
-      Gain net sur 12 ans : <strong>${roiNet >= 0 ? '+' : ''}${formaterEuros(roiNet, true)}</strong>.`;
-  } else {
-    insightEl.className = 'insight warn';
-    const gainPur = HORIZON > duree ? (HORIZON - duree) : 0;
-    insightEl.innerHTML = `<div class="insight-title">Effort net mensuel : ${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois pendant ${duree} ans</div>
-      Après économies (${ecoMens.toLocaleString('fr-FR')} €/mois), effort résiduel de <strong>${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois</strong>.
-      ${gainPur > 0 ? `Mais après le contrat, <strong>${gainPur} années de gain pur</strong> à ${formaterEuros(ecoAn, true)}/an.` : ''}
-      Payback : <strong>${paybackMois > 144 ? '> 12 ans' : paybackMois + ' mois'}</strong>.
-      Gain net sur 12 ans : <strong>${roiNet >= 0 ? '+' : ''}${formaterEuros(roiNet, true)}</strong>.`;
-  }
+  const isPositive = soldeNet >= 0;
+  insightEl.className = isPositive ? 'insight' : 'insight warn';
+
+  insightEl.innerHTML = `
+    <div class="insight-title">${isPositive ? 'Cash-flow positif dès le 1er mois (+' + soldeNet.toLocaleString('fr-FR') + ' €/mois, marge ' + margePct + '%)' : 'Effort net mensuel : ' + Math.abs(soldeNet).toLocaleString('fr-FR') + ' €/mois pendant ' + duree + ' ans'}</div>
+
+    <div style="margin:12px 0;font-size:12px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.06em;">Décomposition du gain</div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:14px;">
+      <tr style="border-bottom:1px solid var(--c-border);">
+        <td style="padding:6px 0;color:var(--c-text-2);">Phase 1 — Contrat (${duree} ans)</td>
+        <td style="padding:6px 0;text-align:right;">Économies <strong>${formaterEuros(ecoCumulPhase1, true)}</strong> − Loyers <strong>${formaterEuros(coutFinancement, true)}</strong></td>
+        <td style="padding:6px 0;text-align:right;font-weight:800;color:${gainPhase1 >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainPhase1 >= 0 ? '+' : ''}${formaterEuros(gainPhase1, true)}</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--c-border);">
+        <td style="padding:6px 0;color:var(--c-text-2);">Phase 2 — Post-contrat (${anneesPostContrat} ans)</td>
+        <td style="padding:6px 0;text-align:right;">Économies <strong>${formaterEuros(gainPhase2, true)}</strong> − Loyers <strong>0 €</strong></td>
+        <td style="padding:6px 0;text-align:right;font-weight:800;color:var(--c-teal);">+${formaterEuros(gainPhase2, true)}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;font-weight:800;color:var(--c-navy);">Économie nette cumulée (${HORIZON} ans)</td>
+        <td></td>
+        <td style="padding:8px 0;text-align:right;font-weight:800;font-size:15px;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</td>
+      </tr>
+    </table>
+
+    <div style="margin:12px 0;font-size:12px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.06em;">Sensibilité énergie</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
+        <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie −20%</div>
+        <div style="font-weight:700;color:${roiLow >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${roiLow >= 0 ? '+' : ''}${formaterEuros(roiLow, true)}</div>
+        <div style="font-size:10px;color:var(--c-text-3);">Solde : ${soldeLow >= 0 ? '+' : ''}${soldeLow.toLocaleString('fr-FR')} €/mois</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:2px solid var(--c-teal-border);background:var(--c-teal-bg);font-size:12px;">
+        <div style="color:var(--c-teal);margin-bottom:2px;font-weight:600;">Prix actuel</div>
+        <div style="font-weight:700;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</div>
+        <div style="font-size:10px;color:var(--c-text-2);">Solde : ${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
+        <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie +20%</div>
+        <div style="font-weight:700;color:var(--c-teal);">${roiHigh >= 0 ? '+' : ''}${formaterEuros(roiHigh, true)}</div>
+        <div style="font-size:10px;color:var(--c-text-3);">Solde : +${soldeHigh.toLocaleString('fr-FR')} €/mois</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:14px;">
+      <span style="font-weight:600;color:var(--c-text-2);">Marge de sécurité :</span>
+      <span style="font-weight:800;color:${margeCouleur};">${margeSecu}%</span>
+      <span style="color:var(--c-text-3);">(ratio économies/loyer)</span>
+      ${margeSecu < 10 ? '<span style="color:var(--c-red);font-weight:600;">⚠ Marge faible</span>' : margeSecu < 20 ? '<span style="color:var(--c-amber);font-weight:600;">⚡ Marge modérée</span>' : '<span style="color:var(--c-green);font-weight:600;">✓ Confortable</span>'}
+    </div>
+
+    <div style="padding:14px 16px;background:var(--c-navy);border-radius:10px;color:white;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-gold);margin-bottom:8px;">L'essentiel pour la direction</div>
+      <div style="font-size:13px;line-height:1.7;">
+        ${isPositive
+          ? `• Le projet <strong>couvre ses loyers dès le démarrage</strong> avec un solde de +${soldeNet.toLocaleString('fr-FR')} €/mois.<br>
+             • La marge mensuelle est de ${margePct}%${margePct < 15 ? ' — <strong>la rentabilité à court terme est modeste</strong>' : ''}.<br>
+             • <strong>La création de valeur principale intervient après le contrat</strong> : ${formaterEuros(gainPhase2, true)} d'économies sur ${anneesPostContrat} ans sans loyer.<br>
+             • Économie nette totale sur ${HORIZON} ans : <strong>${formaterEuros(gainTotal, true)}</strong>.`
+          : `• Effort résiduel de ${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois après déduction des économies d'énergie.<br>
+             • Retour sur investissement en <strong>${paybackMois > 144 ? '> 12 ans' : paybackMois + ' mois'}</strong>.<br>
+             • <strong>Après le contrat de ${duree} ans</strong> : ${formaterEuros(ecoAn, true)}/an d'économies brutes sans loyer.<br>
+             • Économie nette totale sur ${HORIZON} ans : <strong>${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</strong>.`
+        }
+      </div>
+    </div>
+  `;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5290,7 +5381,31 @@ function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule) {
     <text x="${lx + 10}" y="${yScale(lastD.roi) + 3}" font-size="9" font-weight="700" fill="#dc2626">${fk(lastD.roi)}</text>
   `;
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="dash-svg" style="max-height:260px;">
+  // Break-even annotation: find the year where ROI crosses zero
+  let breakEvenMark = '';
+  for (let i = 1; i < data.length; i++) {
+    if (data[i-1].roi < 0 && data[i].roi >= 0) {
+      // Interpolate exact crossing point between years
+      const prev = data[i-1].roi, curr = data[i].roi;
+      const frac = Math.abs(prev) / (Math.abs(prev) + curr);
+      const bx = xScale(i-1) + frac * (xScale(i) - xScale(i-1));
+      const by = yScale(0);
+      breakEvenMark = `
+        <line x1="${bx}" y1="${M.t}" x2="${bx}" y2="${M.t + ph}" stroke="#059669" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+        <circle cx="${bx}" cy="${by}" r="5" fill="#059669" stroke="white" stroke-width="2"/>
+        <rect x="${bx - 34}" y="${by - 22}" width="68" height="16" rx="4" fill="#059669"/>
+        <text x="${bx}" y="${by - 11}" text-anchor="middle" font-size="8" font-weight="700" fill="white">Seuil ~An${Math.round((i - 1 + frac) * 10) / 10}</text>
+      `;
+      break;
+    }
+  }
+
+  // Cumulative totals caption
+  const cumCaption = `
+    <text x="${M.l + 4}" y="${H - 2}" font-size="8" fill="#8896a7">Éco. cumulées : ${fk(lastD.ecoCum)} | Loyers cumulés : ${fk(lastD.loyerCum)} | Net : ${fk(lastD.ecoCum - lastD.loyerCum)}</text>
+  `;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H + 14}" class="dash-svg" style="max-height:275px;">
     ${gridLines}
     ${zeroLine}
     ${gainZone}
@@ -5300,15 +5415,17 @@ function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule) {
     <polyline points="${roiPoints}" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,3" stroke-linejoin="round"/>
     ${dots}
     ${valLabels}
+    ${breakEvenMark}
+    ${cumCaption}
   </svg>`;
 
   if (legendEl) {
     legendEl.innerHTML = `
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#0f2b46"></div>Loyer annuel (contrat ${duree} ans)</div>
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#0d9488"></div>Économie annuelle</div>
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#059669"></div>Gain pur (post-contrat)</div>
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#059669"></div>Gain net après loyers</div>
       <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#d97706;border-radius:50%"></div>Flux cumulé</div>
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dc2626;border-radius:50%"></div>ROI cumulé</div>
+      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dc2626;border-radius:50%"></div>Rendement cumulé</div>
     `;
   }
 }
@@ -6602,27 +6719,96 @@ async function exporterPDF() {
     Y += 4;
     rect(MARG, Y, CONTENU, 12, PDF_COLORS.vertClair);
     rect(MARG, Y, 3, 12, PDF_COLORS.teal);
-    txt('Score global : ' + avgScore + '%  —  ' + eligCount + '/' + allScores.length + ' dispositifs eligibles', MARG + 8, Y + 8, 9, PDF_COLORS.teal, true);
+    txt('Score global : ' + avgScore + '%  -  ' + eligCount + '/' + allScores.length + ' dispositifs eligibles', MARG + 8, Y + 8, 9, PDF_COLORS.teal, true);
 
     Y += 20;
 
     // ── Critères détaillés pour chaque dispositif ──
     txt('DETAIL DES CRITERES PAR DISPOSITIF', MARG, Y, 7.5, PDF_COLORS.gris, true);
     rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.bordure);
-    Y += 8;
+    Y += 10;
+
+    const MAX_TXT_W = CONTENU - 20; // max text width inside card
 
     scoringEntries.forEach(([key, r]) => {
-      checkPageBreak(8 + r.criteria.length * 6);
-      txt(r.name + ' (' + r.score + '%)', MARG, Y, 8, PDF_COLORS.grisfonce, true);
-      Y += 5;
+      // Estimate height needed for this device block
+      const estHeight = 12 + r.criteria.length * 12;
+      checkPageBreak(Math.min(estHeight, 60)); // at least start on page with some room
+
+      // Device header bar
+      const statusColor = r.score >= 70 ? PDF_COLORS.teal : r.score >= 40 ? PDF_COLORS.amber : PDF_COLORS.rouge;
+      rect(MARG, Y, CONTENU, 9, PDF_COLORS.navy);
+      txt(r.name, MARG + 4, Y + 6.5, 8, PDF_COLORS.blanc, true);
+      txt(r.score + '%', W - MARG - 4, Y + 6.5, 8, PDF_COLORS.blanc, true, 'right');
+      // Score mini bar in header
+      rect(W - MARG - 36, Y + 7, 28, 1.5, [255,255,255]);
+      rect(W - MARG - 36, Y + 7, Math.round(r.score / 100 * 28), 1.5, statusColor);
+      Y += 10;
+
+      // Background card for criteria
+      const cardStartY = Y;
       r.criteria.forEach(c => {
-        const icon = c.pass ? '✓' : c.warn ? '!' : '✗';
+        checkPageBreak(14);
         const iconColor = c.pass ? PDF_COLORS.teal : c.warn ? PDF_COLORS.amber : PDF_COLORS.rouge;
-        txt(icon, MARG + 4, Y + 3.5, 8, iconColor, true);
-        txt(c.label, MARG + 10, Y + 3.5, 7.5, c.pass ? PDF_COLORS.grisfonce : PDF_COLORS.gris);
-        Y += 5;
+        const bgRow = c.pass ? PDF_COLORS.vertClair : c.warn ? [255,251,235] : [254,242,242];
+
+        // Wrap label text to fit within margins
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        const labelLines = doc.splitTextToSize(String(c.label), MAX_TXT_W - 10);
+        const detailLines = c.detail ? doc.splitTextToSize(String(c.detail), MAX_TXT_W - 10) : [];
+        const rowH = 4 + labelLines.length * 3.5 + (detailLines.length > 0 ? detailLines.length * 3 + 1.5 : 0) + 2;
+
+        rect(MARG + 1, Y, CONTENU - 2, rowH, bgRow);
+        rect(MARG + 1, Y, 2, rowH, iconColor);
+
+        // Draw icon shape instead of Unicode (Helvetica doesn't support special chars)
+        const iconX = MARG + 5.5;
+        const iconY = Y + 3;
+        if (c.pass) {
+          // Green filled circle
+          doc.setFillColor(...PDF_COLORS.teal);
+          doc.circle(iconX, iconY + 1, 1.8, 'F');
+          // White check line inside
+          doc.setDrawColor(255, 255, 255);
+          doc.setLineWidth(0.5);
+          doc.line(iconX - 0.8, iconY + 1, iconX - 0.1, iconY + 1.7);
+          doc.line(iconX - 0.1, iconY + 1.7, iconX + 1, iconY + 0.3);
+        } else if (c.warn) {
+          // Amber filled triangle
+          doc.setFillColor(...PDF_COLORS.amber);
+          doc.triangle(iconX, iconY - 0.2, iconX - 1.8, iconY + 2.5, iconX + 1.8, iconY + 2.5, 'F');
+          txt('!', iconX - 0.5, iconY + 2.2, 6, PDF_COLORS.blanc, true);
+        } else {
+          // Red filled circle with X
+          doc.setFillColor(...PDF_COLORS.rouge);
+          doc.circle(iconX, iconY + 1, 1.8, 'F');
+          doc.setDrawColor(255, 255, 255);
+          doc.setLineWidth(0.5);
+          doc.line(iconX - 0.8, iconY + 0.2, iconX + 0.8, iconY + 1.8);
+          doc.line(iconX + 0.8, iconY + 0.2, iconX - 0.8, iconY + 1.8);
+        }
+
+        // Label (wrapped)
+        let lineY = Y + 4.5;
+        labelLines.forEach(line => {
+          txt(line, MARG + 12, lineY, 7.5, c.pass ? PDF_COLORS.grisfonce : PDF_COLORS.gris, false);
+          lineY += 3.5;
+        });
+
+        // Detail text (wrapped, lighter)
+        if (detailLines.length > 0) {
+          lineY += 0.5;
+          detailLines.forEach(line => {
+            txt(line, MARG + 12, lineY, 6.5, PDF_COLORS.gris);
+            lineY += 3;
+          });
+        }
+
+        Y += rowH + 1;
       });
-      Y += 4;
+
+      Y += 6;
     });
 
     // Footer page 3
@@ -6909,31 +7095,103 @@ function appliquerParamAdmin() {
 }
 appliquerParamAdmin();
 
-// Sync equipment from Supabase admin
-async function syncEquipementsFromAdmin() {
+// ═══ Sync equipment from Supabase admin ═══
+let _equipSyncInterval = null;
+
+async function syncEquipementsFromAdmin(silent) {
   try {
-    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
-    const res = await fetch(SUPABASE_URL + '/rest/v1/equipements?select=*,categories_equipements(nom,icone),fiches_cee(code)&actif=eq.true&order=libelle', { headers });
-    if (!res.ok) return;
+    // Use user auth token if available, fallback to anon key
+    const userToken = localStorage.getItem('gef_auth_token');
+    const bearer = userToken || SUPABASE_ANON;
+    const headers = {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + bearer,
+      'Content-Type': 'application/json'
+    };
+
+    const url = SUPABASE_URL + '/rest/v1/equipements?select=*,categories_equipements(nom,icone),fiches_cee(code)&actif=eq.true&order=libelle';
+    const res = await fetch(url, { headers });
+
+    if (!res.ok) {
+      console.warn('[Sync] Equipements HTTP error:', res.status, res.statusText);
+      // If 401 with user token, retry with anon key
+      if (res.status === 401 && userToken) {
+        const retryHeaders = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
+        const retryRes = await fetch(url, { headers: retryHeaders });
+        if (!retryRes.ok) { console.warn('[Sync] Retry with anon also failed:', retryRes.status); return; }
+        const retryData = await retryRes.json();
+        if (retryData && retryData.length) applyEquipSync(retryData, silent);
+        return;
+      }
+      return;
+    }
+
     const equips = await res.json();
-    if (!equips || !equips.length) return;
-    const mapped = equips.map(eq => ({
-      libelle: eq.libelle || '',
-      fiche: eq.fiches_cee?.code || '',
-      taux: Number(eq.gain_energetique_typique) || 15,
-      gain: Number(eq.gain_energetique_typique) || 25,
-      tooltip: eq.categories_equipements?.nom ? eq.categories_equipements.icone + ' ' + eq.categories_equipements.nom : '',
-      categorie: eq.categories_equipements?.nom || ''
-    }));
-    adminEquipements = mapped;
-    sauverLS('gef_equipements', mapped);
-    appliquerParamAdmin();
-    console.log('[Sync] Equipements loaded from admin:', mapped.length);
+    if (!equips || !equips.length) {
+      if (!silent) console.warn('[Sync] Equipements query returned empty — keeping cached list (' + adminEquipements.length + ' items)');
+      return;
+    }
+
+    applyEquipSync(equips, silent);
   } catch(e) {
-    console.warn('[Sync] Failed to sync equipements from admin:', e);
+    console.warn('[Sync] Failed to sync equipements:', e.message || e);
   }
 }
-// syncEquipementsFromAdmin() is called after auth in onAuthSuccess()
+
+function applyEquipSync(equips, silent) {
+  // Save current selection to restore after sync
+  const sel = document.getElementById('equip-type');
+  const prevValue = sel ? sel.value : null;
+  const prevLabel = sel ? sel.options[sel.selectedIndex]?.text : null;
+
+  const mapped = equips.map(eq => ({
+    libelle: eq.libelle || '',
+    fiche: eq.fiches_cee?.code || '',
+    taux: Number(eq.gain_energetique_typique) || 15,
+    gain: Number(eq.gain_energetique_typique) || 25,
+    tooltip: eq.categories_equipements?.nom ? (eq.categories_equipements.icone || '') + ' ' + eq.categories_equipements.nom : '',
+    categorie: eq.categories_equipements?.nom || ''
+  }));
+
+  // Only update if the data actually changed
+  const prevJSON = JSON.stringify(adminEquipements.map(e => e.libelle).sort());
+  const newJSON = JSON.stringify(mapped.map(e => e.libelle).sort());
+  if (prevJSON === newJSON && adminEquipements.length === mapped.length) {
+    if (!silent) console.log('[Sync] Equipements unchanged (' + mapped.length + ' items)');
+    return;
+  }
+
+  adminEquipements = mapped;
+  sauverLS('gef_equipements', mapped);
+  appliquerParamAdmin();
+
+  // Restore previous selection if it still exists
+  if (sel && prevValue) {
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === prevValue) { sel.selectedIndex = i; break; }
+    }
+  }
+
+  const count = mapped.length;
+  console.log('[Sync] Equipements synced from Supabase:', count, 'items');
+  if (!silent) showToast(count + ' equipements charges depuis la base', 'success');
+}
+
+function startEquipSync() {
+  // Initial sync
+  syncEquipementsFromAdmin(false);
+
+  // Periodic resync every 5 minutes
+  if (_equipSyncInterval) clearInterval(_equipSyncInterval);
+  _equipSyncInterval = setInterval(() => syncEquipementsFromAdmin(true), 5 * 60 * 1000);
+
+  // Resync when page regains focus (user switches back from admin tab)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      syncEquipementsFromAdmin(true);
+    }
+  });
+}
 
 </script>
 
@@ -8452,12 +8710,24 @@ async function handleAuth() {
       };
       localStorage.setItem('gef_user_profile', JSON.stringify(profile));
     } else {
-      // Ensure profile has email at minimum
+      // Login: rebuild profile from auth response + clear stale data
+      const meta = data.user?.user_metadata || {};
       const existing = JSON.parse(localStorage.getItem('gef_user_profile') || '{}');
-      if (!existing.email) {
-        existing.email = email;
-        localStorage.setItem('gef_user_profile', JSON.stringify(existing));
+      existing.email = email;
+      // Update name from Supabase user_metadata if available
+      if (meta.full_name) {
+        const parts = meta.full_name.split(' ');
+        existing.prenom = parts[0] || existing.prenom || '';
+        existing.nom = parts.slice(1).join(' ') || existing.nom || '';
       }
+      if (meta.prenom) existing.prenom = meta.prenom;
+      if (meta.nom) existing.nom = meta.nom;
+      // If no name info at all, derive from email
+      if (!existing.prenom && !existing.nom) {
+        existing.prenom = email.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        existing.nom = '';
+      }
+      localStorage.setItem('gef_user_profile', JSON.stringify(existing));
     }
 
     // Hide auth gate
@@ -8482,7 +8752,7 @@ function onAuthSuccess() {
   initApp();
 
   // Post-auth syncs — only run once authenticated
-  syncEquipementsFromAdmin();
+  startEquipSync();
   startNotifPolling();
 
   // Resolve internal user_id then log connexion
@@ -8763,10 +9033,10 @@ function showUserProfile() {
 // ═══════════════════════════════════════════════════════════════════
 
 const ONBOARDING_STEPS = [
-  { target: '.form-card, .card:first-child', title: 'Renseignez votre équipement', desc: 'Sélectionnez le type d\'équipement, renseignez le montant d\'investissement et les paramètres énergétiques de votre client.', icon: '🏗️' },
-  { target: '.input-group, .form-group', title: 'Ajustez les paramètres', desc: 'Durée du contrat, taux de financement, gains énergétiques… Tous les curseurs mettent à jour le calcul en temps réel.', icon: '⚙️' },
-  { target: '[data-page="scoring"]', title: 'Consultez l\'éligibilité', desc: 'Le scoring vous montre automatiquement les aides et subventions auxquelles votre client est éligible, avec un niveau de confiance.', icon: '📊', sidebar: true },
-  { target: '.export-bar', title: 'Exportez votre proposition', desc: 'Générez un PDF premium ou un Excel détaillé à partager avec le DAF de votre client. Le branding Lihtea est intégré.', icon: '📤' },
+  { icon: '🏗️', title: 'Renseignez l\'équipement', desc: 'Sélectionnez le type, le montant et les paramètres énergétiques.' },
+  { icon: '⚙️', title: 'Ajustez le financement', desc: 'Durée, taux, gains — tout se recalcule en temps réel.' },
+  { icon: '📊', title: 'Consultez l\'éligibilité', desc: 'Scoring automatique des aides avec indicateur de confiance.' },
+  { icon: '📤', title: 'Exportez la proposition', desc: 'PDF premium ou Excel à partager avec le DAF du client.' },
 ];
 
 function shouldShowOnboarding() {
@@ -8774,75 +9044,46 @@ function shouldShowOnboarding() {
 }
 
 function startOnboarding() {
-  let step = 0;
   const overlay = document.createElement('div');
   overlay.className = 'onboarding-overlay';
   overlay.id = 'onboarding-overlay';
-  document.body.appendChild(overlay);
 
-  function showStep(idx) {
-    step = idx;
-    const s = ONBOARDING_STEPS[idx];
-    const el = document.querySelector(s.target);
-    const existingCard = document.querySelector('.onboarding-card');
-    const existingSpot = document.querySelector('.onboarding-spotlight');
-    if (existingCard) existingCard.remove();
-    if (existingSpot) existingSpot.remove();
+  const profile = JSON.parse(localStorage.getItem('gef_user_profile') || '{}');
+  const prenom = profile.prenom || '';
 
-    // Spotlight
-    if (el) {
-      const r = el.getBoundingClientRect();
-      const spot = document.createElement('div');
-      spot.className = 'onboarding-spotlight';
-      spot.style.cssText = `top:${r.top - 8}px;left:${r.left - 8}px;width:${r.width + 16}px;height:${r.height + 16}px;`;
-      overlay.appendChild(spot);
-    }
-
-    // Card
-    const card = document.createElement('div');
-    card.className = 'onboarding-card';
-    card.innerHTML = `
-      <div class="ob-step">${s.icon} Étape ${idx + 1}/${ONBOARDING_STEPS.length}</div>
-      <div class="ob-title">${s.title}</div>
-      <div class="ob-desc">${s.desc}</div>
-      <div class="ob-dots">${ONBOARDING_STEPS.map((_, i) => `<div class="ob-dot${i === idx ? ' active' : ''}"></div>`).join('')}</div>
-      <div class="ob-actions">
-        <button class="ob-skip" onclick="endOnboarding()">Passer</button>
-        <button class="ob-next" onclick="nextOnboardingStep()">${idx === ONBOARDING_STEPS.length - 1 ? 'Commencer !' : 'Suivant →'}</button>
+  overlay.innerHTML = `
+    <div class="onboarding-card">
+      <div class="ob-header">
+        <div class="ob-header-icon">◆</div>
+        <div class="ob-header-title">Bienvenue${prenom ? ' ' + prenom : ''} sur Lihtea</div>
+        <div class="ob-header-sub">Votre simulateur Green Equipment Finance</div>
       </div>
-    `;
+      <div class="ob-body">
+        ${ONBOARDING_STEPS.map((s, i) => `
+          <div class="ob-step-row">
+            <div class="ob-step-num">${s.icon}</div>
+            <div>
+              <div class="ob-step-text">${s.title}</div>
+              <div class="ob-step-desc">${s.desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="ob-actions">
+        <button class="ob-skip" onclick="endOnboarding()">Ne plus afficher</button>
+        <button class="ob-next" onclick="endOnboarding()">C'est parti !</button>
+      </div>
+    </div>
+  `;
 
-    // Position card near target
-    if (el) {
-      const r = el.getBoundingClientRect();
-      const top = Math.min(r.bottom + 16, window.innerHeight - 280);
-      const left = Math.min(Math.max(r.left, 16), window.innerWidth - 360);
-      card.style.top = top + 'px';
-      card.style.left = left + 'px';
-    } else {
-      card.style.top = '50%';
-      card.style.left = '50%';
-      card.style.transform = 'translate(-50%, -50%)';
-    }
-    overlay.appendChild(card);
-  }
-
-  window.nextOnboardingStep = function() {
-    if (step < ONBOARDING_STEPS.length - 1) {
-      showStep(step + 1);
-    } else {
-      endOnboarding();
-    }
-  };
-
-  window.endOnboarding = function() {
-    localStorage.setItem('gef_onboarding_done', '1');
-    const ov = document.getElementById('onboarding-overlay');
-    if (ov) { ov.style.opacity = '0'; setTimeout(() => ov.remove(), 300); }
-  };
-
-  showStep(0);
+  document.body.appendChild(overlay);
 }
+
+window.endOnboarding = function() {
+  localStorage.setItem('gef_onboarding_done', '1');
+  const ov = document.getElementById('onboarding-overlay');
+  if (ov) { ov.style.opacity = '0'; setTimeout(() => ov.remove(), 300); }
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // B — DARK MODE
