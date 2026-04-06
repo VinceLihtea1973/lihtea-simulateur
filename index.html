@@ -1682,6 +1682,133 @@
     body.pitch-mode .pitch-only { display: block !important; }
     .pitch-only { display: none; }
 
+    /* ─── UNIT TOGGLE PILL ─── */
+    .unit-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .unit-toggle-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--c-text-3);
+    }
+    .unit-toggle {
+      display: flex;
+      background: var(--c-bg-2, #f1f5f9);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+      border: 1px solid var(--c-border);
+    }
+    .unit-toggle-btn {
+      padding: 5px 14px;
+      border-radius: 16px;
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      color: var(--c-text-2);
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+      white-space: nowrap;
+    }
+    .unit-toggle-btn.active {
+      background: var(--c-navy);
+      color: white;
+      box-shadow: 0 2px 6px rgba(15,43,70,0.25);
+    }
+    .unit-toggle-btn:not(.active):hover {
+      background: rgba(15,43,70,0.06);
+      color: var(--c-navy);
+    }
+    /* Unit badge in slider value display */
+    .unit-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--c-teal-bg);
+      color: var(--c-teal);
+      border: 1px solid var(--c-teal-border);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    /* Fintech-style input group card */
+    .sim-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .sim-card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--c-navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sim-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--c-navy);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sim-card-sub {
+      font-size: 11px;
+      color: var(--c-text-3);
+      margin-top: 1px;
+    }
+    /* Slider value pill */
+    .field-value-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--c-navy);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    /* Quick-read eco preview below energy params */
+    .eco-preview {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(13,148,136,0.07), rgba(13,148,136,0.03));
+      border: 1px solid var(--c-teal-border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--c-teal);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eco-preview-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--c-teal-bg);
+      border: 1px solid var(--c-teal-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+    }
+
     /* ─── TIMELINE DOSSIER ─── */
     .timeline {
       position: relative;
@@ -3623,23 +3750,45 @@
 
     <!-- PAGE: SIMULATEUR -->
     <div class="page" id="page-simulateur">
-      <div class="section-label" style="margin-bottom:16px;">Simulateur — Paramètres de la simulation</div>
 
     <div>
-      <!-- Bloc client en tête -->
-      <div class="card" style="padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px;background:var(--c-navy);border-color:var(--c-navy);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <input type="text" id="nom-client" placeholder="Nom du client" oninput="recalculer()" style="
-          flex:1;padding:8px 12px;font-size:14px;font-weight:600;font-family:var(--font-body);
-          border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-          background:rgba(255,255,255,0.1);color:white;outline:none;
-          transition:border-color 0.15s;" 
-          onfocus="this.style.borderColor='var(--c-teal-bright)'" 
-          onblur="this.style.borderColor='rgba(255,255,255,0.2)'" />
+      <!-- ── Bloc client (hero card) ── -->
+      <div class="card" style="padding:16px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--c-navy) 0%,#1e3a5f 100%);border-color:var(--c-navy);box-shadow:0 4px 16px rgba(15,43,70,0.18);">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);margin-bottom:10px;">Simulation pour</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <input type="text" id="nom-client" placeholder="Nom de l'entreprise cliente" oninput="recalculer()" style="
+            flex:1;padding:8px 12px;font-size:14px;font-weight:600;font-family:var(--font-body);
+            border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
+            background:rgba(255,255,255,0.08);color:white;outline:none;
+            transition:border-color 0.15s,box-shadow 0.15s;"
+            onfocus="this.style.borderColor='var(--c-teal-bright)';this.style.boxShadow='0 0 0 3px rgba(45,212,191,0.15)'"
+            onblur="this.style.borderColor='rgba(255,255,255,0.2)';this.style.boxShadow='none'" />
+        </div>
       </div>
 
-      <div class="card">
-        <div class="section-label">Équipement industriel</div>
+      <!-- ── Équipement industriel ── -->
+      <div class="card" style="margin-bottom:14px;">
+        <div class="sim-card-header">
+          <div class="sim-card-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div>
+            <div class="sim-card-title">Équipement & Énergie</div>
+            <div class="sim-card-sub">Paramètres de consommation annuelle</div>
+          </div>
+        </div>
+
+        <!-- Unit toggle -->
+        <div class="unit-toggle-row">
+          <span class="unit-toggle-label">Unité d'énergie</span>
+          <div class="unit-toggle" role="group" aria-label="Unité d'énergie">
+            <button class="unit-toggle-btn active" id="btn-mwh" onclick="setUnitMode('mwh')" type="button">MWh/an</button>
+            <button class="unit-toggle-btn" id="btn-kwh" onclick="setUnitMode('kwh')" type="button">kWh/an</button>
+          </div>
+        </div>
 
         <div class="field">
           <div class="field-label">Type d'équipement</div>
@@ -3665,7 +3814,7 @@
 
         <div class="field">
           <div class="field-header">
-            <span class="field-label">Consommation actuelle (MWh/an)</span>
+            <span class="field-label" id="label-conso">Consommation actuelle (MWh/an)</span>
             <span class="field-value" id="conso-display">500</span>
           </div>
           <input type="range" id="conso" min="50" max="5000" step="50" value="500"
@@ -3686,16 +3835,31 @@
 
         <div class="field">
           <div class="field-header">
-            <span class="field-label">Prix énergie payé (€/MWh)</span>
-            <span class="field-value" id="prix-display">180 €</span>
+            <span class="field-label" id="label-prix">Prix énergie payé (€/MWh)</span>
+            <span class="field-value" id="prix-display">180 €/MWh</span>
           </div>
           <input type="range" id="prix" min="80" max="400" step="5" value="180"
                  oninput="recalculer()">
         </div>
+
+        <!-- Real-time eco preview -->
+        <div class="eco-preview" id="eco-preview-bar">
+          <div class="eco-preview-icon">⚡</div>
+          <span id="eco-preview-text">Calcul en cours…</span>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="section-label">Location financière</div>
+      <!-- ── Location financière ── -->
+      <div class="card" style="margin-bottom:14px;">
+        <div class="sim-card-header">
+          <div class="sim-card-icon" style="background:linear-gradient(135deg,#0f766e,#0d9488);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="sim-card-title">Location financière</div>
+            <div class="sim-card-sub">Modalités de financement</div>
+          </div>
+        </div>
 
         <div class="field">
           <div class="field-header">
@@ -3741,8 +3905,17 @@
         </div>
       </div>
 
-      <div class="card expert-only">
-        <div class="section-label">Paramètres CEE avancés</div>
+      <!-- ── CEE avancés ── -->
+      <div class="card expert-only" style="margin-bottom:14px;">
+        <div class="sim-card-header">
+          <div class="sim-card-icon" style="background:linear-gradient(135deg,#92400e,#b45309);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <div class="sim-card-title">Paramètres CEE avancés</div>
+            <div class="sim-card-sub">Certificats d'Économies d'Énergie</div>
+          </div>
+        </div>
 
         <div class="field">
           <div class="field-header">
@@ -3765,11 +3938,14 @@
                  oninput="recalculer()">
         </div>
       </div>
+
+      <!-- Auto-save indicator -->
+      <div style="display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 0 4px;opacity:0.5;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--c-teal);"><polyline points="20 6 9 17 4 12"/></svg>
+        <span style="font-size:11px;color:var(--c-text-3);font-weight:500;">Résultats mis à jour en temps réel</span>
+      </div>
     </div>
 
-      <div style="text-align:center;margin-top:24px;padding:16px;background:var(--c-teal-bg);border-radius:var(--radius);border:1px solid var(--c-teal-border);">
-        <p style="font-size:12px;color:var(--c-text-2);">Les modifications sont automatiquement recalculées</p>
-      </div>
     </div>
     <!-- FIN PAGE SIMULATEUR -->
 
@@ -4565,6 +4741,7 @@ async function syncLogActivity(type, titre, simulationId, prospectId) {
 
 const aidesActives = { cee: true, ademe: true, bpi: true, feder: false };
 let ongletCourant = 'dashboard';
+let unitMode = 'mwh'; // 'mwh' | 'kwh'
 
 // ─── FONCTIONS UTILITAIRES ───
 function formaterEuros(n, compact) {
@@ -4933,30 +5110,41 @@ function renderFluxChart(valeursParAn) {
 // ─── FONCTION PRINCIPALE ───
 function recalculer() {
   const inv = parseFloat(document.getElementById('inv').value);
-  const conso = parseFloat(document.getElementById('conso').value);
+  const consoRaw = parseFloat(document.getElementById('conso').value);
   const gain = parseFloat(document.getElementById('gain').value);
   const duree = parseFloat(document.getElementById('duree').value);
   const taux = parseFloat(document.getElementById('taux').value);
-  const prix = parseFloat(document.getElementById('prix').value);
+  const prixRaw = parseFloat(document.getElementById('prix').value);
   const kwh = parseFloat(document.getElementById('kwh').value);
   const cours = parseFloat(document.getElementById('cours').value);
   const taille = document.getElementById('taille').value;
   const tauxADEMEselect = parseFloat(document.getElementById('equip-type').value);
 
+  // ── Conversion unités ──
+  // Internally ALL calculations use MWh and €/MWh
+  const isKwh = (unitMode === 'kwh');
+  const conso  = isKwh ? consoRaw / 1000  : consoRaw;   // → MWh/an
+  const prix   = isKwh ? prixRaw  * 1000  : prixRaw;    // → €/MWh
+
   // Mise à jour affichage sliders
   document.getElementById('inv-display').textContent = formaterEuros(inv, true);
-  document.getElementById('conso-display').textContent = Math.round(conso);
+  if (isKwh) {
+    document.getElementById('conso-display').textContent = Math.round(consoRaw).toLocaleString('fr-FR') + ' kWh/an';
+    document.getElementById('prix-display').textContent = prixRaw.toFixed(3) + ' €/kWh';
+  } else {
+    document.getElementById('conso-display').textContent = Math.round(conso).toLocaleString('fr-FR') + ' MWh/an';
+    document.getElementById('prix-display').textContent = prix + ' €/MWh';
+  }
   document.getElementById('gain-display').textContent = gain + '%';
   document.getElementById('duree-display').textContent = duree + ' an' + (duree > 1 ? 's' : '');
   document.getElementById('taux-display').textContent = taux.toFixed(1) + '%';
-  document.getElementById('prix-display').textContent = prix + ' €/MWh';
   document.getElementById('kwh-display').textContent = (kwh / 1e6).toFixed(2) + ' GWh cumac';
   document.getElementById('cours-display').textContent = cours.toFixed(1) + ' €/MWh';
 
   // Calcul unique via calculerAides()
   const a = calculerAides({ inv, kwh, cours, tauxADEMEselect, taille, duree, taux });
-  
-  // Économies énergie
+
+  // Économies énergie (always MWh-based internally)
   const mwhEco = conso * gain / 100;
   const ecoAn = mwhEco * prix;
   const HORIZON = 12; // horizon d'analyse fixe
@@ -5084,7 +5272,22 @@ function recalculer() {
   document.getElementById('r-mensualite').textContent = Math.round(a.mensNette).toLocaleString('fr-FR') + ' €/mois';
   document.getElementById('r-mens-sub').textContent = 'vs ' + Math.round(a.mensBrute).toLocaleString('fr-FR') + ' € brut';
   document.getElementById('r-eco').textContent = formaterEuros(ecoAn, true) + '/an';
-  document.getElementById('r-eco-sub').textContent = Math.round(mwhEco) + ' MWh économisés/an';
+  // Show eco in the user's selected unit
+  if (isKwh) {
+    document.getElementById('r-eco-sub').textContent = Math.round(mwhEco * 1000).toLocaleString('fr-FR') + ' kWh économisés/an';
+  } else {
+    document.getElementById('r-eco-sub').textContent = Math.round(mwhEco) + ' MWh économisés/an';
+  }
+
+  // Update eco preview bar in simulator form
+  const ecoPreviewEl = document.getElementById('eco-preview-text');
+  if (ecoPreviewEl) {
+    const ecoAnRounded = Math.round(ecoAn).toLocaleString('fr-FR');
+    const ecoMwhRounded = isKwh
+      ? Math.round(mwhEco * 1000).toLocaleString('fr-FR') + ' kWh'
+      : Math.round(mwhEco) + ' MWh';
+    ecoPreviewEl.textContent = `Économie estimée : ${ecoAnRounded} €/an · ${ecoMwhRounded} économisés`;
+  }
 
   const roiEl = document.getElementById('r-roi');
   roiEl.textContent = (roiNet >= 0 ? '+' : '') + formaterEuros(roiNet, true);
@@ -5979,13 +6182,15 @@ setTimeout(updateSavedBadge, 100);
 
 function evaluerEligibilite() {
   const inv = parseFloat(document.getElementById('inv').value) || 0;
-  const conso = parseFloat(document.getElementById('conso').value) || 0;
+  const consoRawE = parseFloat(document.getElementById('conso').value) || 0;
   const gain = parseFloat(document.getElementById('gain').value) || 0;
   const duree = parseFloat(document.getElementById('duree').value) || 5;
   const taille = document.getElementById('taille').value;
   const kwh = parseFloat(document.getElementById('kwh').value) || 0;
   const typeLabel = document.getElementById('equip-type').options[document.getElementById('equip-type').selectedIndex]?.text || '';
   const hasFiche = typeLabel.includes('IND-UT') || typeLabel.includes('BAT-TH');
+  // Convert to MWh internally
+  const conso = (unitMode === 'kwh') ? consoRawE / 1000 : consoRawE;
   const mwhEco = conso * gain / 100;
   const isPME = (taille === 'tpe' || taille === 'pme');
   const results = {};
@@ -6125,9 +6330,12 @@ function captureScenario() {
   const tauxADEMEselect = parseFloat(document.getElementById('equip-type').value);
   const typeLabel = document.getElementById('equip-type').options[document.getElementById('equip-type').selectedIndex].text;
 
+  const isKwhS = (unitMode === 'kwh');
+  const consoMwh = isKwhS ? conso / 1000 : conso;
+  const prixMwh  = isKwhS ? prix  * 1000 : prix;
   const a = calculerAides({ inv, kwh, cours, tauxADEMEselect, taille, duree, taux });
-  const mwhEco = conso * gain / 100;
-  const ecoAn = mwhEco * prix;
+  const mwhEco = consoMwh * gain / 100;
+  const ecoAn = mwhEco * prixMwh;
   const HORIZON = 12;
   const ecoTotal = ecoAn * HORIZON;
   const totalLoyers = a.mensNette * a.nbMois;
@@ -6135,7 +6343,7 @@ function captureScenario() {
 
   scenarios.push({
     label: 'Scénario ' + (scenarios.length + 1),
-    inv, duree, taux, gain, conso, prix, taille, typeLabel,
+    inv, duree, taux, gain, conso: consoMwh, prix: prixMwh, taille, typeLabel,
     totalSubventions: a.totalSubventions,
     totalAides: a.totalAidesAffichage,
     coutNet: a.coutNet, pctCouvert: a.pctCouvert,
@@ -6250,17 +6458,22 @@ const PDF_COLORS = {
 
 function lireParametres() {
   const inv = parseFloat(document.getElementById('inv').value);
-  const conso = parseFloat(document.getElementById('conso').value);
+  const consoRaw = parseFloat(document.getElementById('conso').value);
   const gain = parseFloat(document.getElementById('gain').value);
   const duree = parseFloat(document.getElementById('duree').value);
   const taux = parseFloat(document.getElementById('taux').value);
-  const prix = parseFloat(document.getElementById('prix').value);
+  const prixRaw = parseFloat(document.getElementById('prix').value);
   const kwh = parseFloat(document.getElementById('kwh').value);
   const cours = parseFloat(document.getElementById('cours').value);
   const taille = document.getElementById('taille').value;
   const tauxADEMEselect = parseFloat(document.getElementById('equip-type').value);
   const typeLabel = document.getElementById('equip-type').options[document.getElementById('equip-type').selectedIndex].text;
   const nomClient = document.getElementById('nom-client').value.trim() || 'Client';
+
+  // Unit conversion — always compute internally in MWh / €/MWh
+  const isKwh = (unitMode === 'kwh');
+  const conso  = isKwh ? consoRaw / 1000 : consoRaw;
+  const prix   = isKwh ? prixRaw  * 1000 : prixRaw;
 
   // Utilise le calcul unique
   const a = calculerAides({ inv, kwh, cours, tauxADEMEselect, taille, duree, taux });
@@ -7079,6 +7292,60 @@ function sauverLS(cle, val) { try { localStorage.setItem(cle, JSON.stringify(val
 let adminEquipements = chargerLS('gef_equipements', EQUIPEMENTS_DEFAUT);
 let adminBaremes = chargerLS('gef_baremes', BAREMES_DEFAUT);
 let adminInterface = chargerLS('gef_interface', INTERFACE_DEFAUT);
+
+// ─── UNIT MODE TOGGLE ───
+function setUnitMode(mode) {
+  if (mode === unitMode) return;
+
+  const consoSlider = document.getElementById('conso');
+  const prixSlider  = document.getElementById('prix');
+  const labelConso  = document.getElementById('label-conso');
+  const labelPrix   = document.getElementById('label-prix');
+  const btnMwh      = document.getElementById('btn-mwh');
+  const btnKwh      = document.getElementById('btn-kwh');
+
+  if (!consoSlider || !prixSlider) return;
+
+  const oldConso = parseFloat(consoSlider.value);
+  const oldPrix  = parseFloat(prixSlider.value);
+
+  if (mode === 'kwh') {
+    // Convert slider values MWh → kWh, €/MWh → €/kWh
+    consoSlider.min   = 50000;
+    consoSlider.max   = 5000000;
+    consoSlider.step  = 50000;
+    consoSlider.value = Math.round(oldConso * 1000 / 50000) * 50000;
+
+    prixSlider.min   = 0.08;
+    prixSlider.max   = 0.40;
+    prixSlider.step  = 0.005;
+    prixSlider.value = parseFloat((oldPrix / 1000).toFixed(3));
+
+    if (labelConso) labelConso.textContent = 'Consommation actuelle (kWh/an)';
+    if (labelPrix)  labelPrix.textContent  = 'Prix énergie payé (€/kWh)';
+    if (btnMwh) btnMwh.classList.remove('active');
+    if (btnKwh) btnKwh.classList.add('active');
+  } else {
+    // Convert slider values kWh → MWh, €/kWh → €/MWh
+    consoSlider.min   = 50;
+    consoSlider.max   = 5000;
+    consoSlider.step  = 50;
+    consoSlider.value = Math.round(oldConso / 1000 / 50) * 50;
+
+    prixSlider.min   = 80;
+    prixSlider.max   = 400;
+    prixSlider.step  = 5;
+    prixSlider.value = Math.round(oldPrix * 1000 / 5) * 5;
+
+    if (labelConso) labelConso.textContent = 'Consommation actuelle (MWh/an)';
+    if (labelPrix)  labelPrix.textContent  = 'Prix énergie payé (€/MWh)';
+    if (btnMwh) btnMwh.classList.add('active');
+    if (btnKwh) btnKwh.classList.remove('active');
+  }
+
+  unitMode = mode;
+  recalculer();
+}
 
 function appliquerParamAdmin() {
   const sel = document.getElementById('equip-type');
