@@ -4941,20 +4941,27 @@ function calculerAides(params) {
   // Coût net = investissement - subventions directes
   const coutNet = Math.max(0, inv - totalSubventions);
   
-  // Totalités pour affichage (subventions + gain BPI indicatif)
+  // ── Totalités ──
+  // totalAidesAffichage = subventions directes + économie de taux BPI (pour affichage global)
   const totalAidesAffichage = totalSubventions + gainBPI_euros;
-  const pctCouvert = Math.min(100, Math.round(totalAidesAffichage / inv * 100));
-  
+
+  // pctCouvert = réduction réelle du CAPITAL (cohérent avec coutNet = inv − totalSubventions)
+  // On exclut le gainBPI qui est une réduction de taux, pas un versement réduisant le capital
+  const pctCouvert = Math.min(100, Math.round(totalSubventions / inv * 100));
+
+  // pctAvecBPI = bénéfice total incluant la réduction de taux BPI (usage : pitch card, informel)
+  const pctAvecBPI = Math.min(100, Math.round(totalAidesAffichage / inv * 100));
+
   // Mensualités
   const mensBrute = calcMensualite(inv, taux, nbMois);
   const mensNette = calcMensualite(coutNet, tauxNet, nbMois);
-  
+
   return {
     primeCEE, primeADEME_brute, primeADEME, ecretement,
     gainBPI_euros, reductionTauxBPI,
     primeFEDER_brute, primeFEDER, ecretementFEDER,
     totalSubventions, totalAidesAffichage,
-    coutNet, pctCouvert, plafondDepasse, plafondCEE_ADEME,
+    coutNet, pctCouvert, pctAvecBPI, plafondDepasse, plafondCEE_ADEME,
     sommeBrute, bonusPME, mensBrute, mensNette, tauxNet, nbMois,
     PLAFOND_GLOBAL, plafondGlobal,
     plafondGlobalDepasse: sommeSubventions_brute > plafondGlobal
@@ -5303,12 +5310,14 @@ function recalculer() {
   // ROI sur HORIZON ans (loyers s'arrêtent après le contrat, économies continuent)
   const roiNet = ecoAn * HORIZON - totalLoyers;
 
-  // Payback : mois pour que les économies cumulées dépassent les loyers cumulés
-  const paybackMois = ecoAn > 0 && totalLoyers > 0
-    ? Math.round(totalLoyers / (ecoAn / 12))
-    : (ecoAn > 0 ? 0 : 9999);
+  // ── PAYBACK BRUT ──
+  // Temps de récupération du capital net via les seules économies d'énergie (sans financement)
+  // = coutNet / économies annuelles
+  const paybackBrutAns = ecoAn > 0 ? a.coutNet / ecoAn : 9999;
 
+  // ── PAYBACK FINANCÉ (flux réels) ──
   // Flux cumulé sur HORIZON ans (loyer = 0 après fin du contrat)
+  // Départ = −coutNet (investissement initial net), puis chaque année : économies − loyer
   const fluxCumule = [];
   let cumul = -a.coutNet;
   for (let an = 1; an <= HORIZON; an++) {
@@ -5316,6 +5325,13 @@ function recalculer() {
     cumul += ecoAn - loyerAn;
     fluxCumule.push(Math.round(cumul));
   }
+  // Année où le flux cumulé passe positif = payback financé réel
+  const pbFinIdx = fluxCumule.findIndex(v => v >= 0); // index 0-based (année = idx+1)
+
+  // ── Compatibilité backward ── (utilisé dans pitch card / insight)
+  const paybackMois = ecoAn > 0 && totalLoyers > 0
+    ? Math.round(totalLoyers / (ecoAn / 12))
+    : (ecoAn > 0 ? 0 : 9999);
 
   // ─── MISE À JOUR AFFICHAGE ───
   const renderMontant = (id, val) => {
@@ -5365,8 +5381,31 @@ function recalculer() {
   renderMontant('amt-bpi', a.gainBPI_euros);
   renderMontant('amt-feder', a.primeFEDER);
 
-  document.getElementById('total-aides').textContent = formaterEuros(a.totalAidesAffichage, true);
+  // Subventions directes (CEE + ADEME + FEDER) — cohérent avec cout-net-mini = inv − totalSubventions
+  document.getElementById('total-aides').textContent = formaterEuros(a.totalSubventions, true);
   document.getElementById('cout-net-mini').textContent = formaterEuros(a.coutNet, true);
+  // Vérification mathématique : inv − totalSubventions = coutNet (assertion silencieuse en dev)
+  // console.assert(Math.abs(inv - a.totalSubventions - a.coutNet) < 1, 'Incohérence capital');
+
+  // Injecter la décomposition financière sous le capital net (une seule fois, puis mise à jour)
+  let decompEl = document.getElementById('finance-decomp');
+  if (!decompEl) {
+    decompEl = document.createElement('div');
+    decompEl.id = 'finance-decomp';
+    decompEl.style.cssText = 'font-size:10px;color:var(--c-text-3);margin-top:6px;line-height:1.8;border-top:1px solid var(--c-border);padding-top:6px;';
+    document.getElementById('cout-net-mini').closest('.total-row')?.after(decompEl);
+  }
+  const bpiLine = a.gainBPI_euros > 0
+    ? `<div style="color:var(--c-blue,#2563eb);">+ Économie intérêts BPI : <strong>${formaterEuros(a.gainBPI_euros, true)}</strong> sur ${Math.round(a.nbMois)} mois</div>`
+    : '';
+  decompEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr auto;gap:2px 12px;">
+      <span>Investissement brut</span><span style="text-align:right;font-family:var(--font-mono);">${formaterEuros(inv, true)}</span>
+      <span style="color:var(--c-teal);">− Subventions directes</span><span style="text-align:right;font-family:var(--font-mono);color:var(--c-teal);">−${formaterEuros(a.totalSubventions, true)}</span>
+      <span style="font-weight:700;color:var(--c-navy);">= Capital financé</span><span style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--c-navy);">${formaterEuros(a.coutNet, true)}</span>
+    </div>
+    ${bpiLine}
+  `;
 
   // Alerte plafond 65%
   let alertEl = document.getElementById('alerte-plafond');
@@ -5417,9 +5456,14 @@ function recalculer() {
 
   // Métriques résultats
   document.getElementById('r-cout-net').textContent = formaterEuros(a.coutNet, true);
-  document.getElementById('r-pct-aide').textContent = a.pctCouvert + '% couvert par les aides';
+  // pctCouvert = réduction de capital réelle (subventions directes / investissement)
+  document.getElementById('r-pct-aide').textContent = a.pctCouvert + '% couvert · ' + formaterEuros(a.totalSubventions, true) + ' d\'aides directes';
   document.getElementById('r-mensualite').textContent = Math.round(a.mensNette).toLocaleString('fr-FR') + ' €/mois';
-  document.getElementById('r-mens-sub').textContent = 'vs ' + Math.round(a.mensBrute).toLocaleString('fr-FR') + ' € brut';
+  // Affichage mensualité brute → nette : montrer la réduction due aux subventions
+  const reductionMens = Math.round(a.mensBrute - a.mensNette);
+  document.getElementById('r-mens-sub').textContent = reductionMens > 0
+    ? 'vs ' + Math.round(a.mensBrute).toLocaleString('fr-FR') + ' € brut (−' + reductionMens.toLocaleString('fr-FR') + ' € grâce aux aides)'
+    : 'vs ' + Math.round(a.mensBrute).toLocaleString('fr-FR') + ' € brut';
   document.getElementById('r-eco').textContent = formaterEuros(ecoAn, true) + '/an';
   // Show eco in the user's selected unit
   if (isKwh) {
@@ -5442,7 +5486,50 @@ function recalculer() {
   roiEl.textContent = (roiNet >= 0 ? '+' : '') + formaterEuros(roiNet, true);
   roiEl.style.color = roiNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)';
 
-  document.getElementById('r-payback').textContent = paybackMois > HORIZON * 12 ? '> ' + HORIZON + ' ans' : paybackMois + ' mois';
+  // ── Double payback ──
+  // Payback brut : capital net / économies annuelles (valeur intuitive pour la direction)
+  const pbBrutAff = paybackBrutAns >= HORIZON
+    ? '> ' + HORIZON + ' ans'
+    : paybackBrutAns < 1
+      ? Math.round(paybackBrutAns * 12) + ' mois'
+      : paybackBrutAns.toFixed(1).replace('.', ',') + ' ans';
+
+  // Payback financé : année du flux cumulé positif (valeur réelle avec loyers)
+  const pbFinAff = pbFinIdx >= 0 ? 'An ' + (pbFinIdx + 1) : '> ' + HORIZON + ' ans';
+
+  const paybackEl = document.getElementById('r-payback');
+  paybackEl.textContent = pbBrutAff;
+
+  // Sous-titre : payback financé (avec loyers)
+  const paybackSubEl = paybackEl.closest('.metric')?.querySelector('.metric-sub');
+  if (paybackSubEl) {
+    paybackSubEl.innerHTML = 'brut · financé : <strong>' + pbFinAff + '</strong>';
+  }
+
+  // ── Badge autofinancé (dans le loyer-eco-line) ──
+  const ecoMensLoyer2 = Math.round(ecoAn / 12);
+  const mensNet2 = Math.round(a.mensNette);
+  const autofinPct = mensNet2 > 0 ? Math.round(ecoMensLoyer2 / mensNet2 * 100) : 0;
+  if (soldeLoyer >= 0) {
+    ecoLineEl.innerHTML = '✔ Cash-flow positif : économies (' + ecoMensLoyer.toLocaleString('fr-FR') + ' €/mois) ≥ loyer — marge ' + (Math.round((ecoMensLoyer - mensNet2) / ecoMensLoyer * 100)) + '%'
+      + ' &nbsp;<span style="background:var(--c-teal);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">Autofinancé à ' + Math.min(autofinPct, 100) + '%</span>';
+  } else {
+    ecoLineEl.innerHTML = 'Effort net : ' + Math.abs(soldeLoyer).toLocaleString('fr-FR') + ' €/mois après économies'
+      + ' &nbsp;<span style="background:var(--c-amber,#d97706);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">Autofinancé à ' + autofinPct + '%</span>';
+  }
+
+  // ── Note dynamique "Votre investissement est réduit de X €" ──
+  const reductNote = document.getElementById('aide-reduction-note');
+  if (!reductNote && a.totalSubventions > 0) {
+    const noteEl = document.createElement('div');
+    noteEl.id = 'aide-reduction-note';
+    noteEl.style.cssText = 'font-size:11px;color:var(--c-teal);font-weight:600;padding:6px 12px 2px;';
+    document.getElementById('bareme-info-field')?.closest('.card')?.prepend(noteEl);
+  }
+  const noteEl2 = document.getElementById('aide-reduction-note');
+  if (noteEl2 && a.totalSubventions > 0) {
+    noteEl2.textContent = '💡 Votre investissement est réduit de ' + formaterEuros(a.totalSubventions, true) + ' grâce aux aides';
+  }
 
   // Graphiques
   renderWaterfall(inv, a);
@@ -5489,43 +5576,90 @@ function recalculer() {
   const isPositive = soldeNet >= 0;
   insightEl.className = isPositive ? 'insight' : 'insight warn';
 
-  insightEl.innerHTML = `
-    <div class="insight-title">${isPositive ? 'Cash-flow positif dès le 1er mois (+' + soldeNet.toLocaleString('fr-FR') + ' €/mois, marge ' + margePct + '%)' : 'Effort net mensuel : ' + Math.abs(soldeNet).toLocaleString('fr-FR') + ' €/mois pendant ' + duree + ' ans'}</div>
+  // Formatage compact local
+  const fmtI = n => { const v=Math.round(n); if(Math.abs(v)>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(Math.abs(v)>=1e3) return Math.round(v/1e3)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
+  const badgeColor = isPositive ? 'var(--c-teal)' : 'var(--c-amber,#d97706)';
 
-    <div style="margin:12px 0;font-size:12px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.06em;">Décomposition du gain</div>
+  insightEl.innerHTML = `
+    <div class="insight-title">${isPositive
+      ? 'Cash-flow positif dès le 1er mois (+' + soldeNet.toLocaleString('fr-FR') + ' €/mois, marge ' + margePct + '%)'
+      : 'Effort net mensuel : ' + Math.abs(soldeNet).toLocaleString('fr-FR') + ' €/mois pendant ' + duree + ' ans'
+    }</div>
+
+    <!-- ═══ BLOC FINANCIER ═══ -->
+    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Bloc financier</div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:3px 16px;font-size:13px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+      <span style="color:var(--c-text-2);">Investissement</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;">${fmtI(inv)}</span>
+      <span style="color:var(--c-teal);">− Subventions directes</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--c-teal);">−${fmtI(a.totalSubventions)}</span>
+      ${a.gainBPI_euros > 0 ? `<span style="color:#2563eb;font-size:11px;">+ Économie intérêts BPI</span><span style="text-align:right;font-family:var(--font-mono);font-size:11px;color:#2563eb;">−${fmtI(a.gainBPI_euros)}</span>` : ''}
+      <span style="font-weight:800;color:var(--c-navy);border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">= Capital financé</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:800;color:var(--c-navy);border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">${fmtI(a.coutNet)}</span>
+    </div>
+
+    <!-- ═══ BLOC MENSUEL ═══ -->
+    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Bloc mensuel</div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:3px 16px;font-size:13px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+      <span style="color:var(--c-text-2);">Mensualité nette</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;">${mensNet.toLocaleString('fr-FR')} €/mois</span>
+      <span style="color:var(--c-teal);">− Gain énergie</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--c-teal);">−${ecoMens.toLocaleString('fr-FR')} €/mois</span>
+      <span style="font-weight:800;color:${soldeNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">= Effort réel</span>
+      <span style="text-align:right;font-family:var(--font-mono);font-weight:800;color:${soldeNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</span>
+    </div>
+
+    <!-- ═══ BLOC ROI ═══ -->
+    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Retour sur investissement</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="padding:10px 14px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);">
+        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Payback brut</div>
+        <div style="font-size:18px;font-weight:800;color:var(--c-navy);">${pbBrutAff}</div>
+        <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Capital net / économies annuelles</div>
+      </div>
+      <div style="padding:10px 14px;border-radius:8px;border:1px solid var(--c-teal-border);background:var(--c-teal-bg);">
+        <div style="font-size:10px;color:var(--c-teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Payback financé</div>
+        <div style="font-size:18px;font-weight:800;color:var(--c-teal);">${pbFinAff}</div>
+        <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Flux cumulés réels (loyers + éco)</div>
+      </div>
+    </div>
+
+    <!-- ═══ DÉCOMPOSITION PHASES ═══ -->
+    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Décomposition du gain</div>
     <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:14px;">
       <tr style="border-bottom:1px solid var(--c-border);">
         <td style="padding:6px 0;color:var(--c-text-2);">Phase 1 — Contrat (${duree} ans)</td>
-        <td style="padding:6px 0;text-align:right;">Économies <strong>${formaterEuros(ecoCumulPhase1, true)}</strong> − Loyers <strong>${formaterEuros(coutFinancement, true)}</strong></td>
-        <td style="padding:6px 0;text-align:right;font-weight:800;color:${gainPhase1 >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainPhase1 >= 0 ? '+' : ''}${formaterEuros(gainPhase1, true)}</td>
+        <td style="padding:6px 0;text-align:right;font-size:11px;color:var(--c-text-3);">Éco. <strong>${fmtI(ecoCumulPhase1)}</strong> − Loyers <strong>${fmtI(coutFinancement)}</strong></td>
+        <td style="padding:6px 0;text-align:right;font-weight:800;color:${gainPhase1 >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainPhase1 >= 0 ? '+' : ''}${fmtI(gainPhase1)}</td>
       </tr>
       <tr style="border-bottom:1px solid var(--c-border);">
         <td style="padding:6px 0;color:var(--c-text-2);">Phase 2 — Post-contrat (${anneesPostContrat} ans)</td>
-        <td style="padding:6px 0;text-align:right;">Économies <strong>${formaterEuros(gainPhase2, true)}</strong> − Loyers <strong>0 €</strong></td>
-        <td style="padding:6px 0;text-align:right;font-weight:800;color:var(--c-teal);">+${formaterEuros(gainPhase2, true)}</td>
+        <td style="padding:6px 0;text-align:right;font-size:11px;color:var(--c-text-3);">Éco. <strong>${fmtI(gainPhase2)}</strong> − Loyers <strong>0 €</strong></td>
+        <td style="padding:6px 0;text-align:right;font-weight:800;color:var(--c-teal);">+${fmtI(gainPhase2)}</td>
       </tr>
       <tr>
         <td style="padding:8px 0;font-weight:800;color:var(--c-navy);">Économie nette cumulée (${HORIZON} ans)</td>
         <td></td>
-        <td style="padding:8px 0;text-align:right;font-weight:800;font-size:15px;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</td>
+        <td style="padding:8px 0;text-align:right;font-weight:800;font-size:15px;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</td>
       </tr>
     </table>
 
-    <div style="margin:12px 0;font-size:12px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.06em;">Sensibilité énergie</div>
+    <!-- ═══ SENSIBILITÉ ═══ -->
+    <div style="margin:12px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Sensibilité énergie</div>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
         <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie −20%</div>
-        <div style="font-weight:700;color:${roiLow >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${roiLow >= 0 ? '+' : ''}${formaterEuros(roiLow, true)}</div>
+        <div style="font-weight:700;color:${roiLow >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${roiLow >= 0 ? '+' : ''}${fmtI(roiLow)}</div>
         <div style="font-size:10px;color:var(--c-text-3);">Solde : ${soldeLow >= 0 ? '+' : ''}${soldeLow.toLocaleString('fr-FR')} €/mois</div>
       </div>
       <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:2px solid var(--c-teal-border);background:var(--c-teal-bg);font-size:12px;">
         <div style="color:var(--c-teal);margin-bottom:2px;font-weight:600;">Prix actuel</div>
-        <div style="font-weight:700;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</div>
+        <div style="font-weight:700;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</div>
         <div style="font-size:10px;color:var(--c-text-2);">Solde : ${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</div>
       </div>
       <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
         <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie +20%</div>
-        <div style="font-weight:700;color:var(--c-teal);">${roiHigh >= 0 ? '+' : ''}${formaterEuros(roiHigh, true)}</div>
+        <div style="font-weight:700;color:var(--c-teal);">${roiHigh >= 0 ? '+' : ''}${fmtI(roiHigh)}</div>
         <div style="font-size:10px;color:var(--c-text-3);">Solde : +${soldeHigh.toLocaleString('fr-FR')} €/mois</div>
       </div>
     </div>
@@ -5536,18 +5670,21 @@ function recalculer() {
       ${margeSecu < 10 ? '<span style="color:var(--c-red);font-weight:600;">⚠ Marge faible</span>' : margeSecu < 20 ? '<span style="color:var(--c-amber);font-weight:600;">⚡ Marge modérée</span>' : '<span style="color:var(--c-green);font-weight:600;">✓ Confortable</span>'}
     </div>
 
+    <!-- ═══ ESSENTIEL DIRECTION ═══ -->
     <div style="padding:14px 16px;background:var(--c-navy);border-radius:10px;color:white;">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-gold);margin-bottom:8px;">L'essentiel pour la direction</div>
       <div style="font-size:13px;line-height:1.7;">
         ${isPositive
-          ? `• Le projet <strong>couvre ses loyers dès le démarrage</strong> avec un solde de +${soldeNet.toLocaleString('fr-FR')} €/mois.<br>
-             • La marge mensuelle est de ${margePct}%${margePct < 15 ? ' — <strong>la rentabilité à court terme est modeste</strong>' : ''}.<br>
-             • <strong>La création de valeur principale intervient après le contrat</strong> : ${formaterEuros(gainPhase2, true)} d'économies sur ${anneesPostContrat} ans sans loyer.<br>
-             • Économie nette totale sur ${HORIZON} ans : <strong>${formaterEuros(gainTotal, true)}</strong>.`
-          : `• Effort résiduel de ${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois après déduction des économies d'énergie.<br>
-             • Retour sur investissement en <strong>${paybackMois > HORIZON * 12 ? '> ' + HORIZON + ' ans' : paybackMois + ' mois'}</strong>.<br>
-             • <strong>Après le contrat de ${duree} ans</strong> : ${formaterEuros(ecoAn, true)}/an d'économies brutes sans loyer.<br>
-             • Économie nette totale sur ${HORIZON} ans : <strong>${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</strong>.`
+          ? `• Le projet <strong>couvre ses loyers dès le démarrage</strong> — effort réel : <strong>+${soldeNet.toLocaleString('fr-FR')} €/mois</strong>.<br>
+             • Combien ça coûte : <strong>${fmtI(a.coutNet)}</strong> après ${fmtI(a.totalSubventions)} d'aides directes (${a.pctCouvert}%).<br>
+             • Combien ça rapporte : <strong>${fmtI(ecoAn)}/an</strong> d'économies d'énergie — payback brut <strong>${pbBrutAff}</strong>.<br>
+             • Quand l'entreprise gagne de l'argent : dès le 1er mois, et <strong>encore plus après ${duree} ans</strong> (${fmtI(gainPhase2)} sans loyer).<br>
+             • Gain net total sur ${HORIZON} ans : <strong>${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</strong>.`
+          : `• Combien ça coûte : <strong>${fmtI(a.coutNet)}</strong> après ${fmtI(a.totalSubventions)} d'aides (${a.pctCouvert}%), effort mensuel <strong>${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois</strong>.<br>
+             • Combien ça rapporte : <strong>${fmtI(ecoAn)}/an</strong> — payback brut <strong>${pbBrutAff}</strong>, payback financé <strong>${pbFinAff}</strong>.<br>
+             • Quand l'entreprise gagne de l'argent : <strong>à partir de ${pbFinAff}</strong> (flux cumulés positifs).<br>
+             • <strong>Après le contrat de ${duree} ans</strong> : plus de loyer → <strong>${fmtI(ecoAn)}/an</strong> de gain pur.<br>
+             • Gain net total sur ${HORIZON} ans : <strong>${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</strong>.`
         }
       </div>
     </div>
@@ -6042,8 +6179,9 @@ function updatePitchCard(inv, a, ecoAn, duree, roiNet) {
   el('pitch-invest').textContent = fek(inv);
   el('pitch-loyer').textContent = fek(Math.round(a.mensNette));
   el('pitch-eco').textContent = fek(Math.round(ecoAn / 12));
-  el('pitch-aides').textContent = fek(a.totalAidesAffichage);
-  el('pitch-pct').textContent = a.pctCouvert + '% de l\'investissement couvert';
+  // Subventions directes (cohérent avec capital net = inv − totalSubventions)
+  el('pitch-aides').textContent = fek(a.totalSubventions);
+  el('pitch-pct').textContent = a.pctCouvert + '% du capital couvert par les aides';
 
   const ecoMens = Math.round(ecoAn / 12);
   const mensNet = Math.round(a.mensNette);
