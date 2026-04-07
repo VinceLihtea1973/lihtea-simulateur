@@ -7489,6 +7489,12 @@ function setUnitMode(mode) {
   recalculer();
 }
 
+// ── Variables barème — déclarées ICI pour éviter le TDZ lors de appliquerParamAdmin() ──
+// (lookupRate() est hoistée mais _financingRules doit être initialisée avant le 1er appel)
+let _financingRules = [];
+let _baremeName = '';
+let _baremeLoaded = false;
+
 function appliquerParamAdmin() {
   const sel = document.getElementById('equip-type');
   if (sel) {
@@ -7609,10 +7615,6 @@ function startEquipSync() {
 //  Lit les règles actives depuis Supabase (vue active_financing_rules)
 //  et remplace le taux saisi manuellement par les conditions du barème.
 // ═══════════════════════════════════════════════════════════
-let _financingRules = [];
-let _baremeName = '';
-let _baremeLoaded = false;
-
 /**
  * Recherche la règle de financement correspondant à un montant et une durée.
  * Fallback "tranche la plus proche" si aucune correspondance exacte.
