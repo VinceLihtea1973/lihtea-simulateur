@@ -4004,7 +4004,7 @@
 
           <!-- Reste à charge cumulé + ROI (line chart multi-séries sur toute la durée) -->
           <div class="dashboard-chart-card full">
-            <div class="dashboard-chart-title">Tableau de bord annuel — Loyers, Économies, Reste à charge cumulé & ROI</div>
+            <div class="dashboard-chart-title" id="dash-annual-title">Tableau de bord annuel — Loyers, Économies, Reste à charge cumulé & ROI</div>
             <p style="font-size:11px;color:var(--c-text-3);margin:0 0 6px 0;">Barres : flux annuels | Ligne orange : flux cumulé | Tirets rouges : rendement net (économies − loyers cumulés). Le repère vert marque le seuil de rentabilité.</p>
             <div id="dash-annual-chart"></div>
             <div class="chart-legend" id="dash-annual-legend"></div>
@@ -5295,13 +5295,14 @@ function recalculer() {
   // Économies énergie (always MWh-based internally)
   const mwhEco = conso * gain / 100;
   const ecoAn = mwhEco * prix;
-  const HORIZON = 12; // horizon d'analyse fixe
+  // Horizon dynamique : toujours au moins 5 ans après la fin du contrat, min 12 ans
+  const HORIZON = Math.max(12, Math.ceil(duree) + 5);
   const ecoTotal = ecoAn * HORIZON;
   const totalLoyers = a.mensNette * a.nbMois; // loyers sur la durée du contrat seulement
-  
+
   // ROI sur HORIZON ans (loyers s'arrêtent après le contrat, économies continuent)
   const roiNet = ecoAn * HORIZON - totalLoyers;
-  
+
   // Payback : mois pour que les économies cumulées dépassent les loyers cumulés
   const paybackMois = ecoAn > 0 && totalLoyers > 0
     ? Math.round(totalLoyers / (ecoAn / 12))
@@ -5441,7 +5442,7 @@ function recalculer() {
   roiEl.textContent = (roiNet >= 0 ? '+' : '') + formaterEuros(roiNet, true);
   roiEl.style.color = roiNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)';
 
-  document.getElementById('r-payback').textContent = paybackMois > 144 ? '> 12 ans' : paybackMois + ' mois';
+  document.getElementById('r-payback').textContent = paybackMois > HORIZON * 12 ? '> ' + HORIZON + ' ans' : paybackMois + ' mois';
 
   // Graphiques
   renderWaterfall(inv, a);
@@ -5544,7 +5545,7 @@ function recalculer() {
              • <strong>La création de valeur principale intervient après le contrat</strong> : ${formaterEuros(gainPhase2, true)} d'économies sur ${anneesPostContrat} ans sans loyer.<br>
              • Économie nette totale sur ${HORIZON} ans : <strong>${formaterEuros(gainTotal, true)}</strong>.`
           : `• Effort résiduel de ${Math.abs(soldeNet).toLocaleString('fr-FR')} €/mois après déduction des économies d'énergie.<br>
-             • Retour sur investissement en <strong>${paybackMois > 144 ? '> 12 ans' : paybackMois + ' mois'}</strong>.<br>
+             • Retour sur investissement en <strong>${paybackMois > HORIZON * 12 ? '> ' + HORIZON + ' ans' : paybackMois + ' mois'}</strong>.<br>
              • <strong>Après le contrat de ${duree} ans</strong> : ${formaterEuros(ecoAn, true)}/an d'économies brutes sans loyer.<br>
              • Économie nette totale sur ${HORIZON} ans : <strong>${gainTotal >= 0 ? '+' : ''}${formaterEuros(gainTotal, true)}</strong>.`
         }
@@ -5641,7 +5642,11 @@ function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule) {
   const legendEl = document.getElementById('dash-annual-legend');
   if (!el) return;
 
-  const HORIZON = 12;
+  // Horizon dynamique : dérivé directement du tableau fluxCumule construit dans recalculer()
+  const HORIZON = fluxCumule.length;
+  // Mettre le titre à jour avec le vrai horizon
+  const titleEl = document.getElementById('dash-annual-title');
+  if (titleEl) titleEl.textContent = `Tableau de bord sur ${HORIZON} ans — Loyers, Économies & ROI (${duree} an${duree>1?'s':''} de financement)`;
   const fk = n => { const v=Math.round(n); if(Math.abs(v)>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(Math.abs(v)>=1000) return Math.round(v/1000)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
   const mensAn = Math.round(a.mensNette * 12);
   const ecoAnR = Math.round(ecoAn);
@@ -5799,7 +5804,8 @@ function renderProjection() {
   if (!projCache.ecoAn || !projCache.mensNette || !projCache.duree) return;
 
   const { ecoAn, mensNette, duree, inv, totalAides } = projCache;
-  const HORIZON = projHorizon;
+  // S'assurer que l'horizon de projection dépasse toujours la fin du contrat d'au moins 3 ans
+  const HORIZON = Math.max(projHorizon, Math.ceil(duree) + 3);
   const mensAn = Math.round(mensNette * 12);
   const ecoAnR = Math.round(ecoAn);
 
