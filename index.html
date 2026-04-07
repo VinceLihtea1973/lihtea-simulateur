@@ -3513,8 +3513,8 @@
   ════════════════════════════════════════════════════════════ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-logo">◈</div>
-      <div class="sidebar-logo-text">Lihtea</div>
+      <div class="sidebar-logo" id="logo-letter">◈</div>
+      <div class="sidebar-logo-text brand-name" id="app-brand-name">Lihtea</div>
     </div>
 
     <nav class="sidebar-nav">
@@ -3870,13 +3870,15 @@
                  oninput="recalculer()">
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">Taux annuel (location financière)</span>
-            <span class="field-value" id="taux-display">4.5%</span>
+        <div class="field" id="bareme-info-field" style="background:#f0fdfa;border-radius:8px;padding:10px 12px;border:1px solid #99f6e4;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span class="field-label" style="color:#0d9488;font-weight:700;">Conditions de financement</span>
+            <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#8896a7;color:#fff;font-weight:700;transition:background 0.3s;">Chargement…</span>
           </div>
-          <input type="range" id="taux" min="1.5" max="10" step="0.1" value="4.5"
-                 oninput="recalculer()">
+          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.6;">Initialisation du barème…</div>
+          <div id="bareme-lookup-info" style="font-size:11px;color:#0d9488;font-weight:600;font-family:monospace;margin-top:4px;"></div>
+          <!-- Input caché — valeur mise à jour dynamiquement par le barème -->
+          <input type="hidden" id="taux" value="4.5">
         </div>
 
         <div class="field">
@@ -4272,7 +4274,7 @@
 
     <!-- ─── PIED DE PAGE ─── -->
     <div class="footer">
-      <span class="footer-brand">Lihtea</span> — Equipment Finance &amp; Advisory — Version 2.1 — Mars 2026<br>
+      <span class="footer-brand brand-name" id="footer-brand-name">Lihtea</span> — <span id="app-tagline">Equipment Finance &amp; Advisory</span> — Version 2.1 — Mars 2026<br>
       Données basées sur le décret P6 CEE (oct. 2025), les barèmes ADEME et Bpifrance en vigueur.<br>
       Les montants sont des <em>estimations indicatives</em>. Dossier CEE à valider avec un délégataire agréé avant signature.
     </div>
@@ -4471,7 +4473,127 @@ setTimeout(syncFromSupabase, 500);
 // SYNC TO SUPABASE — Envoie simulations, propositions, activités
 // ═══════════════════════════════════════════════════════════════════
 const ADMIN_API = SUPABASE_URL + '/functions/v1/admin-api';
+
+// ── Tenant runtime (populated by loadTenantConfig on DOMContentLoaded) ──
+let currentTenantId   = '17a567c3-5369-4035-b771-dac26f496d4e'; // fallback: Lihtea
+let currentTenantSlug = 'lihtea';
+let currentTenantConfig = null; // full brand_config object
+
+// Legacy alias kept for backward-compat during migration
 const LIHTEA_TENANT_ID = '17a567c3-5369-4035-b771-dac26f496d4e';
+
+// ── Determine tenant slug from URL or localStorage ──────────────────
+function detectTenantSlug() {
+  // 1. URL query param:  ?t=cabinet-xyz
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('t')) return params.get('t');
+  // 2. Subdomain: cabinet-xyz.lihtea.app → 'cabinet-xyz'
+  const host = window.location.hostname;
+  const subMatch = host.match(/^([a-z0-9-]+)\.(lihtea\.app|gef\.app|localhost)/);
+  if (subMatch && subMatch[1] !== 'www') return subMatch[1];
+  // 3. Cached slug from last session
+  const cached = localStorage.getItem('gef_tenant_slug');
+  if (cached) return cached;
+  // 4. Default
+  return 'lihtea';
+}
+
+// ── Fetch tenant config from Supabase & apply white label ───────────
+async function loadTenantConfig() {
+  const slug = detectTenantSlug();
+  try {
+    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON };
+    const url = SUPABASE_URL + '/rest/v1/tenants?slug=eq.' + encodeURIComponent(slug)
+              + '&select=id,nom,slug,logo_url,brand_config,plan&actif=eq.true&limit=1';
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    if (!rows || !rows.length) {
+      console.warn('[Tenant] Slug not found:', slug, '— using Lihtea defaults');
+      return;
+    }
+    const t = rows[0];
+    currentTenantId     = t.id;
+    currentTenantSlug   = t.slug;
+    currentTenantConfig = t.brand_config || {};
+    localStorage.setItem('gef_tenant_slug', t.slug);
+    localStorage.setItem('gef_tenant_id',   t.id);
+    applyTenantBranding(t);
+  } catch (e) {
+    console.warn('[Tenant] Config load failed, using defaults:', e.message);
+  }
+}
+
+// ── Apply brand_config to CSS variables + DOM elements ──────────────
+function applyTenantBranding(tenant) {
+  const cfg = tenant.brand_config || {};
+  const colors = cfg.colors || {};
+  const root = document.documentElement;
+
+  // CSS custom properties — primary palette
+  if (colors.navy) {
+    root.style.setProperty('--c-navy', colors.navy);
+    root.style.setProperty('--c-navy-light', lightenHex(colors.navy, 12));
+    root.style.setProperty('--c-navy-soft',  lightenHex(colors.navy, 22));
+  }
+  if (colors.teal) {
+    root.style.setProperty('--c-teal', colors.teal);
+    root.style.setProperty('--c-teal-bright', lightenHex(colors.teal, 15));
+    root.style.setProperty('--c-teal-bg',     hexWithAlpha(colors.teal, 0.06));
+    root.style.setProperty('--c-teal-border', hexWithAlpha(colors.teal, 0.3));
+  }
+  if (colors.gold) {
+    root.style.setProperty('--c-gold', colors.gold);
+    root.style.setProperty('--c-gold-light', hexWithAlpha(colors.gold, 0.1));
+  }
+
+  // App name / logo letter
+  const appName = cfg.name || tenant.nom || 'GEF';
+  const logoLetter = cfg.logo || appName.substring(0, 2).toUpperCase();
+
+  // Header brand elements
+  const brandNameEls = document.querySelectorAll('.header-brand-name, .brand-name, #app-brand-name');
+  brandNameEls.forEach(el => { el.textContent = appName; });
+
+  const logoLetterEls = document.querySelectorAll('.logo-letter, #logo-letter');
+  logoLetterEls.forEach(el => { el.textContent = logoLetter; });
+
+  const taglineEls = document.querySelectorAll('.header-tagline, .brand-tagline, #app-tagline');
+  const tagline = cfg.tagline || '';
+  taglineEls.forEach(el => { el.textContent = tagline; });
+
+  // Logo image if URL provided
+  const logoUrl = cfg.logo_url || tenant.logo_url;
+  if (logoUrl) {
+    const logoImgEls = document.querySelectorAll('.logo-img, #logo-img');
+    logoImgEls.forEach(el => {
+      if (el.tagName === 'IMG') { el.src = logoUrl; el.style.display = ''; }
+    });
+  }
+
+  // Page title
+  document.title = appName + ' — Simulateur Financement Vert';
+
+  console.log('[Tenant] Branding applied:', appName, '(' + tenant.slug + ')');
+}
+
+// ── Color helpers ────────────────────────────────────────────────────
+function lightenHex(hex, pct) {
+  try {
+    const n = parseInt(hex.replace('#',''), 16);
+    const r = Math.min(255, ((n >> 16) & 0xff) + Math.round(255 * pct / 100));
+    const g = Math.min(255, ((n >>  8) & 0xff) + Math.round(255 * pct / 100));
+    const b = Math.min(255, ( n        & 0xff) + Math.round(255 * pct / 100));
+    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+  } catch { return hex; }
+}
+function hexWithAlpha(hex, alpha) {
+  try {
+    const n = parseInt(hex.replace('#',''), 16);
+    const r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff;
+    return `rgba(${r},${g},${b},${alpha})`;
+  } catch { return hex; }
+}
 
 function getAuthHeaders() {
   const token = localStorage.getItem('gef_auth_token');
@@ -4545,7 +4667,7 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
-        tenant_id: LIHTEA_TENANT_ID,
+        tenant_id: currentTenantId,
         user_id: getCurrentUserId(),
         raison_sociale: clientName,
         contact_email: clientEmail || null,
@@ -4722,7 +4844,7 @@ async function syncLogActivity(type, titre, simulationId, prospectId) {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
-        tenant_id: LIHTEA_TENANT_ID,
+        tenant_id: currentTenantId,
         user_id: userId,
         prospect_id: prospectId || null,
         simulation_id: simulationId || null,
@@ -5113,12 +5235,33 @@ function recalculer() {
   const consoRaw = parseFloat(document.getElementById('conso').value);
   const gain = parseFloat(document.getElementById('gain').value);
   const duree = parseFloat(document.getElementById('duree').value);
-  const taux = parseFloat(document.getElementById('taux').value);
   const prixRaw = parseFloat(document.getElementById('prix').value);
   const kwh = parseFloat(document.getElementById('kwh').value);
   const cours = parseFloat(document.getElementById('cours').value);
   const taille = document.getElementById('taille').value;
   const tauxADEMEselect = parseFloat(document.getElementById('equip-type').value);
+
+  // ── Lookup taux depuis le barème actif (montant en €, durée en mois) ──
+  const nbMoisLookup = Math.round(duree * 12);
+  const matchedRule = lookupRate(inv, nbMoisLookup);
+  const taux = matchedRule ? parseFloat(matchedRule.annual_rate_pct) : parseFloat(document.getElementById('taux').value) || 4.5;
+  // Mettre à jour le champ caché pour la compatibilité avec les exports
+  document.getElementById('taux').value = taux.toString();
+  // Afficher les conditions appliquées
+  const lookupInfoEl = document.getElementById('bareme-lookup-info');
+  if (lookupInfoEl) {
+    if (matchedRule) {
+      const r = taux / 100 / 12;
+      const coefEnd = r / (1 - Math.pow(1 + r, -nbMoisLookup));
+      const coefBegin = coefEnd / (1 + r);
+      const tranche = matchedRule.amount_max
+        ? Math.round(matchedRule.amount_min).toLocaleString('fr-FR') + ' – ' + Math.round(matchedRule.amount_max).toLocaleString('fr-FR') + ' €'
+        : '≥ ' + Math.round(matchedRule.amount_min).toLocaleString('fr-FR') + ' €';
+      lookupInfoEl.textContent = taux.toFixed(2) + '% · coef ' + coefBegin.toFixed(6) + ' · ' + (coefBegin * 1000).toFixed(2) + ' €/k€ · tranche ' + tranche;
+    } else {
+      lookupInfoEl.textContent = taux.toFixed(2) + '% (valeur par défaut — aucun barème actif)';
+    }
+  }
 
   // ── Conversion unités ──
   // Internally ALL calculations use MWh and €/MWh
@@ -5137,7 +5280,6 @@ function recalculer() {
   }
   document.getElementById('gain-display').textContent = gain + '%';
   document.getElementById('duree-display').textContent = duree + ' an' + (duree > 1 ? 's' : '');
-  document.getElementById('taux-display').textContent = taux.toFixed(1) + '%';
   document.getElementById('kwh-display').textContent = (kwh / 1e6).toFixed(2) + ' GWh cumac';
   document.getElementById('cours-display').textContent = cours.toFixed(1) + ' €/MWh';
 
@@ -7354,7 +7496,8 @@ function appliquerParamAdmin() {
     adminEquipements.forEach(eq => {
       const o = document.createElement('option');
       o.value = (eq.taux / 100).toString();
-      o.textContent = eq.libelle + (eq.fiche ? ' (' + eq.fiche + ')' : '');
+      // Use rich label if available (from Supabase sync), fallback to libelle + fiche
+      o.textContent = eq.label || (eq.libelle + (eq.fiche ? ' (' + eq.fiche + ')' : ''));
       sel.appendChild(o);
     });
   }
@@ -7411,14 +7554,21 @@ function applyEquipSync(equips, silent) {
   const prevValue = sel ? sel.value : null;
   const prevLabel = sel ? sel.options[sel.selectedIndex]?.text : null;
 
-  const mapped = equips.map(eq => ({
-    libelle: eq.libelle || '',
-    fiche: eq.fiches_cee?.code || '',
-    taux: Number(eq.gain_energetique_typique) || 15,
-    gain: Number(eq.gain_energetique_typique) || 25,
-    tooltip: eq.categories_equipements?.nom ? (eq.categories_equipements.icone || '') + ' ' + eq.categories_equipements.nom : '',
-    categorie: eq.categories_equipements?.nom || ''
-  }));
+  const mapped = equips.map(eq => {
+    const catIcone = eq.categories_equipements?.icone || '';
+    const catNom   = eq.categories_equipements?.nom   || '';
+    const ficheCode = eq.fiches_cee?.code || '';
+    return {
+      libelle: eq.libelle || '',
+      fiche: ficheCode,
+      taux: Number(eq.gain_energetique_typique) || 15,
+      gain: Number(eq.gain_energetique_typique) || 25,
+      tooltip: catNom ? (catIcone + ' ' + catNom) : '',
+      categorie: catNom,
+      icone: catIcone,
+      label: [catIcone, eq.libelle, ficheCode ? '(' + ficheCode + ')' : ''].filter(Boolean).join(' ')
+    };
+  });
 
   // Only update if the data actually changed
   const prevJSON = JSON.stringify(adminEquipements.map(e => e.libelle).sort());
@@ -7445,20 +7595,121 @@ function applyEquipSync(equips, silent) {
 }
 
 function startEquipSync() {
-  // Initial sync
+  // Post-auth sync (shows toast confirmation to logged-in user)
   syncEquipementsFromAdmin(false);
 
-  // Periodic resync every 5 minutes
+  // Periodic resync every 5 minutes (only set once)
   if (_equipSyncInterval) clearInterval(_equipSyncInterval);
   _equipSyncInterval = setInterval(() => syncEquipementsFromAdmin(true), 5 * 60 * 1000);
+  // Note: visibilitychange listener is registered once at DOMContentLoaded
+}
 
-  // Resync when page regains focus (user switches back from admin tab)
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-      syncEquipementsFromAdmin(true);
-    }
+// ═══════════════════════════════════════════════════════════
+//  MOTEUR DE BARÈMES DE FINANCEMENT — Lihtea
+//  Lit les règles actives depuis Supabase (vue active_financing_rules)
+//  et remplace le taux saisi manuellement par les conditions du barème.
+// ═══════════════════════════════════════════════════════════
+let _financingRules = [];
+let _baremeName = '';
+let _baremeLoaded = false;
+
+/**
+ * Recherche la règle de financement correspondant à un montant et une durée.
+ * Fallback "tranche la plus proche" si aucune correspondance exacte.
+ * @param {number} amount - Montant financé en €
+ * @param {number} durationMonths - Durée en mois
+ * @returns {object|null} La règle matchée ou null
+ */
+function lookupRate(amount, durationMonths) {
+  if (!_financingRules.length) return null;
+
+  // 1. Trouver les règles pour cette durée exacte
+  let forDuration = _financingRules.filter(r => r.duration_months === durationMonths);
+
+  // 2. Si aucune règle pour cette durée, prendre la durée la plus proche
+  if (!forDuration.length) {
+    const allDurs = [...new Set(_financingRules.map(r => r.duration_months))];
+    const closest = allDurs.reduce((a, b) => Math.abs(a - durationMonths) <= Math.abs(b - durationMonths) ? a : b);
+    forDuration = _financingRules.filter(r => r.duration_months === closest);
+  }
+
+  // 3. Trouver la tranche correspondant au montant
+  const match = forDuration.find(r =>
+    amount >= r.amount_min && (r.amount_max == null || amount <= r.amount_max)
+  );
+  if (match) return match;
+
+  // 4. Fallback : tranche la plus proche par amount_min
+  return forDuration.reduce((best, r) => {
+    const d = Math.abs(amount - (r.amount_min + (r.amount_max ?? r.amount_min)) / 2);
+    const bd = Math.abs(amount - (best.amount_min + (best.amount_max ?? best.amount_min)) / 2);
+    return d < bd ? r : best;
   });
 }
+
+/**
+ * Met à jour le bandeau de statut du barème dans le simulateur.
+ */
+function updateBaremeDisplay(rules, ok) {
+  const badge = document.getElementById('bareme-status-badge');
+  const detail = document.getElementById('bareme-detail');
+  if (!badge || !detail) return;
+  if (!ok || !rules || !rules.length) {
+    badge.textContent = 'Non configuré';
+    badge.style.background = '#dc2626';
+    detail.innerHTML = '<span style="color:#dc2626;font-weight:600;">⚠️ Aucun barème actif — contactez votre administrateur Lihtea.</span>';
+    return;
+  }
+  badge.textContent = 'Actif';
+  badge.style.background = '#059669';
+  const durs = [...new Set(rules.map(r => r.duration_months))].sort((a, b) => a - b);
+  const slabs = [...new Set(rules.map(r => r.amount_min + '-' + (r.amount_max ?? '')))].length;
+  const gridName = rules[0]?.grid_name || 'Barème actif';
+  const effDate = rules[0]?.effective_date
+    ? new Date(rules[0].effective_date).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'})
+    : '';
+  detail.innerHTML = '<strong>' + gridName + '</strong>'
+    + (effDate ? ' &nbsp;·&nbsp; En vigueur depuis le ' + effDate : '')
+    + '<br>' + slabs + ' tranche' + (slabs > 1 ? 's' : '')
+    + ' &nbsp;·&nbsp; Durées disponibles : ' + durs.join(', ') + ' mois';
+}
+
+/**
+ * Charge le barème actif depuis Supabase (vue active_financing_rules).
+ * Déclenche recalculer() après chargement.
+ */
+async function loadBareme() {
+  try {
+    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON };
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/active_financing_rules?select=*&order=amount_min.asc,duration_months.asc',
+      { headers }
+    );
+    if (!res.ok) {
+      console.warn('[Barème] HTTP error:', res.status);
+      updateBaremeDisplay(null, false);
+      return;
+    }
+    const rules = await res.json();
+    if (!rules || !rules.length) {
+      console.warn('[Barème] Aucune règle active — barème non configuré dans l\'admin');
+      updateBaremeDisplay(null, false);
+      return;
+    }
+    _financingRules = rules;
+    _baremeName = rules[0]?.grid_name || 'Barème actif';
+    _baremeLoaded = true;
+    updateBaremeDisplay(rules, true);
+    recalculer();
+    console.log('[Barème] Chargé :', _baremeName, '—', rules.length, 'règles sur', [...new Set(rules.map(r=>r.duration_months))].length, 'durées');
+  } catch (e) {
+    console.warn('[Barème] Erreur de chargement :', e.message || e);
+    updateBaremeDisplay(null, false);
+  }
+}
+
+// Chargement initial du barème au démarrage de la page
+loadBareme();
 
 </script>
 
@@ -9637,6 +9888,19 @@ function initApp() {
 
 document.addEventListener('DOMContentLoaded', async function() {
   const gate = document.getElementById('auth-gate');
+
+  // ── 1. Load tenant branding FIRST (white label, before anything renders) ──
+  await loadTenantConfig();
+
+  // ── Sync equipment with anon key immediately on load (no auth needed) ──
+  // RLS allows public SELECT where actif=true with just the anon key.
+  // This ensures the dropdown is always populated from Supabase, even before login.
+  syncEquipementsFromAdmin(true);
+
+  // Set up visibility-based resync (tab focus after switching to admin)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') syncEquipementsFromAdmin(true);
+  });
 
   if (checkAuth()) {
     // Token exists — validate it async
