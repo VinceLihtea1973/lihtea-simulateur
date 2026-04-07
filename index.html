@@ -3870,13 +3870,19 @@
                  oninput="recalculer()">
         </div>
 
-        <div class="field" id="bareme-info-field" style="background:#f0fdfa;border-radius:8px;padding:10px 12px;border:1px solid #99f6e4;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <span class="field-label" style="color:#0d9488;font-weight:700;">Conditions de financement</span>
+        <div class="field" id="bareme-info-field" style="background:#f0fdfa;border-radius:10px;padding:12px 14px;border:1px solid #99f6e4;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span class="field-label" style="color:#0d9488;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Conditions de financement</span>
             <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#8896a7;color:#fff;font-weight:700;transition:background 0.3s;">Chargement…</span>
           </div>
-          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.6;">Initialisation du barème…</div>
-          <div id="bareme-lookup-info" style="font-size:11px;color:#0d9488;font-weight:600;font-family:monospace;margin-top:4px;"></div>
+          <!-- Nom du barème + date de mise en vigueur -->
+          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.5;margin-bottom:8px;">Initialisation du barème…</div>
+          <!-- Coefficient héro — affiché après calcul -->
+          <div id="bareme-coef-block" style="display:none;align-items:baseline;gap:6px;flex-wrap:wrap;">
+            <span id="bareme-coef-value" style="font-size:24px;font-weight:800;color:#0d9488;letter-spacing:-0.5px;line-height:1;"></span>
+            <span style="font-size:11px;color:#5eead4;font-weight:600;align-self:flex-end;padding-bottom:2px;">coefficient mensuel</span>
+            <span id="bareme-taux-note" style="font-size:10px;color:#94a3b8;margin-left:auto;align-self:flex-end;padding-bottom:2px;"></span>
+          </div>
           <!-- Input caché — valeur mise à jour dynamiquement par le barème -->
           <input type="hidden" id="taux" value="4.5">
         </div>
@@ -5248,18 +5254,27 @@ function recalculer() {
   // Mettre à jour le champ caché pour la compatibilité avec les exports
   document.getElementById('taux').value = taux.toString();
   // Afficher les conditions appliquées
-  const lookupInfoEl = document.getElementById('bareme-lookup-info');
-  if (lookupInfoEl) {
+  // ── Mise à jour du bloc coefficient héro ──
+  const coefBlock = document.getElementById('bareme-coef-block');
+  const coefValueEl = document.getElementById('bareme-coef-value');
+  const tauxNoteEl = document.getElementById('bareme-taux-note');
+  if (coefBlock && coefValueEl) {
     if (matchedRule) {
       const r = taux / 100 / 12;
       const coefEnd = r / (1 - Math.pow(1 + r, -nbMoisLookup));
       const coefBegin = coefEnd / (1 + r);
-      const tranche = matchedRule.amount_max
-        ? Math.round(matchedRule.amount_min).toLocaleString('fr-FR') + ' – ' + Math.round(matchedRule.amount_max).toLocaleString('fr-FR') + ' €'
-        : '≥ ' + Math.round(matchedRule.amount_min).toLocaleString('fr-FR') + ' €';
-      lookupInfoEl.textContent = taux.toFixed(2) + '% · coef ' + coefBegin.toFixed(6) + ' · ' + (coefBegin * 1000).toFixed(2) + ' €/k€ · tranche ' + tranche;
+      coefValueEl.textContent = (coefBegin * 1000).toFixed(2) + ' €/k€';
+      // Note discrète si la durée barème ≠ durée simulée
+      if (tauxNoteEl) {
+        const durRef = Number(matchedRule.duration_months);
+        const note = (durRef !== nbMoisLookup)
+          ? 'Taux ' + taux.toFixed(2) + '%/an · réf. ' + durRef + ' mois'
+          : 'Taux ' + taux.toFixed(2) + '%/an';
+        tauxNoteEl.textContent = note;
+      }
+      coefBlock.style.display = 'flex';
     } else {
-      lookupInfoEl.textContent = taux.toFixed(2) + '% (valeur par défaut — aucun barème actif)';
+      coefBlock.style.display = 'none';
     }
   }
 
@@ -7655,25 +7670,23 @@ function lookupRate(amount, durationMonths) {
 function updateBaremeDisplay(rules, ok) {
   const badge = document.getElementById('bareme-status-badge');
   const detail = document.getElementById('bareme-detail');
+  const coefBlock = document.getElementById('bareme-coef-block');
   if (!badge || !detail) return;
   if (!ok || !rules || !rules.length) {
     badge.textContent = 'Non configuré';
     badge.style.background = '#dc2626';
     detail.innerHTML = '<span style="color:#dc2626;font-weight:600;">⚠️ Aucun barème actif — contactez votre administrateur Lihtea.</span>';
+    if (coefBlock) coefBlock.style.display = 'none';
     return;
   }
   badge.textContent = 'Actif';
   badge.style.background = '#059669';
-  const durs = [...new Set(rules.map(r => r.duration_months))].sort((a, b) => a - b);
-  const slabs = [...new Set(rules.map(r => r.amount_min + '-' + (r.amount_max ?? '')))].length;
   const gridName = rules[0]?.grid_name || 'Barème actif';
   const effDate = rules[0]?.effective_date
     ? new Date(rules[0].effective_date).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'})
     : '';
   detail.innerHTML = '<strong>' + gridName + '</strong>'
-    + (effDate ? ' &nbsp;·&nbsp; En vigueur depuis le ' + effDate : '')
-    + '<br>' + slabs + ' tranche' + (slabs > 1 ? 's' : '')
-    + ' &nbsp;·&nbsp; Durées disponibles : ' + durs.join(', ') + ' mois';
+    + (effDate ? ' &nbsp;·&nbsp; En vigueur depuis le ' + effDate : '');
 }
 
 /**
