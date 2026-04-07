@@ -3881,7 +3881,6 @@
           <div id="bareme-coef-block" style="display:none;align-items:baseline;gap:6px;flex-wrap:wrap;">
             <span id="bareme-coef-value" style="font-size:24px;font-weight:800;color:#0d9488;letter-spacing:-0.5px;line-height:1;"></span>
             <span style="font-size:11px;color:#5eead4;font-weight:600;align-self:flex-end;padding-bottom:2px;">coefficient mensuel</span>
-            <span id="bareme-taux-note" style="font-size:10px;color:#94a3b8;margin-left:auto;align-self:flex-end;padding-bottom:2px;"></span>
           </div>
           <!-- Input caché — valeur mise à jour dynamiquement par le barème -->
           <input type="hidden" id="taux" value="4.5">
@@ -5263,15 +5262,7 @@ function recalculer() {
       const r = taux / 100 / 12;
       const coefEnd = r / (1 - Math.pow(1 + r, -nbMoisLookup));
       const coefBegin = coefEnd / (1 + r);
-      coefValueEl.textContent = (coefBegin * 1000).toFixed(2) + ' €/k€';
-      // Note discrète si la durée barème ≠ durée simulée
-      if (tauxNoteEl) {
-        const durRef = Number(matchedRule.duration_months);
-        const note = (durRef !== nbMoisLookup)
-          ? 'Taux ' + taux.toFixed(2) + '%/an · réf. ' + durRef + ' mois'
-          : 'Taux ' + taux.toFixed(2) + '%/an';
-        tauxNoteEl.textContent = note;
-      }
+      coefValueEl.textContent = (coefBegin * 100).toFixed(3);
       coefBlock.style.display = 'flex';
     } else {
       coefBlock.style.display = 'none';
