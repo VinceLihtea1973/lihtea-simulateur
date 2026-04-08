@@ -3597,10 +3597,6 @@
         <span class="sidebar-item-icon" id="user-avatar-icon" style="width:28px;height:28px;background:var(--c-teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;">?</span>
         <span class="sidebar-item-label" id="user-sidebar-name" style="font-size:12px;">Mon compte</span>
       </a>
-      <a class="sidebar-item" id="admin-link" onclick="(function(){var tok=localStorage.getItem('gef_auth_token')||'';var ref=localStorage.getItem('gef_auth_refresh')||'';window.open('https://admin.lihtea.com'+(tok?'?access_token='+encodeURIComponent(tok)+'&refresh_token='+encodeURIComponent(ref):''),'_blank');})()" style="padding:10px 16px;margin:0 4px;border-radius:8px;border-left:none;cursor:pointer;">
-        <span class="sidebar-item-icon" style="font-size:14px;">⚙️</span>
-        <span class="sidebar-item-label" style="font-size:12px;">Espace Admin</span>
-      </a>
       <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebar()">☰</button>
     </div>
   </aside>
