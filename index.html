@@ -1114,6 +1114,7 @@
     .equip-card.drag-over { border-color:var(--c-teal); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
     .equip-card.saved-flash { border-color:var(--c-teal); box-shadow:0 0 0 3px rgba(13,148,136,0.15); animation: savedPulse 0.6s ease; }
     @keyframes savedPulse { 0%{box-shadow:0 0 0 3px rgba(13,148,136,0.15)} 50%{box-shadow:0 0 0 6px rgba(13,148,136,0.2)} 100%{box-shadow:0 0 0 3px rgba(13,148,136,0.15)} }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .equip-card-view { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; }
     .equip-drag-handle { cursor:grab; color:var(--admin-border); font-size:16px; flex-shrink:0; user-select:none; padding:2px 4px; transition:color 0.15s; }
@@ -4257,15 +4258,26 @@
     <!-- PAGE: MES SIMULATIONS -->
     <div class="page" id="page-saved">
       <div class="app">
-<div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div class="section-label" style="margin-bottom:0;">Simulations sauvegardées</div>
-            <button onclick="saveCurrentSimulation()" style="
-              padding:7px 14px;font-size:12px;font-weight:600;font-family:var(--font-body);
-              border:none;border-radius:var(--radius-sm);background:var(--c-navy);color:white;
-              cursor:pointer;transition:all 0.15s;">
-              + Sauvegarder l'actuelle
-            </button>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+            <div>
+              <div class="section-label" style="margin-bottom:2px;">Mes simulations</div>
+              <div style="font-size:12px;color:var(--c-text-3);">Locales &amp; synchronisées cloud</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button onclick="renderSavedSimulations()" title="Rafraîchir" style="
+                padding:7px 10px;font-size:13px;font-family:var(--font-body);
+                border:1px solid var(--c-border);border-radius:var(--radius-sm);background:var(--c-surface);
+                color:var(--c-text-2);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--c-bg)'" onmouseout="this.style.background='var(--c-surface)'">
+                ↻
+              </button>
+              <button onclick="saveCurrentSimulation()" style="
+                padding:7px 14px;font-size:12px;font-weight:600;font-family:var(--font-body);
+                border:none;border-radius:var(--radius-sm);background:var(--c-navy);color:white;
+                cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--c-navy-light)'" onmouseout="this.style.background='var(--c-navy)'">
+                + Sauvegarder l'actuelle
+              </button>
+            </div>
           </div>
           <div class="saved-sims" id="saved-sims-list">
             <!-- Généré par JS -->
@@ -6419,50 +6431,175 @@ async function deleteSimulation(id) {
   showToast('Simulation supprimée', 'success');
 }
 
-function renderSavedSimulations() {
+// ── Charger une simulation API dans le formulaire ──────────────────────────
+function loadSimulationFromAPI(sim) {
+  const p = sim.parametres || {};
+  // Map API field names → form field ids
+  if (p.investissement)     document.getElementById('inv').value   = p.investissement;
+  if (p.consommation)       document.getElementById('conso').value = p.consommation;
+  if (p.gain_energetique)   document.getElementById('gain').value  = p.gain_energetique;
+  if (p.duree_ans)          document.getElementById('duree').value = p.duree_ans;
+  if (p.taux)               document.getElementById('taux').value  = p.taux;
+  if (p.prix_energie)       document.getElementById('prix').value  = p.prix_energie;
+  if (p.kwh_cumac)          document.getElementById('kwh').value   = p.kwh_cumac;
+  if (p.cours_cee)          document.getElementById('cours').value = p.cours_cee;
+  if (p.taille)             document.getElementById('taille').value = p.taille;
+  if (sim.client_entreprise || sim.client_nom) {
+    document.getElementById('nom-client').value = sim.client_entreprise || sim.client_nom || '';
+  }
+  // Restore aides from aides_selectionnees
+  const aides = sim.aides_selectionnees || {};
+  ['cee','ademe','bpi','feder'].forEach(k => {
+    if (aides[k] !== undefined) {
+      aidesActives[k] = aides[k];
+      const toggle = document.getElementById('toggle-' + k);
+      if (toggle) toggle.classList.toggle('on', aides[k]);
+    }
+  });
+  recalculer();
+  switchPage('resultats', document.querySelector('[data-page="resultats"]'));
+  showToast('Simulation chargée ✓', 'success');
+}
+
+// ── Rendu principal de la page Mes Simulations ─────────────────────────────
+async function renderSavedSimulations() {
   const container = document.getElementById('saved-sims-list');
   if (!container) return;
-  const sims = getSavedSimulations();
   updateSavedBadge();
 
-  if (sims.length === 0) {
-    container.innerHTML = `<div style="padding:24px;text-align:center;">
-      <div style="font-size:28px;margin-bottom:8px;opacity:0.3;">💾</div>
-      <div style="font-size:13px;color:var(--c-text-2);font-weight:600;margin-bottom:4px;">Aucune simulation sauvegardée</div>
-      <div style="font-size:12px;color:var(--c-text-3);">Cliquez sur « Sauvegarder l'actuelle » pour conserver une configuration.</div>
+  const fek = n => { const v=Math.abs(Math.round(n||0)); if(v>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(v>=1000) return Math.round(v/1000)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
+  const timeAgo = d => {
+    if (!d) return '—';
+    const mins = Math.round((Date.now() - new Date(d).getTime()) / 60000);
+    if (mins < 2) return 'À l\'instant';
+    if (mins < 60) return 'il y a ' + mins + 'min';
+    if (mins < 1440) return 'il y a ' + Math.round(mins/60) + 'h';
+    const days = Math.floor(mins/1440);
+    if (days < 30) return 'il y a ' + days + 'j';
+    return new Date(d).toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+  };
+  const statusBadge = s => {
+    const map = {brouillon:'#6b7280',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'};
+    const lbl = {brouillon:'Brouillon',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'};
+    const c = map[s]||'#6b7280';
+    return `<span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:${c}18;color:${c};text-transform:uppercase">${lbl[s]||s}</span>`;
+  };
+
+  // ── Simulations locales (localStorage) ──
+  const localSims = getSavedSimulations();
+
+  // ── Simulations cloud (API Supabase) ──
+  const isLoggedIn = !!localStorage.getItem('gef_auth_token');
+  let cloudSims = [];
+
+  if (isLoggedIn) {
+    container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--c-text-3);font-size:13px;">
+      <span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;"></span>
+      Chargement de vos simulations cloud…
+    </div>`;
+
+    try {
+      const res = await fetch(ADMIN_API + '/simulations?limit=50', { headers: getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        cloudSims = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+      }
+    } catch(e) { console.warn('[Saved] API fetch error:', e); }
+  }
+
+  // ── Rendu ──
+  const hasLocal = localSims.length > 0;
+  const hasCloud = cloudSims.length > 0;
+
+  if (!hasLocal && !hasCloud) {
+    container.innerHTML = `<div style="padding:40px 24px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;opacity:0.25;">💾</div>
+      <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:6px;">Aucune simulation sauvegardée</div>
+      <div style="font-size:12px;color:var(--c-text-3);line-height:1.6;">
+        Cliquez sur « Sauvegarder l'actuelle » pour conserver votre configuration.<br>
+        ${!isLoggedIn ? '<br><a onclick="switchPage(\'resultats\',null)" style="color:var(--c-teal);cursor:pointer;font-weight:600;">Connectez-vous</a> pour synchroniser vos simulations entre appareils.' : ''}
+      </div>
     </div>`;
     return;
   }
 
-  const fek = n => { const v=Math.abs(Math.round(n)); if(v>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(v>=1000) return Math.round(v/1000)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
-  const timeAgo = d => {
-    const mins = Math.round((Date.now() - new Date(d).getTime()) / 60000);
-    if (mins < 60) return 'il y a ' + mins + ' min';
-    if (mins < 1440) return 'il y a ' + Math.round(mins/60) + 'h';
-    return new Date(d).toLocaleDateString('fr-FR');
-  };
+  let html = '';
 
-  container.innerHTML = sims.map(s => `
-    <div class="saved-sim-card" onclick="loadSimulation(${s.id})">
-      <div class="saved-sim-info">
-        <div class="saved-sim-name">${s.name}</div>
-        <div class="saved-sim-meta">
-          <span>${timeAgo(s.date)}</span>
-          <span>·</span>
-          <span>${fek(s.params.inv)} inv.</span>
-          <span>·</span>
-          <span>${s.results.pctCouvert}% couvert</span>
-          <span>·</span>
-          <span style="color:${s.results.roiNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${s.results.roiNet >= 0 ? '+' : ''}${fek(s.results.roiNet)} ROI</span>
+  // ── Section Cloud ──
+  if (isLoggedIn) {
+    html += `<div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-teal);">☁️ Cloud — synchronisées</span>
+        <span style="font-size:11px;color:var(--c-text-3);">${cloudSims.length} simulation${cloudSims.length>1?'s':''}</span>
+      </div>`;
+
+    if (cloudSims.length === 0) {
+      html += `<div style="padding:16px;text-align:center;font-size:12px;color:var(--c-text-3);background:var(--c-bg);border-radius:8px;border:1px dashed var(--c-border);">
+        Aucune simulation cloud — sauvegardez une simulation pour la synchroniser automatiquement.
+      </div>`;
+    } else {
+      html += cloudSims.map(s => {
+        const inv = s.parametres?.investissement || 0;
+        const loyer = s.montant_loyer_mensuel || s.resultats?.mensualite_nette || 0;
+        const aides = s.montant_aides_total || s.resultats?.total_aides || 0;
+        const pct = inv > 0 ? Math.round(aides/inv*100) : 0;
+        const id = JSON.stringify(s.id);
+        return `<div class="saved-sim-card" onclick="loadSimulationFromAPI(window.__cloudSim_${s.id})">
+          <div class="saved-sim-info">
+            <div class="saved-sim-name">${s.client_entreprise||s.client_nom||'Sans nom'}</div>
+            <div class="saved-sim-meta">
+              <span>${timeAgo(s.updated_at||s.created_at)}</span>
+              <span>·</span>
+              <span>${fek(inv)} inv.</span>
+              ${pct>0?`<span>·</span><span>${pct}% couvert</span>`:''}
+              ${loyer>0?`<span>·</span><span style="color:var(--c-teal);">${fek(loyer)}/mois</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">${statusBadge(s.statut||'brouillon')}</div>
+          <div class="saved-sim-actions">
+            <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulationFromAPI(window.__cloudSim_${s.id})">Charger</button>
+          </div>
+        </div>`;
+      }).join('');
+      // Expose cloud sims globally for click access
+      cloudSims.forEach(s => { window['__cloudSim_' + s.id] = s; });
+    }
+    html += '</div>';
+  }
+
+  // ── Séparateur ──
+  if (isLoggedIn && hasLocal) {
+    html += `<div style="display:flex;align-items:center;gap:8px;margin:16px 0 10px;">
+      <div style="flex:1;height:1px;background:var(--c-border);"></div>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-text-3);">💻 Locales — appareil uniquement</span>
+      <div style="flex:1;height:1px;background:var(--c-border);"></div>
+    </div>`;
+  }
+
+  // ── Section Locale ──
+  if (hasLocal) {
+    html += localSims.map(s => `
+      <div class="saved-sim-card" onclick="loadSimulation(${s.id})">
+        <div class="saved-sim-info">
+          <div class="saved-sim-name">${s.name}</div>
+          <div class="saved-sim-meta">
+            <span>${timeAgo(s.date)}</span>
+            <span>·</span>
+            <span>${fek(s.params?.inv)} inv.</span>
+            ${s.results?.pctCouvert!=null?`<span>·</span><span>${s.results.pctCouvert}% couvert</span>`:''}
+            ${s.results?.roiNet!=null?`<span>·</span><span style="color:${s.results.roiNet>=0?'var(--c-teal)':'var(--c-red)'};">${s.results.roiNet>=0?'+':''}${fek(s.results.roiNet)} ROI</span>`:''}
+          </div>
+        </div>
+        <div class="saved-sim-amount">${s.results?.mensNette?fek(s.results.mensNette)+'/mois':'—'}</div>
+        <div class="saved-sim-actions">
+          <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulation(${s.id})">Charger</button>
+          <button class="saved-sim-btn danger" onclick="event.stopPropagation();deleteSimulation(${s.id})">✕</button>
         </div>
       </div>
-      <div class="saved-sim-amount">${fek(s.results.mensNette)}/mois</div>
-      <div class="saved-sim-actions">
-        <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulation(${s.id})">Charger</button>
-        <button class="saved-sim-btn danger" onclick="event.stopPropagation();deleteSimulation(${s.id})">✕</button>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
+
+  container.innerHTML = html;
 }
 
 // Init saved badge on load
