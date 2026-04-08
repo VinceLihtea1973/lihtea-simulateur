@@ -3807,10 +3807,34 @@
         <div class="field">
           <div class="field-header">
             <span class="field-label">Investissement total HT</span>
-            <span class="field-value" id="inv-display">250 000 €</span>
+          </div>
+          <!-- Saisie directe du montant (toujours visible) -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input type="number" id="inv-number"
+              min="20000" max="2000000" step="1000" value="250000"
+              style="flex:1;padding:8px 12px;border:2px solid var(--c-teal);border-radius:8px;font-size:16px;font-weight:700;font-family:var(--font-mono);color:var(--c-navy);background:var(--c-teal-bg);outline:none;text-align:right;"
+              oninput="
+                const v=Math.max(20000,Math.min(2000000,parseInt(this.value)||20000));
+                document.getElementById('inv').value=v;
+                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
+                recalculer();
+              "
+              onblur="
+                const v=Math.max(20000,Math.min(2000000,parseInt(this.value)||20000));
+                this.value=v;
+                document.getElementById('inv').value=v;
+                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
+                recalculer();
+              ">
+            <span style="font-size:12px;color:var(--c-text-3);white-space:nowrap;">€ HT</span>
           </div>
           <input type="range" id="inv" min="20000" max="2000000" step="5000" value="250000"
-                 oninput="recalculer()">
+                 oninput="
+                   document.getElementById('inv-number').value=this.value;
+                   document.getElementById('inv-display').textContent=Number(this.value).toLocaleString('fr-FR')+'\u202f€';
+                   recalculer();
+                 ">
+          <span id="inv-display" style="display:none;">250 000 €</span>
         </div>
 
         <div class="field">
@@ -3978,31 +4002,14 @@
             <div class="metric-sub" id="r-eco-sub">0 MWh</div>
           </div>
           <div class="metric highlight" style="grid-column:span 2;">
-            <div class="metric-label">Économie nette cumulée (économies − coût financement)</div>
+            <div class="metric-label">Rentabilité atteinte</div>
             <div class="metric-val" id="r-roi">—</div>
-            <div class="metric-sub" id="r-roi-sub">sur la durée d'analyse</div>
-          </div>
-          <div class="metric warn">
-            <div class="metric-label">Délai de retour</div>
-            <div class="metric-val" id="r-payback">—</div>
-            <div class="metric-sub">payback period</div>
+            <div class="metric-sub" id="r-roi-sub">moment où le cumul devient positif</div>
           </div>
         </div>
 
         <!-- Dashboard Charts -->
         <div class="dashboard-grid">
-          <!-- Loyer vs Économies (bar chart comparatif) -->
-          <div class="dashboard-chart-card">
-            <div class="dashboard-chart-title">Mensualité vs Économies</div>
-            <div id="dash-loyer-eco"></div>
-          </div>
-
-          <!-- Répartition du financement (donut) -->
-          <div class="dashboard-chart-card">
-            <div class="dashboard-chart-title">Répartition du financement</div>
-            <div id="dash-donut"></div>
-          </div>
-
           <!-- Reste à charge cumulé + ROI (line chart multi-séries sur toute la durée) -->
           <div class="dashboard-chart-card full">
             <div class="dashboard-chart-title" id="dash-annual-title">Tableau de bord annuel — Loyers, Économies, Reste à charge cumulé & ROI</div>
@@ -5494,29 +5501,20 @@ function recalculer() {
     ecoPreviewEl.textContent = `Économie estimée : ${ecoAnRounded} €/an · ${ecoMwhRounded} économisés`;
   }
 
-  const roiEl = document.getElementById('r-roi');
-  roiEl.textContent = (roiNet >= 0 ? '+' : '') + formaterEuros(roiNet, true);
-  roiEl.style.color = roiNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)';
-
-  // ── Double payback ──
-  // Payback brut : capital net / économies annuelles (valeur intuitive pour la direction)
+  // ── PAYBACK BRUT (kept for insight text) ──
   const pbBrutAff = paybackBrutAns >= HORIZON
     ? '> ' + HORIZON + ' ans'
     : paybackBrutAns < 1
       ? Math.round(paybackBrutAns * 12) + ' mois'
       : paybackBrutAns.toFixed(1).replace('.', ',') + ' ans';
 
-  // Payback financé : année du flux cumulé positif (valeur réelle avec loyers)
+  // ── PAYBACK FINANCÉ : quand le flux cumulé réel devient positif ──
   const pbFinAff = pbFinIdx >= 0 ? 'An ' + (pbFinIdx + 1) : '> ' + HORIZON + ' ans';
 
-  const paybackEl = document.getElementById('r-payback');
-  paybackEl.textContent = pbBrutAff;
-
-  // Sous-titre : payback financé (avec loyers)
-  const paybackSubEl = paybackEl.closest('.metric')?.querySelector('.metric-sub');
-  if (paybackSubEl) {
-    paybackSubEl.innerHTML = 'brut · financé : <strong>' + pbFinAff + '</strong>';
-  }
+  // Afficher payback financé dans la métrique principale "Rentabilité atteinte"
+  const roiEl = document.getElementById('r-roi');
+  roiEl.textContent = pbFinAff;
+  roiEl.style.color = pbFinIdx >= 0 ? 'var(--c-teal)' : 'var(--c-amber,#d97706)';
 
   // ── Badge autofinancé (dans le loyer-eco-line) ──
   const ecoMensLoyer2 = Math.round(ecoAn / 12);
@@ -5582,7 +5580,7 @@ function recalculer() {
 
   // Update ROI sub label
   const roiSubEl = document.getElementById('r-roi-sub');
-  if (roiSubEl) roiSubEl.textContent = `Phase 1 : ${gainPhase1 >= 0 ? '+' : ''}${formaterEuros(gainPhase1, true)} | Phase 2 : +${formaterEuros(gainPhase2, true)}`;
+  if (roiSubEl) roiSubEl.textContent = pbFinIdx >= 0 ? `flux cumulés positifs dès l'an ${pbFinIdx + 1}` : 'au-delà de l\'horizon d\'analyse';
 
   const insightEl = document.getElementById('insight-box');
   const isPositive = soldeNet >= 0;
@@ -5598,88 +5596,18 @@ function recalculer() {
       : 'Effort net mensuel : ' + Math.abs(soldeNet).toLocaleString('fr-FR') + ' €/mois pendant ' + duree + ' ans'
     }</div>
 
-    <!-- ═══ BLOC FINANCIER ═══ -->
-    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Bloc financier</div>
-    <div style="display:grid;grid-template-columns:1fr auto;gap:3px 16px;font-size:13px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-      <span style="color:var(--c-text-2);">Investissement</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;">${fmtI(inv)}</span>
-      <span style="color:var(--c-teal);">− Subventions directes</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--c-teal);">−${fmtI(a.totalSubventions)}</span>
-      ${a.gainBPI_euros > 0 ? `<span style="color:#2563eb;font-size:11px;">+ Économie intérêts BPI</span><span style="text-align:right;font-family:var(--font-mono);font-size:11px;color:#2563eb;">−${fmtI(a.gainBPI_euros)}</span>` : ''}
-      <span style="font-weight:800;color:var(--c-navy);border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">= Capital financé</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:800;color:var(--c-navy);border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">${fmtI(a.coutNet)}</span>
-    </div>
-
-    <!-- ═══ BLOC MENSUEL ═══ -->
-    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Bloc mensuel</div>
-    <div style="display:grid;grid-template-columns:1fr auto;gap:3px 16px;font-size:13px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-      <span style="color:var(--c-text-2);">Mensualité nette</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;">${mensNet.toLocaleString('fr-FR')} €/mois</span>
-      <span style="color:var(--c-teal);">− Gain énergie</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--c-teal);">−${ecoMens.toLocaleString('fr-FR')} €/mois</span>
-      <span style="font-weight:800;color:${soldeNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">= Effort réel</span>
-      <span style="text-align:right;font-family:var(--font-mono);font-weight:800;color:${soldeNet >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};border-top:1px solid var(--c-border);padding-top:4px;margin-top:2px;">${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</span>
-    </div>
-
-    <!-- ═══ BLOC ROI ═══ -->
-    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Retour sur investissement</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-      <div style="padding:10px 14px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);">
-        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Payback brut</div>
-        <div style="font-size:18px;font-weight:800;color:var(--c-navy);">${pbBrutAff}</div>
-        <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Capital net / économies annuelles</div>
+    <!-- ═══ RÉSUMÉ CHIFFRES CLÉS ═══ -->
+    <div style="margin:14px 0 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="padding:12px 14px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);">
+        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Économies d'énergie</div>
+        <div style="font-size:18px;font-weight:800;color:var(--c-teal);">${fmtI(ecoAn)}/an</div>
+        <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">Effort réel : ${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</div>
       </div>
-      <div style="padding:10px 14px;border-radius:8px;border:1px solid var(--c-teal-border);background:var(--c-teal-bg);">
-        <div style="font-size:10px;color:var(--c-teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Payback financé</div>
+      <div style="padding:12px 14px;border-radius:8px;border:1px solid var(--c-teal-border);background:var(--c-teal-bg);">
+        <div style="font-size:10px;color:var(--c-teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Rentabilité atteinte</div>
         <div style="font-size:18px;font-weight:800;color:var(--c-teal);">${pbFinAff}</div>
-        <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Flux cumulés réels (loyers + éco)</div>
+        <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">Flux cumulés positifs (loyers inclus)</div>
       </div>
-    </div>
-
-    <!-- ═══ DÉCOMPOSITION PHASES ═══ -->
-    <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Décomposition du gain</div>
-    <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:14px;">
-      <tr style="border-bottom:1px solid var(--c-border);">
-        <td style="padding:6px 0;color:var(--c-text-2);">Phase 1 — Contrat (${duree} ans)</td>
-        <td style="padding:6px 0;text-align:right;font-size:11px;color:var(--c-text-3);">Éco. <strong>${fmtI(ecoCumulPhase1)}</strong> − Loyers <strong>${fmtI(coutFinancement)}</strong></td>
-        <td style="padding:6px 0;text-align:right;font-weight:800;color:${gainPhase1 >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainPhase1 >= 0 ? '+' : ''}${fmtI(gainPhase1)}</td>
-      </tr>
-      <tr style="border-bottom:1px solid var(--c-border);">
-        <td style="padding:6px 0;color:var(--c-text-2);">Phase 2 — Post-contrat (${anneesPostContrat} ans)</td>
-        <td style="padding:6px 0;text-align:right;font-size:11px;color:var(--c-text-3);">Éco. <strong>${fmtI(gainPhase2)}</strong> − Loyers <strong>0 €</strong></td>
-        <td style="padding:6px 0;text-align:right;font-weight:800;color:var(--c-teal);">+${fmtI(gainPhase2)}</td>
-      </tr>
-      <tr>
-        <td style="padding:8px 0;font-weight:800;color:var(--c-navy);">Économie nette cumulée (${HORIZON} ans)</td>
-        <td></td>
-        <td style="padding:8px 0;text-align:right;font-weight:800;font-size:15px;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</td>
-      </tr>
-    </table>
-
-    <!-- ═══ SENSIBILITÉ ═══ -->
-    <div style="margin:12px 0 6px;font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:0.07em;">Sensibilité énergie</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
-        <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie −20%</div>
-        <div style="font-weight:700;color:${roiLow >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${roiLow >= 0 ? '+' : ''}${fmtI(roiLow)}</div>
-        <div style="font-size:10px;color:var(--c-text-3);">Solde : ${soldeLow >= 0 ? '+' : ''}${soldeLow.toLocaleString('fr-FR')} €/mois</div>
-      </div>
-      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:2px solid var(--c-teal-border);background:var(--c-teal-bg);font-size:12px;">
-        <div style="color:var(--c-teal);margin-bottom:2px;font-weight:600;">Prix actuel</div>
-        <div style="font-weight:700;color:${gainTotal >= 0 ? 'var(--c-teal)' : 'var(--c-red)'};">${gainTotal >= 0 ? '+' : ''}${fmtI(gainTotal)}</div>
-        <div style="font-size:10px;color:var(--c-text-2);">Solde : ${soldeNet >= 0 ? '+' : ''}${soldeNet.toLocaleString('fr-FR')} €/mois</div>
-      </div>
-      <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;">
-        <div style="color:var(--c-text-3);margin-bottom:2px;">Prix énergie +20%</div>
-        <div style="font-weight:700;color:var(--c-teal);">${roiHigh >= 0 ? '+' : ''}${fmtI(roiHigh)}</div>
-        <div style="font-size:10px;color:var(--c-text-3);">Solde : +${soldeHigh.toLocaleString('fr-FR')} €/mois</div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:14px;">
-      <span style="font-weight:600;color:var(--c-text-2);">Marge de sécurité :</span>
-      <span style="font-weight:800;color:${margeCouleur};">${margeSecu}%</span>
-      <span style="color:var(--c-text-3);">(ratio économies/loyer)</span>
-      ${margeSecu < 10 ? '<span style="color:var(--c-red);font-weight:600;">⚠ Marge faible</span>' : margeSecu < 20 ? '<span style="color:var(--c-amber);font-weight:600;">⚡ Marge modérée</span>' : '<span style="color:var(--c-green);font-weight:600;">✓ Confortable</span>'}
     </div>
 
     <!-- ═══ ESSENTIEL DIRECTION ═══ -->
@@ -5711,8 +5639,8 @@ function renderDashboard(inv, a, ecoAn, duree, roiNet, fluxCumule) {
   renderDashLoyerEco(a, ecoAn);
   renderDashDonut(inv, a);
   renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule);
-  // Cache data for projection
-  projCache = { ecoAn, mensNette: a.mensNette, duree, inv, totalAides: a.totalAides };
+  // Cache data for projection + annual chart sync
+  projCache = { ecoAn, mensNette: a.mensNette, duree, inv, totalAides: a.totalAides, a, fluxCumule };
   renderProjection();
 }
 
@@ -5786,13 +5714,13 @@ function renderDashDonut(inv, a) {
 }
 
 // ── Graphique annuel multi-séries (SVG) ──
-function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule) {
+function renderDashAnnualChart(inv, a, ecoAn, duree, fluxCumule, horizonOverride) {
   const el = document.getElementById('dash-annual-chart');
   const legendEl = document.getElementById('dash-annual-legend');
   if (!el) return;
 
-  // Horizon dynamique : dérivé directement du tableau fluxCumule construit dans recalculer()
-  const HORIZON = fluxCumule.length;
+  // Horizon : either the selected projection horizon or derived from fluxCumule length
+  const HORIZON = horizonOverride ? Math.max(horizonOverride, Math.ceil(duree) + 3) : fluxCumule.length;
   // Mettre le titre à jour avec le vrai horizon
   const titleEl = document.getElementById('dash-annual-title');
   if (titleEl) titleEl.textContent = `Tableau de bord sur ${HORIZON} ans — Loyers, Économies & ROI (${duree} an${duree>1?'s':''} de financement)`;
@@ -5947,6 +5875,10 @@ function setProjectionHorizon(years, btn) {
   document.querySelectorAll('.proj-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderProjection();
+  // Sync annual dashboard chart to the same horizon
+  if (projCache.fluxCumule && projCache.a) {
+    renderDashAnnualChart(projCache.inv, projCache.a, projCache.ecoAn, projCache.duree, projCache.fluxCumule, years);
+  }
 }
 
 function renderProjection() {
