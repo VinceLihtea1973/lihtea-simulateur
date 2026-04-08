@@ -4695,8 +4695,13 @@ async function resolveInternalUserId() {
     const users = data?.data || [];
     if (users.length > 0 && users[0].id) {
       localStorage.setItem('gef_internal_user_id', users[0].id);
-      // Sync profile name from admin users table
+      // Sync tenant_id from authoritative server record — évite le tenant_id hardcodé fallback
       const u = users[0];
+      if (u.tenant_id) {
+        currentTenantId = u.tenant_id;
+        localStorage.setItem('gef_tenant_id', u.tenant_id);
+      }
+      // Sync profile name from admin users table
       const profile = JSON.parse(localStorage.getItem('gef_user_profile') || '{}');
       if (u.prenom || u.nom || u.full_name) {
         if (u.prenom) profile.prenom = u.prenom;
