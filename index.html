@@ -7985,32 +7985,8 @@ LIHTEA COPILOT — ASSISTANT IA INTÉGRÉ
 ══════════════════════════════════════════════════════════════
 */
 
-const COPILOT_SYSTEM = `Tu es l'assistant IA de Lihtea, société de conseil en Equipment Finance & Advisory spécialisée dans le financement d'équipements industriels verts en France.
-
-TON RÔLE : Aider les commerciaux Lihtea à monter des dossiers de subventions (CEE, ADEME, BPI, FEDER) pour leurs clients industriels.
-
-TES CONNAISSANCES :
-- Dispositif CEE P6 (2026-2030), fiches IND-UT-102 (compresseurs), IND-UT-105 (chaudières), IND-UT-116 (variateurs), IND-UT-129 (presses), IND-UT-137/138/139 (chaleur fatale), BAT-TH-134 (groupes froid)
-- Cours CEE : ~8 EUR/MWh cumac (mars 2026)
-- Fonds Chaleur ADEME : jusqu'à 60% chaleur fatale, 30-40% autres, bonus PME +10%
-- Tremplin PME ADEME : jusqu'à 200k EUR forfaitaire TPE/PME, processus simplifié
-- DECARB FLASH : projets > 100k EUR
-- Prêt Vert BPI : réduction taux -0,8%/an, plafond 1M EUR, PME/ETI
-- FEDER : jusqu'à 50%, plafond variable par région
-- Plafond cumul CEE+ADEME : 65% (décret 2019-1320)
-- Plafond global aides publiques : 80% PME, 70% GE
-- CRITIQUE : le dossier CEE DOIT être déposé AVANT le bon de commande
-
-QUAND ON TE DÉCRIT UN PROJET :
-1. Identifie le type d'équipement et la fiche CEE applicable
-2. Estime le volume kWh cumac et la prime CEE
-3. Recommande le dispositif ADEME adapté
-4. Vérifie éligibilité BPI et FEDER
-5. Calcule le plan de financement complet
-6. Alerte sur les points de vigilance
-7. Propose les paramètres optimaux pour le simulateur Lihtea
-
-Réponds de façon structurée et conversationnelle. Chiffres concrets. Mentionne "estimation indicative". Sois proactif. Représente Lihtea avec professionnalisme. Réponds en français.`;
+// System prompt géré côté serveur dans l'Edge Function copilot-proxy
+// (SUPABASE_URL + '/functions/v1/copilot-proxy') — clé Anthropic stockée en secret Supabase
 
 let copilotMessages = [];
 let copilotOpen = false;
@@ -8050,38 +8026,32 @@ async function copilotSend(text) {
 
   let assistantText = '';
 
-  // Try API first
+  // Appel via Edge Function sécurisée (clé Anthropic côté serveur uniquement)
   try {
     const ctx = getCopilotContext();
-    const apiMessages = [
-      { role: 'user', content: '[CONTEXTE SIMULATEUR]\n' + ctx },
-      { role: 'assistant', content: 'J\'ai le contexte du simulateur. Comment puis-je vous aider ?' },
-      ...copilotMessages.map(m => ({ role: m.role, content: m.content }))
-    ];
-
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 12000);
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/copilot-proxy', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        system: COPILOT_SYSTEM,
-        messages: apiMessages,
+        messages: copilotMessages.map(m => ({ role: m.role, content: m.content })),
+        context: ctx,
       }),
       signal: controller.signal,
     });
     clearTimeout(timeout);
 
-    const data = await response.json();
-    assistantText = data.content
-      ?.filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('\n') || '';
+    if (response.ok) {
+      const data = await response.json();
+      assistantText = data.text || '';
+    }
   } catch (err) {
-    // API non disponible → fallback intelligent
+    // Proxy non disponible → fallback intelligent local
     assistantText = '';
   }
 
