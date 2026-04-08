@@ -2719,6 +2719,41 @@
     .modal-btn-confirm:active {
       transform: translateY(0);
     }
+
+    /* ── Proposition Quick Look ── */
+    .prop-preview-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,30,55,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 11000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .prop-preview-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .prop-preview-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 32px 100px rgba(10,30,55,0.35), 0 0 0 1px rgba(10,30,55,0.08);
+      width: 520px;
+      max-width: 94vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      transform: translateY(24px) scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .prop-preview-overlay.visible .prop-preview-card {
+      transform: translateY(0) scale(1);
+    }
+
     .modal-scenario-preview {
       margin-top: 14px;
       padding: 10px 14px;
@@ -3810,28 +3845,32 @@
           </div>
           <!-- Saisie directe du montant (toujours visible) -->
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <input type="number" id="inv-number"
-              min="20000" max="2000000" step="1000" value="250000"
+            <input type="text" id="inv-number" inputmode="numeric" autocomplete="off"
+              value="250 000"
               style="flex:1;padding:8px 12px;border:2px solid var(--c-teal);border-radius:8px;font-size:16px;font-weight:700;font-family:var(--font-mono);color:var(--c-navy);background:var(--c-teal-bg);outline:none;text-align:right;"
               oninput="
-                const v=Math.max(20000,Math.min(2000000,parseInt(this.value)||20000));
+                const raw=this.value.replace(/[^\d]/g,'');
+                const v=Math.max(20000,Math.min(2000000,parseInt(raw)||20000));
                 document.getElementById('inv').value=v;
                 document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
                 recalculer();
               "
               onblur="
-                const v=Math.max(20000,Math.min(2000000,parseInt(this.value)||20000));
-                this.value=v;
+                const raw=this.value.replace(/[^\d]/g,'');
+                const v=Math.max(20000,Math.min(2000000,parseInt(raw)||20000));
+                this.value=v.toLocaleString('fr-FR');
                 document.getElementById('inv').value=v;
                 document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
                 recalculer();
-              ">
+              "
+              onfocus="this.select();">
             <span style="font-size:12px;color:var(--c-text-3);white-space:nowrap;">€ HT</span>
           </div>
           <input type="range" id="inv" min="20000" max="2000000" step="5000" value="250000"
                  oninput="
-                   document.getElementById('inv-number').value=this.value;
-                   document.getElementById('inv-display').textContent=Number(this.value).toLocaleString('fr-FR')+'\u202f€';
+                   const formatted=Number(this.value).toLocaleString('fr-FR');
+                   document.getElementById('inv-number').value=formatted;
+                   document.getElementById('inv-display').textContent=formatted+'\u202f€';
                    recalculer();
                  ">
           <span id="inv-display" style="display:none;">250 000 €</span>
@@ -4326,6 +4365,13 @@
   </div>
 
 </div><!-- FIN .app-layout -->
+
+<!-- ─── PROPOSITION QUICK LOOK OVERLAY ─── -->
+<div class="prop-preview-overlay" id="prop-preview-overlay" onclick="if(event.target===this)closePropPreview()">
+  <div class="prop-preview-card" id="prop-preview-card">
+    <!-- Contenu généré par previewProposition() -->
+  </div>
+</div>
 
 <!-- ─── COPILOT IA ─── -->
 <button class="copilot-fab" id="copilot-fab" onclick="toggleCopilot()" title="Lihtea Copilot — Assistant IA Subventions">
@@ -8838,6 +8884,7 @@ function renderPropositions() {
           </div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
+          <button onclick="previewProposition(${p.id})" title="Aperçu de la proposition" style="padding:5px 10px;font-size:13px;border-radius:5px;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text-2);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;line-height:1;" onmouseover="this.style.background='var(--c-bg)';this.style.borderColor='var(--c-navy)'" onmouseout="this.style.background='var(--c-surface)';this.style.borderColor=''">👁</button>
           <button onclick="${hasData ? dlOnClick : ''}" ${!hasData ? 'disabled title="Données insuffisantes pour régénérer"' : 'title="Télécharger à nouveau"'} style="${dlBtnStyle}" ${hasData ? `onmouseover="this.style.background='var(--c-teal)';this.style.color='white'" onmouseout="this.style.background='var(--c-teal-bg)';this.style.color='var(--c-teal)'"` : ''}>${dlLabel}</button>
           <button onclick="supprimerProposition(${p.id})" style="padding:4px 8px;font-size:10px;border-radius:4px;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text-3);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;" onmouseover="this.style.color='#dc2626';this.style.borderColor='#fca5a5'" onmouseout="this.style.color='';this.style.borderColor=''">✕</button>
         </div>
@@ -8853,6 +8900,135 @@ function renderPropositions() {
   const countEl = document.getElementById('propositions-count');
   if (countEl) countEl.textContent = propositions.length + ' proposition' + (propositions.length > 1 ? 's' : '');
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// PROPOSITION QUICK LOOK PREVIEW
+// ═══════════════════════════════════════════════════════════════════
+
+function previewProposition(id) {
+  const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
+  const p = propositions.find(x => x.id === id);
+  if (!p) return;
+
+  const fe = n => Math.round(n).toLocaleString('fr-FR') + ' €';
+  const d = new Date(p.date);
+  const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const duree = p.duree ? parseFloat(p.duree) : null;
+  const taux = p.taux ? parseFloat(p.taux) : null;
+  const coutNet = p.coutNet || 0;
+  const mensEstim = duree && taux !== null ? (() => {
+    const r = taux / 100 / 12;
+    const n = duree * 12;
+    if (r === 0) return coutNet / n;
+    return coutNet * r / (1 - Math.pow(1 + r, -n));
+  })() : null;
+  const aidesPct = p.investissement > 0 ? Math.round(p.totalAides / p.investissement * 100) : 0;
+  const typeIcon = p.type === 'pdf' ? '📕' : '📗';
+  const typeBg = p.type === 'pdf' ? '#fef2f2' : '#ecfdf5';
+  const typeColor = p.type === 'pdf' ? '#dc2626' : '#059669';
+
+  const card = document.getElementById('prop-preview-card');
+  card.innerHTML = `
+    <!-- En-tête navy -->
+    <div style="background:var(--c-navy);border-radius:20px 20px 0 0;padding:24px 28px 20px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.45);margin-bottom:4px;">Proposition client</div>
+          <div style="font-size:22px;font-weight:800;color:white;line-height:1.2;">${esc(p.clientName || 'Sans nom')}</div>
+          ${p.equipType ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:4px;">${esc(p.equipType)}</div>` : ''}
+        </div>
+        <button onclick="closePropPreview()" title="Fermer (Échap)" style="background:rgba(255,255,255,0.12);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:16px;flex-shrink:0;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">✕</button>
+      </div>
+      <!-- Méta -->
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <span style="font-size:10px;padding:3px 9px;border-radius:5px;font-weight:700;background:${typeBg};color:${typeColor};">${typeIcon} ${p.type?.toUpperCase()}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.5);">📅 ${dateStr} à ${timeStr}</span>
+        ${duree ? `<span style="font-size:10px;color:rgba(255,255,255,0.5);">⏱ ${duree} ans</span>` : ''}
+        ${taux !== null ? `<span style="font-size:10px;color:rgba(255,255,255,0.5);">% ${taux}%</span>` : ''}
+      </div>
+    </div>
+
+    <!-- Corps -->
+    <div style="padding:24px 28px;">
+
+      <!-- Grille 3 chiffres clés -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div style="padding:14px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:center;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px;">Investissement</div>
+          <div style="font-size:18px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);">${fe(p.investissement)}</div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">HT total</div>
+        </div>
+        <div style="padding:14px;border-radius:12px;background:var(--c-teal-bg);border:1px solid var(--c-teal-border);text-align:center;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-teal);margin-bottom:6px;">Aides publiques</div>
+          <div style="font-size:18px;font-weight:800;color:var(--c-teal);font-family:var(--font-mono);">−${fe(p.totalAides)}</div>
+          <div style="font-size:9px;color:var(--c-teal);margin-top:3px;">${aidesPct}% couvert</div>
+        </div>
+        <div style="padding:14px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:center;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px;">Capital financé</div>
+          <div style="font-size:18px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);">${fe(coutNet)}</div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">net après aides</div>
+        </div>
+      </div>
+
+      <!-- Mensualité estimée -->
+      ${mensEstim ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:12px;background:var(--c-navy);margin-bottom:20px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.45);margin-bottom:4px;">Mensualité estimée</div>
+          <div style="font-size:26px;font-weight:800;color:white;font-family:var(--font-mono);">${Math.round(mensEstim).toLocaleString('fr-FR')} <span style="font-size:14px;font-weight:600;opacity:0.65;">€/mois</span></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">Sur ${duree} ans</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);">Taux ${taux}%</div>
+        </div>
+      </div>` : ''}
+
+      <!-- Barre aides visuelles -->
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:6px;">
+          <span>Répartition de l'investissement</span>
+          <span>${aidesPct}% aides · ${100-aidesPct}% financé</span>
+        </div>
+        <div style="height:8px;border-radius:4px;background:#e2e8f0;overflow:hidden;">
+          <div style="height:100%;width:${aidesPct}%;background:linear-gradient(90deg,var(--c-teal),#34d399);border-radius:4px;transition:width 0.5s ease;"></div>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:6px;">
+          <span style="font-size:10px;color:var(--c-teal);">● Aides : ${fe(p.totalAides)}</span>
+          <span style="font-size:10px;color:#94a3b8;">● Financé : ${fe(coutNet)}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;padding-top:16px;border-top:1px solid #f1f5f9;">
+        ${p.fullParams ? `
+        <button onclick="closePropPreview();${p.type==='pdf'?`regenererPDF(${p.id})`:`regenererExcel(${p.id})`}"
+          style="flex:1;padding:10px 16px;border-radius:8px;border:none;background:var(--c-navy);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background 0.15s;"
+          onmouseover="this.style.background='var(--c-navy-light)'" onmouseout="this.style.background='var(--c-navy)'">
+          ${p.type === 'pdf' ? '📕 Télécharger PDF' : '📗 Télécharger Excel'}
+        </button>` : ''}
+        <button onclick="closePropPreview()"
+          style="flex:1;padding:10px 16px;border-radius:8px;border:1px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
+          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+          Fermer
+        </button>
+      </div>
+    </div>
+  `;
+
+  const overlay = document.getElementById('prop-preview-overlay');
+  overlay.classList.add('visible');
+}
+
+function closePropPreview() {
+  const overlay = document.getElementById('prop-preview-overlay');
+  overlay.classList.remove('visible');
+}
+
+// Fermer avec Échap
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePropPreview();
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // FEATURE 1: AUTO-SAVE & RESTORE
