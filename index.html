@@ -3597,6 +3597,10 @@
         <span class="sidebar-item-icon" id="user-avatar-icon" style="width:28px;height:28px;background:var(--c-teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;">?</span>
         <span class="sidebar-item-label" id="user-sidebar-name" style="font-size:12px;">Mon compte</span>
       </a>
+      <a class="sidebar-item" id="admin-link" onclick="(function(){var tok=localStorage.getItem('gef_auth_token')||'';var ref=localStorage.getItem('gef_auth_refresh')||'';window.open('https://admin.lihtea.com'+(tok?'?access_token='+encodeURIComponent(tok)+'&refresh_token='+encodeURIComponent(ref):''),'_blank');})()" style="padding:10px 16px;margin:0 4px;border-radius:8px;border-left:none;cursor:pointer;">
+        <span class="sidebar-item-icon" style="font-size:14px;">⚙️</span>
+        <span class="sidebar-item-label" style="font-size:12px;">Espace Admin</span>
+      </a>
       <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebar()">☰</button>
     </div>
   </aside>
@@ -9580,6 +9584,8 @@ async function handleAuth() {
       localStorage.setItem('gef_auth_refresh', data.refresh_token || '');
       currentUser = data.user || { email };
       localStorage.setItem('gef_auth_user', JSON.stringify(currentUser));
+      // Sync Admin format (same-origin benefit + cross-domain consistency)
+      localStorage.setItem('ls', JSON.stringify({access_token: data.access_token, refresh_token: data.refresh_token||'', user: currentUser}));
     }
 
     // Save profile for new registrations
@@ -9730,6 +9736,7 @@ function logout() {
   localStorage.removeItem('gef_auth_refresh');
   localStorage.removeItem('gef_auth_user');
   localStorage.removeItem('gef_internal_user_id');
+  localStorage.removeItem('ls'); // sync Admin session key
   currentUser = null;
   location.reload();
 }
@@ -10253,6 +10260,20 @@ function initApp() {
 
 document.addEventListener('DOMContentLoaded', async function() {
   const gate = document.getElementById('auth-gate');
+
+  // ── Cross-domain SSO: accept ?access_token= from Admin ──
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const urlTok = params.get('access_token');
+    const urlRef = params.get('refresh_token') || '';
+    if (urlTok) {
+      window.history.replaceState({}, '', window.location.pathname);
+      localStorage.setItem('gef_auth_token', urlTok);
+      localStorage.setItem('gef_auth_refresh', urlRef);
+      localStorage.setItem('ls', JSON.stringify({access_token: urlTok, refresh_token: urlRef, user: {}}));
+      // gef_auth_user will be refreshed by validateToken()
+    }
+  })();
 
   // ── 1. Load tenant branding FIRST (white label, before anything renders) ──
   await loadTenantConfig();
