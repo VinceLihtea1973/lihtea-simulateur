@@ -4778,33 +4778,39 @@ async function lookupClientSiren() {
   if (btn) { btn.textContent = '⏳ Recherche…'; btn.disabled = true; }
   try {
     const res = await fetch(CONNECTORS_API + '/siret?siret=' + siren, {
-      headers: { 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' }
+      headers: { 'apikey': SUPABASE_ANON }
     });
     const json = await res.json();
+    console.log('[SIREN] Response:', res.status, JSON.stringify(json).slice(0, 200));
     const d = json?.data;
-    if (d?.raison_sociale) {
+    const badge = document.getElementById('client-enriched-badge');
+    if (d && (d.raison_sociale || d.siren)) {
       currentClientSiret = siren;
       currentClientData  = d;
       // Pré-remplir le nom client
       const nomInput = document.getElementById('nom-client');
-      if (nomInput) { nomInput.value = d.raison_sociale; recalculer(); }
+      if (nomInput && d.raison_sociale) { nomInput.value = d.raison_sociale; recalculer(); }
       // Pré-remplir la taille
       const tailleSelect = document.getElementById('taille');
       if (tailleSelect && d.taille_calculee) tailleSelect.value = mapTailleInsee(d.taille_calculee);
       // Afficher le badge
-      const badge = document.getElementById('client-enriched-badge');
       if (badge) {
         const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
-        badge.textContent = '✓ ' + parts.join(' — ') + ' — prospect créé automatiquement à la sauvegarde';
+        badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — prospect créé automatiquement à la sauvegarde';
         badge.style.display = 'block';
+        badge.style.color = 'var(--c-teal-bright)';
       }
       showToast('Entreprise enrichie ✓', 'success');
     } else {
-      showToast('SIREN non trouvé dans la base INSEE', 'warning');
+      const msg = json?.error || 'SIREN ' + siren + ' non trouvé (Pappers + INSEE)';
+      if (badge) { badge.textContent = '⚠ ' + msg; badge.style.display = 'block'; badge.style.color = '#f59e0b'; }
+      showToast(msg, 'warning');
     }
   } catch(e) {
     console.warn('[SIREN] Lookup error:', e);
-    showToast('Erreur de connexion à l\'API SIRET', 'error');
+    const badge = document.getElementById('client-enriched-badge');
+    if (badge) { badge.textContent = '⚠ Erreur réseau — ' + e.message; badge.style.display = 'block'; badge.style.color = '#dc2626'; }
+    showToast('Erreur réseau lors du lookup SIREN', 'error');
   } finally {
     if (btn) { btn.textContent = '🔍 Enrichir'; btn.disabled = false; }
   }
