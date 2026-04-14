@@ -4851,7 +4851,7 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
         code_postal: d.code_postal || null,
         ville: d.ville || null,
         region: d.region || null,
-        source: 'simulateur',
+        source: 'entrant',
         statut: 'nouveau',
         score_lead: clientSiret ? 50 : 30,
         montant_potentiel: 0,
