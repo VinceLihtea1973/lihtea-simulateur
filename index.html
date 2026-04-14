@@ -3795,7 +3795,7 @@
           <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
-          <input type="text" id="nom-client" placeholder="Nom de l'entreprise cliente" oninput="recalculer()" style="
+          <input type="text" id="nom-client" placeholder="Nom de l'entreprise cliente" oninput="recalculer();resetClientEnrichment(false)" style="
             flex:1;padding:8px 12px;font-size:14px;font-weight:600;font-family:var(--font-body);
             border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
             background:rgba(255,255,255,0.08);color:white;outline:none;
@@ -3803,6 +3803,23 @@
             onfocus="this.style.borderColor='var(--c-teal-bright)';this.style.boxShadow='0 0 0 3px rgba(45,212,191,0.15)'"
             onblur="this.style.borderColor='rgba(255,255,255,0.2)';this.style.boxShadow='none'" />
         </div>
+        <!-- ── SIREN / Enrichissement optionnel ── -->
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <input type="text" id="client-siren" maxlength="9" placeholder="SIREN (optionnel — 9 chiffres)"
+            oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)"
+            style="flex:1;padding:6px 10px;font-size:12px;font-family:var(--font-body);
+              border:1px solid rgba(255,255,255,0.15);border-radius:6px;
+              background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.75);outline:none;"
+            onfocus="this.style.borderColor='rgba(45,212,191,0.5)'"
+            onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
+          <button onclick="lookupClientSiren()" id="btn-siren-lookup" type="button" style="
+            padding:6px 12px;border-radius:6px;border:1px solid rgba(45,212,191,0.35);
+            background:rgba(45,212,191,0.1);color:rgba(45,212,191,0.9);
+            font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;
+            transition:background 0.15s;">🔍 Enrichir</button>
+        </div>
+        <div id="client-enriched-badge" style="display:none;margin-top:6px;font-size:11px;
+          color:var(--c-teal-bright);font-weight:600;line-height:1.4;"></div>
       </div>
 
       <!-- ── Équipement industriel ── -->
@@ -4542,12 +4559,17 @@ setTimeout(syncFromSupabase, 500);
 // ═══════════════════════════════════════════════════════════════════
 // SYNC TO SUPABASE — Envoie simulations, propositions, activités
 // ═══════════════════════════════════════════════════════════════════
-const ADMIN_API = SUPABASE_URL + '/functions/v1/admin-api';
+const ADMIN_API      = SUPABASE_URL + '/functions/v1/admin-api';
+const CONNECTORS_API = SUPABASE_URL + '/functions/v1/api-connectors';
 
 // ── Tenant runtime (populated by loadTenantConfig on DOMContentLoaded) ──
 let currentTenantId   = '17a567c3-5369-4035-b771-dac26f496d4e'; // fallback: Lihtea
 let currentTenantSlug = 'lihtea';
 let currentTenantConfig = null; // full brand_config object
+
+// ── Client courant — enrichissement SIREN ──────────────────────────────
+let currentClientSiret = null; // SIREN validé lors du lookup
+let currentClientData  = {};   // données complètes retournées par l'API SIRET
 
 // Legacy alias kept for backward-compat during migration
 const LIHTEA_TENANT_ID = '17a567c3-5369-4035-b771-dac26f496d4e';
@@ -4723,6 +4745,71 @@ async function resolveInternalUserId() {
   }
 }
 
+// ── SIREN lookup & enrichissement ────────────────────────────────────────
+function resetClientEnrichment(clearInput = true) {
+  currentClientSiret = null;
+  currentClientData  = {};
+  const badge = document.getElementById('client-enriched-badge');
+  if (badge) badge.style.display = 'none';
+  if (clearInput) {
+    const si = document.getElementById('client-siren');
+    if (si) si.value = '';
+  }
+}
+
+// Mapping taille INSEE → select Simulateur
+function mapTailleInsee(t) {
+  if (!t) return 'pme';
+  const v = t.toUpperCase();
+  if (v.includes('GE') || v.includes('GRANDE')) return 'ge';
+  if (v.includes('ETI')) return 'eti';
+  if (v.includes('TPE') || v === '0' || v === 'NN') return 'tpe';
+  return 'pme';
+}
+
+async function lookupClientSiren() {
+  const sirenInput = document.getElementById('client-siren');
+  const siren = sirenInput?.value?.replace(/\D/g, '');
+  if (!siren || siren.length !== 9) {
+    showToast('SIREN invalide — 9 chiffres requis', 'warning');
+    return;
+  }
+  const btn = document.getElementById('btn-siren-lookup');
+  if (btn) { btn.textContent = '⏳ Recherche…'; btn.disabled = true; }
+  try {
+    const res = await fetch(CONNECTORS_API + '/siret?siret=' + siren, {
+      headers: { 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' }
+    });
+    const json = await res.json();
+    const d = json?.data;
+    if (d?.raison_sociale) {
+      currentClientSiret = siren;
+      currentClientData  = d;
+      // Pré-remplir le nom client
+      const nomInput = document.getElementById('nom-client');
+      if (nomInput) { nomInput.value = d.raison_sociale; recalculer(); }
+      // Pré-remplir la taille
+      const tailleSelect = document.getElementById('taille');
+      if (tailleSelect && d.taille_calculee) tailleSelect.value = mapTailleInsee(d.taille_calculee);
+      // Afficher le badge
+      const badge = document.getElementById('client-enriched-badge');
+      if (badge) {
+        const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
+        badge.textContent = '✓ ' + parts.join(' — ') + ' — prospect créé automatiquement à la sauvegarde';
+        badge.style.display = 'block';
+      }
+      showToast('Entreprise enrichie ✓', 'success');
+    } else {
+      showToast('SIREN non trouvé dans la base INSEE', 'warning');
+    }
+  } catch(e) {
+    console.warn('[SIREN] Lookup error:', e);
+    showToast('Erreur de connexion à l\'API SIRET', 'error');
+  } finally {
+    if (btn) { btn.textContent = '🔍 Enrichir'; btn.disabled = false; }
+  }
+}
+
 // --- Find or create prospect from client info ---
 async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, clientTaille) {
   if (!clientName || clientName === 'Sans nom') return null;
@@ -4731,26 +4818,36 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     const searchRes = await fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() });
     const searchData = await searchRes.json();
     const prospects = searchData?.data || [];
+    // Déduplication : SIREN en priorité, puis nom
     const existing = prospects.find(p =>
-      p.raison_sociale?.toLowerCase() === clientName.toLowerCase() ||
-      (clientSiret && p.siret === clientSiret)
+      (clientSiret && (p.siret === clientSiret || p.siren === clientSiret)) ||
+      p.raison_sociale?.toLowerCase() === clientName.toLowerCase()
     );
     if (existing) return existing.id;
 
-    // Create new prospect
+    // Construire le payload avec données enrichies si disponibles
+    const d = currentClientData || {};
     const createRes = await fetch(ADMIN_API + '/prospects', {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
         tenant_id: currentTenantId,
         user_id: getCurrentUserId(),
-        raison_sociale: clientName,
+        raison_sociale: d.raison_sociale || clientName,
         contact_email: clientEmail || null,
-        client_siret: clientSiret || null,
-        taille: clientTaille || 'pme',
+        siret: clientSiret || null,
+        siren: clientSiret ? clientSiret.slice(0, 9) : null,
+        code_naf: d.code_naf || null,
+        libelle_naf: d.libelle_naf || null,
+        taille: d.taille_calculee ? mapTailleInsee(d.taille_calculee) : (clientTaille || 'pme'),
+        effectifs: d.effectifs || null,
+        adresse: d.adresse || null,
+        code_postal: d.code_postal || null,
+        ville: d.ville || null,
+        region: d.region || null,
         source: 'simulateur',
         statut: 'nouveau',
-        score_lead: 30,
+        score_lead: clientSiret ? 50 : 30,
         montant_potentiel: 0,
         date_premier_contact: new Date().toISOString().slice(0, 10)
       })
@@ -4769,7 +4866,7 @@ async function syncSimulationToSupabase(simData) {
   if (!userId) { console.log('[Sync] No auth user, skip simulation sync'); return null; }
   try {
     const prospectId = await syncFindOrCreateProspect(
-      simData.clientName, null, null, simData.params?.taille
+      simData.clientName, null, currentClientSiret, simData.params?.taille
     );
 
     const equipSelect = document.getElementById('equip-type');
@@ -4837,7 +4934,7 @@ async function syncPropositionToSupabase(propData) {
   if (!userId) { console.log('[Sync] No auth user, skip proposition sync'); return null; }
   try {
     const prospectId = await syncFindOrCreateProspect(
-      propData.clientName, null, null,
+      propData.clientName, null, currentClientSiret,
       propData.fullParams?.taille
     );
 
