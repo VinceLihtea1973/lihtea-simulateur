@@ -1991,13 +1991,38 @@
     .score-b { background: rgba(217,119,6,0.15); color: #d97706; }
     .score-c { background: rgba(220,38,38,0.12); color: #dc2626; }
 
-    /* ─── CLIENTS TABLE ─── */
-    .clients-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .clients-table th { text-align: left; padding: 9px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); border-bottom: 2px solid var(--c-border); font-weight: 600; white-space: nowrap; }
-    .clients-table td { padding: 11px 12px; border-bottom: 1px solid var(--c-border); vertical-align: middle; }
-    .clients-table tbody tr { cursor: pointer; transition: background .12s; }
-    .clients-table tbody tr:hover td { background: var(--c-bg); }
-    .overdue-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #dc2626; animation: pulse 1.5s infinite; margin-left: 5px; }
+    /* ─── CLIENTS CRM ─── */
+    .crm-page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .crm-page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--c-navy); }
+    .crm-page-header p { font-size: 12px; color: var(--c-text-3); margin-top: 2px; }
+    .crm-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all .15s; border: 1px solid var(--c-teal); background: var(--c-teal); color: #fff; }
+    .crm-btn:hover { background: #0b8075; border-color: #0b8075; }
+    .crm-btn-ghost { background: var(--c-surface); color: var(--c-text-2); border: 1px solid var(--c-border); }
+    .crm-btn-ghost:hover { background: var(--c-bg); border-color: var(--c-teal); color: var(--c-teal); }
+
+    .crm-kpi-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .crm-kpi-card { flex: 1; min-width: 100px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+    .crm-kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); font-weight: 600; }
+    .crm-kpi-val { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; color: var(--c-navy); }
+    .crm-kpi-card.kpi-alert .crm-kpi-val { color: var(--c-red); }
+    .crm-kpi-card.kpi-won .crm-kpi-val { color: var(--c-green); }
+    .crm-kpi-card.kpi-active .crm-kpi-val { color: var(--c-teal); }
+
+    .filters-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; padding: 12px 14px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
+    .filter-select { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--c-text-2); font-size: 12px; font-family: var(--font-body); cursor: pointer; outline: none; transition: border-color .15s; }
+    .filter-select:focus { border-color: var(--c-teal); }
+    .filter-search { flex: 1; min-width: 160px; background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--c-text); font-size: 12px; font-family: var(--font-body); outline: none; transition: border-color .15s; }
+    .filter-search:focus { border-color: var(--c-teal); }
+    .filter-search::placeholder { color: var(--c-text-3); }
+    .filter-count { font-size: 12px; color: var(--c-text-3); margin-left: auto; white-space: nowrap; }
+
+    .prospect-table { width: 100%; border-collapse: collapse; }
+    .prospect-table th { text-align: left; padding: 10px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-3); border-bottom: 1px solid var(--c-border); font-weight: 600; white-space: nowrap; background: var(--c-bg); }
+    .prospect-table td { padding: 12px; border-bottom: 1px solid var(--c-border); font-size: 13px; cursor: pointer; vertical-align: middle; }
+    .prospect-table tbody tr { transition: background .1s; }
+    .prospect-table tbody tr:hover td { background: var(--c-teal-bg); }
+    .stage-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .overdue-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #dc2626; animation: pulse 1.5s infinite; margin-left: 6px; vertical-align: middle; }
 
     /* ─── PIPELINE KANBAN ─── */
     .pipeline-board { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; min-height: 60vh; }
@@ -4539,21 +4564,26 @@
     <!-- PAGE: CLIENTS (Full-Width, table CRM) -->
     <div class="page" id="page-clients">
       <div class="app">
-        <!-- En-tête + filtres -->
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+
+        <!-- En-tête CRM -->
+        <div class="crm-page-header">
           <div>
-            <div class="section-label" style="margin-bottom:2px;">Portefeuille Clients</div>
-            <div style="font-size:12px;color:var(--c-text-3);">CRM · Filtres avancés · Score ICP · Drawer 360°</div>
+            <h1>Clients</h1>
+            <p>Portefeuille commercial · Filtres avancés · Score ICP · Drawer 360°</p>
           </div>
-          <button onclick="renderClientsPage()" style="padding:6px 12px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);font-size:12px;cursor:pointer;font-family:var(--font-body);">↻ Actualiser</button>
+          <div style="display:flex;gap:8px;">
+            <button onclick="renderClientsPage()" class="crm-btn crm-btn-ghost">↻ Actualiser</button>
+            <button onclick="switchPage('simulateur')" class="crm-btn">+ Nouvelle simulation</button>
+          </div>
         </div>
 
-        <!-- Stats rapides -->
-        <div id="clients-stats" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+        <!-- KPIs -->
+        <div id="clients-stats" class="crm-kpi-row"></div>
 
         <!-- Filtres avancés CRM -->
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;">
-          <select id="cf-statut" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+        <div class="filters-bar">
+          <input id="cf-search" type="text" class="filter-search" placeholder="🔍  Rechercher un client…" oninput="_clientsApplyFilters()">
+          <select id="cf-statut" onchange="_clientsApplyFilters()" class="filter-select">
             <option value="">Tous les statuts</option>
             <option value="nouveau">Nouveau</option>
             <option value="qualifie">Qualifié</option>
@@ -4561,17 +4591,17 @@
             <option value="proposition">Proposition</option>
             <option value="negociation">Négociation</option>
             <option value="dossier_depose">Dossier déposé</option>
-            <option value="gagne">Gagné</option>
+            <option value="gagne">Gagné ✓</option>
             <option value="perdu">Perdu</option>
           </select>
-          <select id="cf-taille" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+          <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
             <option value="">Toutes tailles</option>
             <option value="tpe">TPE</option>
             <option value="pme">PME</option>
             <option value="eti">ETI</option>
             <option value="ge">GE</option>
           </select>
-          <select id="cf-source" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+          <select id="cf-source" onchange="_clientsApplyFilters()" class="filter-select">
             <option value="">Toutes sources</option>
             <option value="entrant">Entrant</option>
             <option value="simulateur">Simulateur</option>
@@ -4580,18 +4610,18 @@
             <option value="partenaire">Partenaire</option>
             <option value="prospection">Prospection</option>
           </select>
-          <select id="cf-sort" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+          <select id="cf-sort" onchange="_clientsApplyFilters()" class="filter-select">
             <option value="score_desc">↓ Score ICP</option>
             <option value="invest_desc">↓ Investissement</option>
-            <option value="date_desc">↓ Date contact</option>
+            <option value="date_desc">↓ Dernière activité</option>
             <option value="alert">⚠ Alertes d'abord</option>
           </select>
-          <span id="clients-count" style="font-size:12px;color:var(--c-text-3);margin-left:auto;"></span>
+          <span id="clients-count" class="filter-count"></span>
         </div>
 
-        <!-- Table dense -->
-        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;overflow:auto;">
-          <div id="clients-list"></div>
+        <!-- Table CRM -->
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);overflow:hidden;">
+          <div id="clients-list" style="overflow-x:auto;"></div>
         </div>
       </div>
     </div>
@@ -7029,133 +7059,6 @@ async function renderSavedSimulations() {
 setTimeout(updateSavedBadge, 100);
 
 // ═══════════════════════════════════════════════════════════════════
-// PAGE CLIENTS — Portefeuille commercial
-// ═══════════════════════════════════════════════════════════════════
-const STATUT_COLORS = {
-  nouveau:'#3b82f6', qualifie:'#0d9488', en_discussion:'#ea580c',
-  proposition:'#7c3aed', negociation:'#d97706', gagne:'#059669',
-  perdu:'#dc2626', inactif:'#6b7280'
-};
-const STATUT_LABELS = {
-  nouveau:'Nouveau', qualifie:'Qualifié', en_discussion:'En discussion',
-  proposition:'Proposition', negociation:'Négociation', gagne:'Gagné',
-  perdu:'Perdu', inactif:'Inactif'
-};
-
-async function renderClientsPage() {
-  const list = document.getElementById('clients-list');
-  const stats = document.getElementById('clients-stats');
-  const filterStatut = document.getElementById('clients-filter-statut')?.value || '';
-  if (!list) return;
-
-  const isLoggedIn = !!localStorage.getItem('gef_auth_token');
-  if (!isLoggedIn) {
-    list.innerHTML = `<div style="padding:40px;text-align:center;">
-      <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">🔒</div>
-      <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:8px;">Connexion requise</div>
-      <div style="font-size:12px;color:var(--c-text-3);">Connectez-vous pour accéder à votre portefeuille clients.</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--c-text-3);font-size:13px;">
-    <span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;"></span>
-    Chargement…</div>`;
-
-  try {
-    const [prospectsRes, simsRes] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() })
-    ]);
-    const prospectsData = await prospectsRes.json();
-    const simsData = await simsRes.json();
-
-    let prospects = prospectsData?.data || [];
-    const sims = simsData?.data || [];
-
-    // Filtrer par statut si sélectionné
-    if (filterStatut) prospects = prospects.filter(p => p.statut === filterStatut);
-
-    // Enrichir avec comptes de simulations et détection alerte 15j
-    const now = Date.now();
-    const enriched = prospects.map(p => {
-      const pSims = sims.filter(s => s.prospect_id === p.id);
-      const lastSim = pSims.sort((a,b) => (b.updated_at||'').localeCompare(a.updated_at||''))[0];
-      const lastContact = new Date(p.date_dernier_contact || p.updated_at || p.created_at).getTime();
-      const daysInactive = Math.floor((now - lastContact) / 86400000);
-      const hasAlert = daysInactive > 15 && !['gagne','perdu','inactif'].includes(p.statut);
-      const totalInvest = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
-      return { ...p, nb_sims: pSims.length, lastSim, daysInactive, hasAlert, totalInvest };
-    });
-
-    // Mettre à jour le badge alerte dans la sidebar
-    const alertCount = enriched.filter(p => p.hasAlert).length;
-    const badge = document.getElementById('badge-clients-alerte');
-    if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
-
-    // Stats rapides
-    if (stats) {
-      const all = prospectsData?.data || [];
-      const fek = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M€' : n >= 1000 ? Math.round(n/1000)+'k€' : n+'€';
-      stats.innerHTML = [
-        { icon:'👥', val: all.length, lbl:'Total clients' },
-        { icon:'🔥', val: all.filter(p=>p.statut==='en_discussion').length, lbl:'En discussion' },
-        { icon:'✅', val: all.filter(p=>p.statut==='gagne').length, lbl:'Gagnés' },
-        { icon:'⚠️', val: all.filter(p=>{ const d=Math.floor((now-new Date(p.updated_at||p.created_at).getTime())/86400000); return d>15&&!['gagne','perdu','inactif'].includes(p.statut); }).length, lbl:'Alertes relance' },
-      ].map(({icon,val,lbl}) => `<div style="padding:12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:10px;text-align:center;">
-        <div style="font-size:20px;margin-bottom:4px;">${icon}</div>
-        <div style="font-size:20px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono,'monospace')">${val}</div>
-        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.04em;">${lbl}</div>
-      </div>`).join('');
-    }
-
-    if (enriched.length === 0) {
-      list.innerHTML = `<div style="padding:40px;text-align:center;">
-        <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">👥</div>
-        <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:6px;">${filterStatut ? 'Aucun client avec ce statut' : 'Aucun client encore'}</div>
-        <div style="font-size:12px;color:var(--c-text-3);">Les clients sont créés automatiquement depuis le simulateur.</div>
-      </div>`;
-      return;
-    }
-
-    const fmtD = n => n < 1 ? 'Auj.' : n < 30 ? n+'j' : Math.floor(n/30)+'mois';
-    const fek = n => n >= 1e6 ? (n/1e6).toFixed(1).replace('.',',')+' M€' : n >= 1000 ? Math.round(n/1000)+' k€' : n+'€';
-
-    list.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">` +
-      enriched.map(p => {
-        const color = STATUT_COLORS[p.statut] || '#6b7280';
-        const label = STATUT_LABELS[p.statut] || p.statut;
-        const alertBadge = p.hasAlert
-          ? `<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid #fcd34d;">⚠ Relancer (${p.daysInactive}j)</span>`
-          : '';
-        return `<div style="padding:14px 16px;background:var(--c-surface);border:1px solid ${p.hasAlert?'#fcd34d':color+'30'};border-left:3px solid ${color};border-radius:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow .15s;"
-          onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'"
-          onclick="openClientDrawer('${p.id}')">
-          <div style="width:36px;height:36px;border-radius:10px;background:${color}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${color};flex-shrink:0;">${(p.raison_sociale||'?')[0].toUpperCase()}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.raison_sociale||'Sans nom'}</div>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-              <span style="background:${color}18;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">${label}</span>
-              ${p.ville ? `<span style="font-size:11px;color:var(--c-text-3);">📍 ${p.ville}</span>` : ''}
-              ${p.code_naf ? `<span style="font-size:11px;color:var(--c-text-3);">NAF ${p.code_naf}</span>` : ''}
-              ${alertBadge}
-            </div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:600;color:var(--c-navy);">${p.nb_sims} sim${p.nb_sims>1?'s':''}</div>
-            ${p.totalInvest > 0 ? `<div style="font-size:11px;color:var(--c-teal);font-weight:600;">${fek(p.totalInvest)}</div>` : ''}
-            <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">il y a ${fmtD(p.daysInactive)}</div>
-          </div>
-        </div>`;
-      }).join('') + `</div>`;
-
-  } catch(e) {
-    console.warn('[Clients] Error:', e);
-    list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-text-3);">Impossible de charger le portefeuille — ${e.message}</div>`;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // CONTEXT BAND — Bandeau de simulation active sur pages full-width
 // ═══════════════════════════════════════════════════════════════════
 function updateContextBand(show) {
@@ -7350,65 +7253,105 @@ async function renderClientsPage() {
   }
 }
 
+const STATUT_STAGES = {
+  nouveau:        { label: 'Nouveau',        bg: 'rgba(59,130,246,0.12)',  color: '#2563eb' },
+  qualifie:       { label: 'Qualifié',        bg: 'rgba(139,92,246,0.12)', color: '#7c3aed' },
+  en_discussion:  { label: 'En discussion',   bg: 'rgba(14,165,233,0.12)', color: '#0284c7' },
+  proposition:    { label: 'Proposition',     bg: 'rgba(245,158,11,0.12)', color: '#d97706' },
+  negociation:    { label: 'Négociation',     bg: 'rgba(234,88,12,0.12)',  color: '#ea580c' },
+  dossier_depose: { label: 'Dossier déposé',  bg: 'rgba(13,148,136,0.12)', color: '#0d9488' },
+  gagne:          { label: 'Gagné ✓',         bg: 'rgba(5,150,105,0.12)',  color: '#059669' },
+  perdu:          { label: 'Perdu',           bg: 'rgba(220,38,38,0.1)',   color: '#dc2626' },
+  inactif:        { label: 'Inactif',         bg: 'rgba(107,114,128,0.1)', color: '#6b7280' },
+};
+
 function _renderClientsTable() {
   const container = document.getElementById('clients-list');
-  const statsEl = document.getElementById('clients-stats');
+  const statsEl   = document.getElementById('clients-stats');
+  const countEl   = document.getElementById('clients-count');
   const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':n>0?Math.round(n)+'€':'—';
-  const fd = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
-  const STATUT_COLORS = {nouveau:'#3b82f6',qualifie:'#8b5cf6',en_discussion:'#0ea5e9',proposition:'#f59e0b',negociation:'#ea580c',dossier_depose:'#0d9488',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280'};
-  const STATUT_LABELS = {nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif'};
+  const fd  = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+
+  const search = (document.getElementById('cf-search')?.value||'').toLowerCase().trim();
 
   let filtered = _clientsAll.filter(c => {
     if (_clientsFilterStatut && c.statut !== _clientsFilterStatut) return false;
     if (_clientsFilterTaille && c.taille !== _clientsFilterTaille) return false;
     if (_clientsFilterSource && c.source !== _clientsFilterSource) return false;
+    if (search) {
+      const hay = [c.raison_sociale, c.contact_nom, c.contact_prenom, c.siren, c.ville].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
     return true;
   });
 
-  if (_clientsSort === 'score_desc') filtered.sort((a,b) => b.score - a.score);
+  if (_clientsSort === 'score_desc')  filtered.sort((a,b) => b.score - a.score);
   else if (_clientsSort === 'invest_desc') filtered.sort((a,b) => b.totalInvest - a.totalInvest);
-  else if (_clientsSort === 'date_desc') filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
-  else if (_clientsSort === 'alert') filtered.sort((a,b) => b.hasAlert - a.hasAlert);
+  else if (_clientsSort === 'date_desc')   filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
+  else if (_clientsSort === 'alert')  filtered.sort((a,b) => b.hasAlert - a.hasAlert);
 
-  // Stats rapides
+  // ─── KPI cards ───────────────────────────────────────────────────
   if (statsEl) {
     const all = _clientsAll;
+    const totalInv = all.reduce((s,c)=>s+c.totalInvest,0);
     statsEl.innerHTML = [
-      { icon:'👥', val: all.length, lbl:'Total' },
-      { icon:'🔥', val: all.filter(c=>c.statut==='en_discussion').length, lbl:'En discussion' },
-      { icon:'📤', val: all.filter(c=>c.statut==='dossier_depose').length, lbl:'Dossiers' },
-      { icon:'✅', val: all.filter(c=>c.statut==='gagne').length, lbl:'Gagnés' },
-      { icon:'⚠️', val: all.filter(c=>c.hasAlert).length, lbl:'Alertes' },
-    ].map(({icon,val,lbl}) => `<div style="padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;text-align:center;min-width:80px;">
-      <div style="font-size:16px;margin-bottom:2px;">${icon}</div>
-      <div style="font-size:18px;font-weight:800;color:var(--c-navy);">${val}</div>
-      <div style="font-size:9px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</div>
+      { lbl:'Total clients', val: all.length,                                        cls:'' },
+      { lbl:'En discussion',  val: all.filter(c=>c.statut==='en_discussion').length, cls:'kpi-active' },
+      { lbl:'Dossiers déposés',val: all.filter(c=>c.statut==='dossier_depose').length,cls:'' },
+      { lbl:'Gagnés',          val: all.filter(c=>c.statut==='gagne').length,         cls:'kpi-won' },
+      { lbl:'Alertes',         val: all.filter(c=>c.hasAlert).length,                cls:'kpi-alert' },
+      { lbl:'Volume potentiel',val: fek(totalInv),                                   cls:'' },
+    ].map(({lbl,val,cls}) => `<div class="crm-kpi-card ${cls}">
+      <div class="crm-kpi-label">${lbl}</div>
+      <div class="crm-kpi-val">${val}</div>
     </div>`).join('');
   }
 
+  if (countEl) countEl.textContent = filtered.length + ' client' + (filtered.length>1?'s':'');
+
   if (filtered.length === 0) {
-    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Aucun client ne correspond aux filtres.</div>';
+    container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);font-size:13px;">Aucun client ne correspond aux filtres.</div>';
     return;
   }
 
-  container.innerHTML = `<table class="clients-table">
+  container.innerHTML = `<table class="prospect-table">
     <thead><tr>
-      <th>Score</th><th>Entreprise</th><th>Contact</th><th>Secteur / Taille</th><th>Potentiel Aides</th><th>Simulations</th><th>Statut</th><th>Dernier contact</th><th>Action</th>
+      <th style="width:52px;">Score</th>
+      <th>Entreprise</th>
+      <th>Contact</th>
+      <th>Secteur&nbsp;/&nbsp;Taille</th>
+      <th>Statut</th>
+      <th>Aides potentielles</th>
+      <th>Sims</th>
+      <th>Dernière activité</th>
+      <th></th>
     </tr></thead>
     <tbody>
     ${filtered.map(c => {
-      const sc = STATUT_COLORS[c.statut]||'#6b7280';
+      const stage   = STATUT_STAGES[c.statut] || { label: c.statut||'—', bg:'rgba(107,114,128,0.1)', color:'#6b7280' };
       const overdue = c.hasAlert;
+      const contact = c.contact_nom ? [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') : '—';
+      const taille  = c.taille ? `<span style="font-size:10px;background:var(--c-bg);border:1px solid var(--c-border);padding:1px 6px;border-radius:4px;margin-top:3px;display:inline-block;">${c.taille.toUpperCase()}</span>` : '';
+      const secteur = c.code_naf || c.secteur || '—';
       return `<tr onclick="openClientDrawer('${c.id}')">
-        <td><span class="score-badge ${scoreClass(c.score)}">${c.score}</span></td>
-        <td style="font-weight:700;color:var(--c-navy);">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</td>
-        <td style="color:var(--c-text-2);font-size:12px;">${c.contact_nom?c.contact_prenom+' '+c.contact_nom:'—'}</td>
-        <td style="font-size:12px;color:var(--c-text-3);">${c.code_naf||'—'}<br><span style="font-size:10px;background:var(--c-bg);padding:1px 6px;border-radius:4px;">${(c.taille||'—').toUpperCase()}</span></td>
-        <td style="font-weight:600;color:var(--c-teal);font-family:monospace;">${fek(c.totalAides)}</td>
-        <td style="text-align:center;font-size:13px;">${c.nb_sims}</td>
-        <td><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:${sc}18;color:${sc};">${STATUT_LABELS[c.statut]||c.statut}</span></td>
+        <td><span class="score-badge ${scoreClass(c.score)}">★ ${c.score}</span></td>
+        <td style="font-weight:600;color:var(--c-navy);max-width:180px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.raison_sociale||'—'}</span>
+            ${overdue ? '<span class="overdue-dot"></span>' : ''}
+          </div>
+          ${c.siren ? `<div style="font-size:10px;color:var(--c-text-3);font-family:var(--font-mono);">SIREN ${c.siren}</div>` : ''}
+        </td>
+        <td style="color:var(--c-text-2);font-size:12px;">${contact}</td>
+        <td style="font-size:12px;color:var(--c-text-2);">${secteur}<br>${taille}</td>
+        <td><span class="stage-badge" style="background:${stage.bg};color:${stage.color};">${stage.label}</span></td>
+        <td style="font-weight:600;color:var(--c-teal);font-family:var(--font-mono);font-size:12px;">${fek(c.totalAides)}</td>
+        <td style="text-align:center;font-size:13px;color:${c.nb_sims>0?'var(--c-navy)':'var(--c-text-3)'};">${c.nb_sims||'—'}</td>
         <td style="font-size:12px;color:var(--c-text-3);">${fd(c.updated_at||c.created_at)}</td>
-        <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')" style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;">⚙ Simuler</td>
+        <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')"
+            style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;padding:12px 16px;">
+          ⚡ Simuler
+        </td>
       </tr>`;
     }).join('')}
     </tbody>
@@ -7419,7 +7362,7 @@ function _clientsApplyFilters() {
   _clientsFilterStatut = document.getElementById('cf-statut')?.value || '';
   _clientsFilterTaille = document.getElementById('cf-taille')?.value || '';
   _clientsFilterSource = document.getElementById('cf-source')?.value || '';
-  _clientsSort = document.getElementById('cf-sort')?.value || 'score_desc';
+  _clientsSort         = document.getElementById('cf-sort')?.value   || 'score_desc';
   _renderClientsTable();
 }
 
