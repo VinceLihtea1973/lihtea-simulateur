@@ -2397,7 +2397,40 @@
 
     .sidebar-item-label {
       transition: opacity 0.3s;
+      flex: 1;
     }
+
+    /* ─── Titres de sections sidebar ─── */
+    .sidebar-section-title {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      padding: 16px 18px 4px;
+      user-select: none;
+    }
+    .sidebar.collapsed .sidebar-section-title { display: none; }
+    .sidebar-section-title:first-child { padding-top: 8px; }
+
+    /* ─── Badge numérique sur item sidebar ─── */
+    .sidebar-item-badge {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: var(--c-red, #dc2626);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+    .sidebar-item-badge:empty { display: none; }
+    .sidebar.collapsed .sidebar-item-badge { display: none; }
 
     /* Sidebar footer */
     .sidebar-footer {
@@ -3525,14 +3558,14 @@
     <a class="mobile-nav-item active" onclick="switchPage('dashboard', document.querySelector('[data-page=&quot;dashboard&quot;]'))" data-page="dashboard">
       <span class="mobile-nav-icon">◫</span>Dashboard
     </a>
+    <a class="mobile-nav-item" onclick="switchPage('clients', document.querySelector('[data-page=&quot;clients&quot;]'))" data-page="clients">
+      <span class="mobile-nav-icon">👥</span>Clients
+    </a>
     <a class="mobile-nav-item" onclick="switchPage('resultats', document.querySelector('[data-page=&quot;resultats&quot;]'))" data-page="resultats">
       <span class="mobile-nav-icon">⚙</span>Simulateur
     </a>
-    <a class="mobile-nav-item" onclick="switchPage('eligibilite', document.querySelector('[data-page=&quot;eligibilite&quot;]'))" data-page="eligibilite">
-      <span class="mobile-nav-icon">✓</span>Éligibilité
-    </a>
-    <a class="mobile-nav-item" onclick="switchPage('aides', document.querySelector('[data-page=&quot;aides&quot;]'))" data-page="aides">
-      <span class="mobile-nav-icon">💰</span>Offres
+    <a class="mobile-nav-item" onclick="switchPage('saved', document.querySelector('[data-page=&quot;saved&quot;]'))" data-page="saved">
+      <span class="mobile-nav-icon">💾</span>Simulations
     </a>
     <a class="mobile-nav-item" onclick="openMobileSidebar()" data-page="menu">
       <span class="mobile-nav-icon">☰</span>Menu
@@ -3554,30 +3587,43 @@
     </div>
 
     <nav class="sidebar-nav">
+
+      <!-- ── VENTES ───────────────────── -->
+      <div class="sidebar-section-title">Ventes</div>
+
       <a class="sidebar-item active" data-page="dashboard" onclick="switchPage('dashboard', this)">
         <span class="sidebar-item-icon">◫</span>
         <span class="sidebar-item-label">Dashboard</span>
       </a>
+      <a class="sidebar-item" data-page="clients" onclick="switchPage('clients', this)">
+        <span class="sidebar-item-icon">👥</span>
+        <span class="sidebar-item-label">Clients</span>
+        <span class="sidebar-item-badge" id="badge-clients-alerte"></span>
+      </a>
+      <a class="sidebar-item" data-page="saved" onclick="switchPage('saved', this)">
+        <span class="sidebar-item-icon">💾</span>
+        <span class="sidebar-item-label">Mes simulations</span>
+      </a>
+
+      <!-- ── OUTILS ───────────────────── -->
+      <div class="sidebar-section-title">Outils</div>
+
       <a class="sidebar-item" data-page="resultats" onclick="switchPage('resultats', this)">
         <span class="sidebar-item-icon">⚙</span>
         <span class="sidebar-item-label">Simulateur</span>
-      </a>
-      <a class="sidebar-item" data-page="eligibilite" onclick="switchPage('eligibilite', this)">
-        <span class="sidebar-item-icon">✓</span>
-        <span class="sidebar-item-label">Éligibilité</span>
-      </a>
-      <a class="sidebar-item" data-page="aides" onclick="switchPage('aides', this)">
-        <span class="sidebar-item-icon">💰</span>
-        <span class="sidebar-item-label">Aides</span>
-      </a>
-      <a class="sidebar-item" data-page="organismes" onclick="switchPage('organismes', this)">
-        <span class="sidebar-item-icon">🏛</span>
-        <span class="sidebar-item-label">Organismes</span>
       </a>
       <a class="sidebar-item" data-page="scenarios" onclick="switchPage('scenarios', this)">
         <span class="sidebar-item-icon">⚖</span>
         <span class="sidebar-item-label">Scénarios</span>
       </a>
+      <a class="sidebar-item" data-page="ressources" onclick="switchPage('ressources', this)">
+        <span class="sidebar-item-icon">📚</span>
+        <span class="sidebar-item-label">Ressources</span>
+      </a>
+
+      <!-- ── DOSSIERS ──────────────────── -->
+      <div class="sidebar-section-title">Dossiers</div>
+
       <a class="sidebar-item" data-page="dossier" onclick="switchPage('dossier', this)">
         <span class="sidebar-item-icon">📋</span>
         <span class="sidebar-item-label">Dossier</span>
@@ -3586,10 +3632,7 @@
         <span class="sidebar-item-icon">📄</span>
         <span class="sidebar-item-label">Propositions</span>
       </a>
-      <a class="sidebar-item" data-page="saved" onclick="switchPage('saved', this)">
-        <span class="sidebar-item-icon">💾</span>
-        <span class="sidebar-item-label">Mes simulations</span>
-      </a>
+
     </nav>
 
     <div class="sidebar-footer" style="flex-direction:column;gap:8px;">
@@ -4349,6 +4392,58 @@
       </div>
     </div>
 
+
+    <!-- PAGE: CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="app">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;">
+            <div>
+              <div class="section-label" style="margin-bottom:2px;">Portefeuille Clients</div>
+              <div style="font-size:12px;color:var(--c-text-3);">Gestion commerciale · Leads & Dossiers actifs</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button onclick="renderClientsPage()" title="Rafraîchir" style="padding:7px 10px;font-size:13px;font-family:var(--font-body);border:1px solid var(--c-border);border-radius:var(--radius-sm);background:var(--c-surface);color:var(--c-text-2);cursor:pointer;">↻</button>
+              <select id="clients-filter-statut" onchange="renderClientsPage()" style="padding:7px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:var(--radius-sm);font-family:var(--font-body);background:var(--c-surface);color:var(--c-text);">
+                <option value="">Tous les statuts</option>
+                <option value="nouveau">Nouveau</option>
+                <option value="qualifie">Qualifié</option>
+                <option value="en_discussion">En discussion</option>
+                <option value="proposition">Proposition</option>
+                <option value="negociation">Négociation</option>
+                <option value="gagne">Gagné</option>
+                <option value="perdu">Perdu</option>
+              </select>
+            </div>
+          </div>
+          <!-- Stats rapides -->
+          <div id="clients-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;"></div>
+          <!-- Liste prospects -->
+          <div id="clients-list">
+            <div style="padding:40px;text-align:center;color:var(--c-text-3);font-size:13px;">
+              <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">👥</div>
+              Chargement du portefeuille…
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: RESSOURCES -->
+    <div class="page" id="page-ressources">
+      <div class="app">
+        <!-- Onglets -->
+        <div style="display:flex;gap:2px;border-bottom:2px solid var(--c-border);margin-bottom:0;">
+          <button class="ressources-tab active" data-tab="aides" onclick="switchRessourcesTab('aides',this)" style="padding:10px 18px;border:none;background:none;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--c-teal);border-bottom:2px solid var(--c-teal);margin-bottom:-2px;cursor:pointer;">💰 Aides & Subventions</button>
+          <button class="ressources-tab" data-tab="eligibilite" onclick="switchRessourcesTab('eligibilite',this)" style="padding:10px 18px;border:none;background:none;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--c-text-3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">✓ Éligibilité</button>
+          <button class="ressources-tab" data-tab="organismes" onclick="switchRessourcesTab('organismes',this)" style="padding:10px 18px;border:none;background:none;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--c-text-3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">🏛 Organismes</button>
+        </div>
+        <!-- Contenu des onglets — les pages existantes sont rendues ici -->
+        <div id="ressources-content-aides" class="ressources-tab-content" style="display:block;"></div>
+        <div id="ressources-content-eligibilite" class="ressources-tab-content" style="display:none;"></div>
+        <div id="ressources-content-organismes" class="ressources-tab-content" style="display:none;"></div>
+      </div>
+    </div>
 
   <!-- FIN PAGES -->
 
@@ -5183,35 +5278,39 @@ function toggleMobileSimulator() {
 
 // ─── NAVIGATION ───
 // All pages show the simulator panel in split-view
-const ALL_PAGES = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
+const ALL_PAGES = ['dashboard', 'clients', 'saved', 'resultats', 'scenarios', 'ressources', 'eligibilite', 'aides', 'organismes', 'dossier', 'propositions'];
 
 // Page labels and subtitles
 const PAGE_LABELS = {
-  dashboard: 'Dashboard',
-  resultats: 'Simulateur',
-  eligibilite: 'Éligibilité',
-  aides: 'Aides',
-  organismes: 'Organismes',
-  scenarios: 'Scénarios',
-  dossier: 'Dossier',
+  dashboard:    'Dashboard',
+  clients:      'Clients',
+  saved:        'Mes simulations',
+  resultats:    'Simulateur',
+  scenarios:    'Scénarios',
+  ressources:   'Ressources',
+  eligibilite:  'Éligibilité',
+  aides:        'Aides',
+  organismes:   'Organismes',
+  dossier:      'Dossier',
   propositions: 'Propositions',
-  saved: 'Mes simulations',
 };
 
 const PAGE_SUBTITLES = {
-  dashboard: 'Vue d\'ensemble',
-  resultats: 'Paramètres & résultats',
-  eligibilite: 'Scoring par dispositif',
-  aides: 'Dispositifs activés',
-  organismes: 'Aides & subventions disponibles',
-  scenarios: 'Comparateur multi-scénarios',
-  dossier: 'Parcours de montage',
+  dashboard:    'Vue d\'ensemble',
+  clients:      'Portefeuille & suivi commercial',
+  saved:        'Historique des simulations',
+  resultats:    'Paramètres & résultats',
+  scenarios:    'Comparateur multi-scénarios',
+  ressources:   'Aides, éligibilité & organismes',
+  eligibilite:  'Scoring par dispositif',
+  aides:        'Dispositifs activés',
+  organismes:   'Aides & subventions disponibles',
+  dossier:      'Parcours de montage',
   propositions: 'Propositions archivées',
-  saved: 'Historique des simulations',
 };
 
 // Breadcrumb step order (kept for internal logic)
-const BREADCRUMB_STEPS = ['dashboard', 'resultats', 'eligibilite', 'aides', 'organismes', 'scenarios', 'dossier', 'propositions', 'saved'];
+const BREADCRUMB_STEPS = ['dashboard', 'clients', 'saved', 'resultats', 'scenarios', 'ressources', 'dossier', 'propositions'];
 
 function updateBreadcrumb(pageName) {
   // Update page title in header
@@ -5335,6 +5434,10 @@ function switchPage(pageName, navItem) {
     recalculer();
   } else if (pageName === 'scenarios') {
     renderScenarios();
+  } else if (pageName === 'clients') {
+    renderClientsPage();
+  } else if (pageName === 'ressources') {
+    renderRessourcesPage();
   }
 
   // Update mobile navigation (closes sidebar and updates active state)
@@ -6690,6 +6793,227 @@ async function renderSavedSimulations() {
 
 // Init saved badge on load
 setTimeout(updateSavedBadge, 100);
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGE CLIENTS — Portefeuille commercial
+// ═══════════════════════════════════════════════════════════════════
+const STATUT_COLORS = {
+  nouveau:'#3b82f6', qualifie:'#0d9488', en_discussion:'#ea580c',
+  proposition:'#7c3aed', negociation:'#d97706', gagne:'#059669',
+  perdu:'#dc2626', inactif:'#6b7280'
+};
+const STATUT_LABELS = {
+  nouveau:'Nouveau', qualifie:'Qualifié', en_discussion:'En discussion',
+  proposition:'Proposition', negociation:'Négociation', gagne:'Gagné',
+  perdu:'Perdu', inactif:'Inactif'
+};
+
+async function renderClientsPage() {
+  const list = document.getElementById('clients-list');
+  const stats = document.getElementById('clients-stats');
+  const filterStatut = document.getElementById('clients-filter-statut')?.value || '';
+  if (!list) return;
+
+  const isLoggedIn = !!localStorage.getItem('gef_auth_token');
+  if (!isLoggedIn) {
+    list.innerHTML = `<div style="padding:40px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">🔒</div>
+      <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:8px;">Connexion requise</div>
+      <div style="font-size:12px;color:var(--c-text-3);">Connectez-vous pour accéder à votre portefeuille clients.</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--c-text-3);font-size:13px;">
+    <span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;"></span>
+    Chargement…</div>`;
+
+  try {
+    const [prospectsRes, simsRes] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() })
+    ]);
+    const prospectsData = await prospectsRes.json();
+    const simsData = await simsRes.json();
+
+    let prospects = prospectsData?.data || [];
+    const sims = simsData?.data || [];
+
+    // Filtrer par statut si sélectionné
+    if (filterStatut) prospects = prospects.filter(p => p.statut === filterStatut);
+
+    // Enrichir avec comptes de simulations et détection alerte 15j
+    const now = Date.now();
+    const enriched = prospects.map(p => {
+      const pSims = sims.filter(s => s.prospect_id === p.id);
+      const lastSim = pSims.sort((a,b) => (b.updated_at||'').localeCompare(a.updated_at||''))[0];
+      const lastContact = new Date(p.date_dernier_contact || p.updated_at || p.created_at).getTime();
+      const daysInactive = Math.floor((now - lastContact) / 86400000);
+      const hasAlert = daysInactive > 15 && !['gagne','perdu','inactif'].includes(p.statut);
+      const totalInvest = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
+      return { ...p, nb_sims: pSims.length, lastSim, daysInactive, hasAlert, totalInvest };
+    });
+
+    // Mettre à jour le badge alerte dans la sidebar
+    const alertCount = enriched.filter(p => p.hasAlert).length;
+    const badge = document.getElementById('badge-clients-alerte');
+    if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
+
+    // Stats rapides
+    if (stats) {
+      const all = prospectsData?.data || [];
+      const fek = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M€' : n >= 1000 ? Math.round(n/1000)+'k€' : n+'€';
+      stats.innerHTML = [
+        { icon:'👥', val: all.length, lbl:'Total clients' },
+        { icon:'🔥', val: all.filter(p=>p.statut==='en_discussion').length, lbl:'En discussion' },
+        { icon:'✅', val: all.filter(p=>p.statut==='gagne').length, lbl:'Gagnés' },
+        { icon:'⚠️', val: all.filter(p=>{ const d=Math.floor((now-new Date(p.updated_at||p.created_at).getTime())/86400000); return d>15&&!['gagne','perdu','inactif'].includes(p.statut); }).length, lbl:'Alertes relance' },
+      ].map(({icon,val,lbl}) => `<div style="padding:12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:10px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:4px;">${icon}</div>
+        <div style="font-size:20px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono,'monospace')">${val}</div>
+        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.04em;">${lbl}</div>
+      </div>`).join('');
+    }
+
+    if (enriched.length === 0) {
+      list.innerHTML = `<div style="padding:40px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">👥</div>
+        <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:6px;">${filterStatut ? 'Aucun client avec ce statut' : 'Aucun client encore'}</div>
+        <div style="font-size:12px;color:var(--c-text-3);">Les clients sont créés automatiquement depuis le simulateur.</div>
+      </div>`;
+      return;
+    }
+
+    const fmtD = n => n < 1 ? 'Auj.' : n < 30 ? n+'j' : Math.floor(n/30)+'mois';
+    const fek = n => n >= 1e6 ? (n/1e6).toFixed(1).replace('.',',')+' M€' : n >= 1000 ? Math.round(n/1000)+' k€' : n+'€';
+
+    list.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">` +
+      enriched.map(p => {
+        const color = STATUT_COLORS[p.statut] || '#6b7280';
+        const label = STATUT_LABELS[p.statut] || p.statut;
+        const alertBadge = p.hasAlert
+          ? `<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid #fcd34d;">⚠ Relancer (${p.daysInactive}j)</span>`
+          : '';
+        return `<div style="padding:14px 16px;background:var(--c-surface);border:1px solid ${p.hasAlert?'#fcd34d':color+'30'};border-left:3px solid ${color};border-radius:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow .15s;"
+          onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'"
+          onclick="startSimForClient('${p.raison_sociale}','${p.siren||p.siret||''}')">
+          <div style="width:36px;height:36px;border-radius:10px;background:${color}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${color};flex-shrink:0;">${(p.raison_sociale||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.raison_sociale||'Sans nom'}</div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <span style="background:${color}18;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">${label}</span>
+              ${p.ville ? `<span style="font-size:11px;color:var(--c-text-3);">📍 ${p.ville}</span>` : ''}
+              ${p.code_naf ? `<span style="font-size:11px;color:var(--c-text-3);">NAF ${p.code_naf}</span>` : ''}
+              ${alertBadge}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:600;color:var(--c-navy);">${p.nb_sims} sim${p.nb_sims>1?'s':''}</div>
+            ${p.totalInvest > 0 ? `<div style="font-size:11px;color:var(--c-teal);font-weight:600;">${fek(p.totalInvest)}</div>` : ''}
+            <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">il y a ${fmtD(p.daysInactive)}</div>
+          </div>
+        </div>`;
+      }).join('') + `</div>`;
+
+  } catch(e) {
+    console.warn('[Clients] Error:', e);
+    list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-text-3);">Impossible de charger le portefeuille — ${e.message}</div>`;
+  }
+}
+
+// Lance une simulation pré-remplie avec le client
+function startSimForClient(raison, siren) {
+  const nomInput = document.getElementById('nom-client');
+  if (nomInput && raison) { nomInput.value = raison; recalculer(); }
+  if (siren && siren.length === 9) {
+    const sirenInput = document.getElementById('client-siren');
+    if (sirenInput) sirenInput.value = siren;
+    resetClientEnrichment(false);
+    currentClientSiret = siren;
+  }
+  switchPage('resultats', document.querySelector('[data-page="resultats"]'));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGE RESSOURCES — Aides + Éligibilité + Organismes en onglets
+// ═══════════════════════════════════════════════════════════════════
+let _ressourcesInitialized = false;
+
+function renderRessourcesPage() {
+  // Première visite : forcer le rendu de l'onglet actif
+  if (!_ressourcesInitialized) {
+    _ressourcesInitialized = true;
+    switchRessourcesTab('aides', document.querySelector('.ressources-tab[data-tab="aides"]'));
+  }
+}
+
+function switchRessourcesTab(tab, btn) {
+  // Mettre à jour les onglets visuels
+  document.querySelectorAll('.ressources-tab').forEach(b => {
+    b.style.color = 'var(--c-text-3)';
+    b.style.fontWeight = '500';
+    b.style.borderBottom = '2px solid transparent';
+  });
+  if (btn) {
+    btn.style.color = 'var(--c-teal)';
+    btn.style.fontWeight = '600';
+    btn.style.borderBottom = '2px solid var(--c-teal)';
+  }
+
+  // Afficher/masquer les contenus
+  document.querySelectorAll('.ressources-tab-content').forEach(c => c.style.display = 'none');
+  const content = document.getElementById('ressources-content-' + tab);
+  if (content) content.style.display = 'block';
+
+  // Rendre le contenu de l'onglet si pas encore fait
+  if (tab === 'aides') {
+    // Copier le contenu de la page aides dans l'onglet ressources
+    const aidesPage = document.getElementById('page-aides');
+    if (aidesPage && !content.hasChildNodes()) {
+      // Clone les cards d'aides disponibles
+      recalculer(); // force le recalcul pour avoir les données à jour
+      setTimeout(() => {
+        const aidesInner = aidesPage.querySelector('.app');
+        if (aidesInner && content) content.innerHTML = aidesInner.innerHTML;
+      }, 100);
+    }
+  } else if (tab === 'eligibilite') {
+    renderScoring();
+    setTimeout(() => {
+      const elPage = document.getElementById('page-eligibilite');
+      if (elPage && content && !content.hasChildNodes()) {
+        const inner = elPage.querySelector('.app');
+        if (inner) content.innerHTML = inner.innerHTML;
+      }
+    }, 100);
+  } else if (tab === 'organismes') {
+    renderOrganismesFront();
+    setTimeout(() => {
+      const orgPage = document.getElementById('page-organismes');
+      if (orgPage && content && !content.hasChildNodes()) {
+        const inner = orgPage.querySelector('.app') || orgPage;
+        content.innerHTML = inner.innerHTML;
+      }
+    }, 200);
+  }
+}
+
+// Initialiser le badge clients au chargement (si connecté)
+setTimeout(async () => {
+  if (!localStorage.getItem('gef_auth_token')) return;
+  try {
+    const res = await fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() });
+    const data = await res.json();
+    const prospects = data?.data || [];
+    const now = Date.now();
+    const alerts = prospects.filter(p => {
+      const d = Math.floor((now - new Date(p.updated_at||p.created_at).getTime()) / 86400000);
+      return d > 15 && !['gagne','perdu','inactif'].includes(p.statut);
+    }).length;
+    const badge = document.getElementById('badge-clients-alerte');
+    if (badge) badge.textContent = alerts > 0 ? String(alerts) : '';
+  } catch {}
+}, 2000);
 
 // ═══════════════════════════════════════════════════════════
 // SCORING D'ÉLIGIBILITÉ
