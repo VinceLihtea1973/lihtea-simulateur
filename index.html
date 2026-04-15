@@ -1957,6 +1957,50 @@
     .saved-sim-btn:hover { color: var(--c-text); border-color: var(--c-border-strong); }
     .saved-sim-btn.danger:hover { color: #dc2626; border-color: #fca5a5; background: #fef2f2; }
 
+    /* ─── DRAWER CLIENT ─── */
+    .client-drawer-overlay {
+      position: fixed; inset: 0; z-index: 150;
+      background: rgba(15,43,70,0.5); backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .client-drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .client-drawer {
+      position: fixed; top: 0; right: -520px; width: 500px; max-width: 96vw;
+      height: 100vh; background: var(--c-surface, #fff); z-index: 151;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+      transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+      font-family: var(--font-body);
+    }
+    .client-drawer.open { right: 0; }
+    .client-drawer-header {
+      padding: 20px 24px 16px;
+      background: linear-gradient(135deg, #0f2b46, #1a3d5c);
+      color: #fff; flex-shrink: 0;
+    }
+    .client-drawer-body {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+      background: var(--c-bg, #f6f8fb);
+    }
+    .client-drawer-kpi {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px;
+    }
+    .client-drawer-kpi-card {
+      padding: 12px; background: #fff; border: 1px solid var(--c-border,#e1e7ef);
+      border-radius: 10px; text-align: center;
+    }
+    .client-drawer-section { margin-bottom: 20px; }
+    .client-drawer-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--c-text-3,#8896a7); margin-bottom: 8px;
+    }
+    .client-drawer-sim-row {
+      padding: 10px 12px; background: #fff; border: 1px solid var(--c-border,#e1e7ef);
+      border-radius: 8px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: box-shadow .15s;
+    }
+    .client-drawer-sim-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
     /* ─── COPILOT IA ─── */
     .copilot-fab {
       position: fixed;
@@ -4485,6 +4529,44 @@
   </div>
 </div>
 
+<!-- ─── DRAWER DÉTAIL CLIENT ─── -->
+<div class="client-drawer-overlay" id="client-drawer-overlay" onclick="closeClientDrawer()"></div>
+<div class="client-drawer" id="client-drawer">
+  <div class="client-drawer-header">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;">DOSSIER CLIENT</div>
+        <div id="drawer-nom" style="font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+          <span id="drawer-siren" style="font-size:11px;color:rgba(255,255,255,.5);font-family:monospace;"></span>
+          <span id="drawer-naf" style="font-size:11px;color:rgba(255,255,255,.4);"></span>
+          <span id="drawer-ville" style="font-size:11px;color:rgba(255,255,255,.4);"></span>
+        </div>
+      </div>
+      <button onclick="closeClientDrawer()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;flex-shrink:0;">✕</button>
+    </div>
+    <!-- Statut + changement -->
+    <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <span id="drawer-statut-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;"></span>
+      <select id="drawer-statut-select" onchange="updateClientStatut(this.value)" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;cursor:pointer;">
+        <option value="">Changer le statut…</option>
+        <option value="nouveau">Nouveau</option>
+        <option value="qualifie">Qualifié</option>
+        <option value="en_discussion">En discussion</option>
+        <option value="proposition">Proposition</option>
+        <option value="negociation">Négociation</option>
+        <option value="dossier_depose">📤 Dossier déposé</option>
+        <option value="gagne">✅ Gagné</option>
+        <option value="perdu">❌ Perdu</option>
+      </select>
+      <span id="drawer-admin-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#fef3c7;color:#92400e;">⏳ En revue Admin</span>
+    </div>
+  </div>
+  <div class="client-drawer-body" id="drawer-body">
+    <div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>
+  </div>
+</div>
+
 <!-- ─── COPILOT IA ─── -->
 <button class="copilot-fab" id="copilot-fab" onclick="toggleCopilot()" title="Lihtea Copilot — Assistant IA Subventions">
   <span id="copilot-fab-icon">L</span>
@@ -6896,7 +6978,7 @@ async function renderClientsPage() {
           : '';
         return `<div style="padding:14px 16px;background:var(--c-surface);border:1px solid ${p.hasAlert?'#fcd34d':color+'30'};border-left:3px solid ${color};border-radius:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow .15s;"
           onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'"
-          onclick="startSimForClient('${p.raison_sociale}','${p.siren||p.siret||''}')">
+          onclick="openClientDrawer('${p.id}')">
           <div style="width:36px;height:36px;border-radius:10px;background:${color}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${color};flex-shrink:0;">${(p.raison_sociale||'?')[0].toUpperCase()}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:13px;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.raison_sociale||'Sans nom'}</div>
@@ -6921,8 +7003,155 @@ async function renderClientsPage() {
   }
 }
 
+// ─── Drawer état courant ───────────────────────────────────────────
+let _drawerClientId = null;
+let _drawerClientData = null;
+
+// Ouvre le drawer avec les détails d'un prospect
+async function openClientDrawer(prospectId) {
+  _drawerClientId = prospectId;
+  const overlay = document.getElementById('client-drawer-overlay');
+  const drawer  = document.getElementById('client-drawer');
+  const body    = document.getElementById('drawer-body');
+  if (!overlay || !drawer) return;
+  overlay.classList.add('open');
+  drawer.classList.add('open');
+  body.innerHTML = `<div style="padding:40px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>`;
+  try {
+    const res  = await fetch(ADMIN_API + '/prospects/' + prospectId + '/detail', { headers: getAuthHeaders() });
+    const data = await res.json();
+    const p    = data?.data;
+    if (!p) throw new Error('Prospect introuvable');
+    _drawerClientData = p;
+    renderDrawerContent(p);
+  } catch(e) {
+    body.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
+  }
+}
+
+function closeClientDrawer() {
+  document.getElementById('client-drawer-overlay')?.classList.remove('open');
+  document.getElementById('client-drawer')?.classList.remove('open');
+  _drawerClientId = null;
+}
+
+function renderDrawerContent(p) {
+  const SCOL = { nouveau:'#3b82f6',qualifie:'#0d9488',en_discussion:'#ea580c',proposition:'#7c3aed',negociation:'#d97706',dossier_depose:'#f59e0b',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280' };
+  const SLBL = { nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif' };
+  const fek  = n => n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M€':n>=1000?Math.round(n/1000)+' k€':Math.round(n)+'€';
+  const c    = p._computed || {};
+
+  // Header
+  document.getElementById('drawer-nom').textContent = p.raison_sociale || '—';
+  document.getElementById('drawer-siren').textContent = p.siren ? 'SIREN '+p.siren : '';
+  document.getElementById('drawer-naf').textContent = p.libelle_naf ? p.code_naf+' — '+p.libelle_naf : (p.code_naf || '');
+  document.getElementById('drawer-ville').textContent = p.ville || '';
+  const badge = document.getElementById('drawer-statut-badge');
+  const sc = SCOL[p.statut]||'#6b7280';
+  badge.textContent = SLBL[p.statut]||p.statut;
+  badge.style.cssText = `background:${sc}25;color:${sc};font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;`;
+  const adminBadge = document.getElementById('drawer-admin-badge');
+  if (adminBadge) adminBadge.style.display = p.needs_admin_review ? 'inline-flex' : 'none';
+
+  // Body
+  const body = document.getElementById('drawer-body');
+  body.innerHTML = `
+    <!-- KPIs -->
+    <div class="client-drawer-kpi">
+      ${[
+        { icon:'💰', val: c.total_investissement>0?fek(c.total_investissement):'—', lbl:'Investissement' },
+        { icon:'🎯', val: c.total_aides>0?fek(c.total_aides):'—', lbl:'Aides totales' },
+        { icon:'📈', val: c.roi_moyen>0?c.roi_moyen+' mois':'—', lbl:'ROI moyen' },
+      ].map(k=>`<div class="client-drawer-kpi-card">
+        <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
+        <div style="font-size:15px;font-weight:800;color:var(--c-navy);font-family:monospace">${k.val}</div>
+        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.04em;">${k.lbl}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Contact -->
+    ${p.contact_nom||p.contact_email?`<div class="client-drawer-section">
+      <div class="client-drawer-section-title">Contact</div>
+      <div style="background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:12px;font-size:13px;">
+        ${p.contact_nom?`<div style="font-weight:600;color:var(--c-navy);">${p.contact_prenom||''} ${p.contact_nom} <span style="font-weight:400;color:var(--c-text-3);">${p.contact_fonction||''}</span></div>`:''}
+        ${p.contact_email?`<div style="color:var(--c-text-2);margin-top:3px;">✉️ ${p.contact_email}</div>`:''}
+        ${p.contact_telephone?`<div style="color:var(--c-text-2);">📞 ${p.contact_telephone}</div>`:''}
+      </div>
+    </div>`:'' }
+
+    <!-- Simulations -->
+    <div class="client-drawer-section">
+      <div class="client-drawer-section-title">Simulations (${p.simulations?.length||0})</div>
+      ${!p.simulations?.length?`<div style="padding:16px;text-align:center;font-size:12px;color:var(--c-text-3);background:#fff;border:1px dashed var(--c-border);border-radius:8px;">Aucune simulation liée</div>`
+      :p.simulations.map(s=>{
+        const inv = Number(s.parametres?.investissement)||0;
+        const sc2 = {brouillon:'#6b7280',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'}[s.statut]||'#6b7280';
+        return `<div class="client-drawer-sim-row" onclick="loadSimFromDrawer('${s.id}')">
+          <div style="width:8px;height:8px;border-radius:4px;background:${sc2};flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' investissement':'Simulation'}</div>
+            <div style="font-size:11px;color:var(--c-text-3);">${new Date(s.created_at).toLocaleDateString('fr-FR')} · ${s.montant_aides_total>0?fek(s.montant_aides_total)+' aides':'aucune aide'}</div>
+          </div>
+          <span style="font-size:10px;font-weight:700;color:${sc2};background:${sc2}18;padding:2px 7px;border-radius:6px;">${{brouillon:'Brouillon',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'}[s.statut]||s.statut}</span>
+        </div>`;}).join('')}
+      <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}')" style="width:100%;margin-top:8px;padding:9px;border:2px dashed var(--c-teal);border-radius:8px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nouvelle simulation</button>
+    </div>
+
+    <!-- Notes -->
+    <div class="client-drawer-section">
+      <div class="client-drawer-section-title">Notes</div>
+      <textarea id="drawer-notes" rows="3" placeholder="Ajouter une note…" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box;background:#fff;">${p.notes||''}</textarea>
+      <button onclick="saveDrawerNotes()" style="margin-top:6px;padding:7px 14px;background:var(--c-navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
+    </div>
+  `;
+}
+
+// Changer le statut depuis le drawer
+async function updateClientStatut(newStatut) {
+  if (!_drawerClientId || !newStatut) return;
+  const select = document.getElementById('drawer-statut-select');
+  if (select) select.disabled = true;
+  try {
+    const res = await fetch(ADMIN_API + '/prospects/' + _drawerClientId, {
+      method: 'PUT', headers: getAuthHeaders(),
+      body: JSON.stringify({ statut: newStatut })
+    });
+    const data = await res.json();
+    if (data?.updated) {
+      showToast(newStatut === 'dossier_depose' ? '📤 Dossier soumis — Admin notifié ✓' : 'Statut mis à jour ✓', 'success');
+      if (_drawerClientData) {
+        _drawerClientData.statut = newStatut;
+        _drawerClientData.needs_admin_review = newStatut === 'dossier_depose';
+        renderDrawerContent(_drawerClientData);
+      }
+      // Rafraîchir la liste Clients
+      setTimeout(renderClientsPage, 300);
+    }
+  } catch(e) { showToast('Erreur : '+e.message, 'error'); }
+  if (select) { select.disabled = false; select.value = ''; }
+}
+
+// Sauvegarder les notes
+async function saveDrawerNotes() {
+  if (!_drawerClientId) return;
+  const notes = document.getElementById('drawer-notes')?.value || '';
+  await fetch(ADMIN_API + '/prospects/' + _drawerClientId, {
+    method: 'PUT', headers: getAuthHeaders(),
+    body: JSON.stringify({ notes })
+  });
+  showToast('Notes sauvegardées ✓', 'success');
+}
+
+// Charger une simulation depuis le drawer
+function loadSimFromDrawer(simId) {
+  closeClientDrawer();
+  showToast('Simulation chargée depuis la fiche client', 'success');
+  switchPage('saved', document.querySelector('[data-page="saved"]'));
+}
+
 // Lance une simulation pré-remplie avec le client
 function startSimForClient(raison, siren) {
+  closeClientDrawer();
   const nomInput = document.getElementById('nom-client');
   if (nomInput && raison) { nomInput.value = raison; recalculer(); }
   if (siren && siren.length === 9) {
