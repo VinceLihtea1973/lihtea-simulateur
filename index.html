@@ -1957,6 +1957,79 @@
     .saved-sim-btn:hover { color: var(--c-text); border-color: var(--c-border-strong); }
     .saved-sim-btn.danger:hover { color: #dc2626; border-color: #fca5a5; background: #fef2f2; }
 
+    /* ─── CONTEXT BAND ─── */
+    #context-band {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      height: 38px;
+      background: linear-gradient(90deg, var(--c-navy) 0%, #1a3d5c 100%);
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      animation: slideDown 0.2s ease;
+    }
+    #context-band.visible { display: flex; }
+    @keyframes slideDown { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    #context-band .cb-chip {
+      padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 600;
+      background: rgba(45,212,191,0.2); color: #2dd4bf; white-space: nowrap;
+    }
+    #context-band .cb-sep { color: rgba(255,255,255,0.2); }
+    #context-band .cb-edit-btn {
+      margin-left: auto; padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(45,212,191,0.4);
+      background: rgba(45,212,191,0.1); color: #2dd4bf; font-size: 11px; font-weight: 600;
+      cursor: pointer; font-family: var(--font-body); white-space: nowrap; flex-shrink: 0;
+    }
+    #context-band .cb-edit-btn:hover { background: rgba(45,212,191,0.2); }
+
+    /* ─── SCORE ICP ─── */
+    .score-badge { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .score-a { background: rgba(5,150,105,0.15); color: #059669; }
+    .score-b { background: rgba(217,119,6,0.15); color: #d97706; }
+    .score-c { background: rgba(220,38,38,0.12); color: #dc2626; }
+
+    /* ─── CLIENTS TABLE ─── */
+    .clients-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .clients-table th { text-align: left; padding: 9px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); border-bottom: 2px solid var(--c-border); font-weight: 600; white-space: nowrap; }
+    .clients-table td { padding: 11px 12px; border-bottom: 1px solid var(--c-border); vertical-align: middle; }
+    .clients-table tbody tr { cursor: pointer; transition: background .12s; }
+    .clients-table tbody tr:hover td { background: var(--c-bg); }
+    .overdue-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #dc2626; animation: pulse 1.5s infinite; margin-left: 5px; }
+
+    /* ─── PIPELINE KANBAN ─── */
+    .pipeline-board { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; min-height: 60vh; }
+    .pipeline-col { min-width: 190px; flex: 1; display: flex; flex-direction: column; }
+    .pipeline-col-header { padding: 8px 12px; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .pipeline-col-header .col-count { background: rgba(255,255,255,0.25); padding: 1px 7px; border-radius: 8px; font-size: 11px; }
+    .pipeline-col-body { flex: 1; background: var(--c-surface); border: 1px solid var(--c-border); border-top: none; border-radius: 0 0 8px 8px; padding: 8px; display: flex; flex-direction: column; gap: 7px; min-height: 60px; transition: background .15s, border-color .15s; }
+    .pipeline-col-body.drag-over { background: var(--c-teal-bg,#f0fdfa); border-color: var(--c-teal); }
+    .pipeline-kanban-card { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: 8px; padding: 10px 12px; cursor: grab; transition: box-shadow .15s, transform .15s; }
+    .pipeline-kanban-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.1); transform: translateY(-1px); border-color: var(--c-teal); }
+    .pipeline-kanban-card.dragging { opacity: .4; }
+    .pkc-name { font-size: 13px; font-weight: 600; color: var(--c-navy); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pkc-meta { font-size: 11px; color: var(--c-text-3); }
+    .pkc-amount { font-size: 12px; font-weight: 600; color: var(--c-teal); font-family: monospace; margin-top: 5px; }
+
+    /* ─── DRAWER 4 ONGLETS ─── */
+    .drawer-tabs { display: flex; border-bottom: 2px solid var(--c-border); padding: 0 24px; background: var(--c-bg); flex-shrink: 0; }
+    .drawer-tab-btn { padding: 10px 14px; font-size: 12px; font-weight: 500; color: var(--c-text-3); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: var(--font-body); transition: color .15s; white-space: nowrap; }
+    .drawer-tab-btn:hover { color: var(--c-navy); }
+    .drawer-tab-btn.active { color: var(--c-teal); border-bottom-color: var(--c-teal); font-weight: 600; }
+    .drawer-tab-content { display: none; padding: 20px 24px; }
+    .drawer-tab-content.active { display: block; }
+    .info-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .info-field .if-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); margin-bottom: 3px; }
+    .info-field .if-val { font-size: 13px; color: var(--c-navy); font-weight: 500; }
+    .timeline-entry { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--c-border); }
+    .te-icon { width: 26px; height: 26px; border-radius: 50%; background: var(--c-bg); border: 1px solid var(--c-border); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; color: var(--c-teal); }
+    .te-msg { font-size: 13px; color: var(--c-navy); }
+    .te-date { font-size: 11px; color: var(--c-text-3); margin-top: 2px; }
+    .doc-entry { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--c-border); }
+    .doc-icon-box { width: 32px; height: 32px; border-radius: 6px; background: var(--c-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1px solid var(--c-border); flex-shrink: 0; }
+
     /* ─── DRAWER CLIENT ─── */
     .client-drawer-overlay {
       position: fixed; inset: 0; z-index: 150;
@@ -3644,9 +3717,10 @@
         <span class="sidebar-item-label">Clients</span>
         <span class="sidebar-item-badge" id="badge-clients-alerte"></span>
       </a>
-      <a class="sidebar-item" data-page="saved" onclick="switchPage('saved', this)">
-        <span class="sidebar-item-icon">💾</span>
-        <span class="sidebar-item-label">Mes simulations</span>
+      <a class="sidebar-item" data-page="pipeline" onclick="switchPage('pipeline', this)">
+        <span class="sidebar-item-icon">⊞</span>
+        <span class="sidebar-item-label">Pipeline</span>
+        <span class="sidebar-item-badge" id="badge-pipeline-overdue"></span>
       </a>
 
       <!-- ── OUTILS ───────────────────── -->
@@ -3671,10 +3745,6 @@
       <a class="sidebar-item" data-page="dossier" onclick="switchPage('dossier', this)">
         <span class="sidebar-item-icon">📋</span>
         <span class="sidebar-item-label">Dossier</span>
-      </a>
-      <a class="sidebar-item" data-page="propositions" onclick="switchPage('propositions', this)">
-        <span class="sidebar-item-icon">📄</span>
-        <span class="sidebar-item-label">Propositions</span>
       </a>
 
     </nav>
@@ -3710,6 +3780,16 @@
         </div>
       </div>
       <div id="breadcrumb" class="breadcrumb-bar" style="display:none;"></div>
+    </div>
+
+    <!-- ─── BANDEAU DE CONTEXTE ─── -->
+    <div id="context-band">
+      <span id="cb-client" class="cb-chip">—</span>
+      <span class="cb-sep">·</span>
+      <span id="cb-invest" style="color:rgba(255,255,255,0.6);font-size:11px;">—</span>
+      <span class="cb-sep">·</span>
+      <span id="cb-aides" style="color:#2dd4bf;font-size:11px;">—</span>
+      <button class="cb-edit-btn" onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))">⚙ Modifier les paramètres</button>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════
@@ -4437,38 +4517,81 @@
     </div>
 
 
-    <!-- PAGE: CLIENTS -->
+    <!-- PAGE: PIPELINE -->
+    <div class="page" id="page-pipeline">
+      <div class="app">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div class="section-label" style="margin-bottom:2px;">Pipeline Commercial</div>
+            <div style="font-size:12px;color:var(--c-text-3);">Glisser-déposer pour changer le statut · mise à jour temps réel</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span id="pipeline-overdue-badge" style="display:none;font-size:11px;font-weight:700;color:#dc2626;">● 0 en retard</span>
+            <button onclick="renderPipelinePage()" style="padding:6px 12px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);font-size:12px;cursor:pointer;font-family:var(--font-body);">↻ Actualiser</button>
+          </div>
+        </div>
+        <div id="pipeline-board" class="pipeline-board">
+          <div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: CLIENTS (Full-Width, table CRM) -->
     <div class="page" id="page-clients">
       <div class="app">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;">
-            <div>
-              <div class="section-label" style="margin-bottom:2px;">Portefeuille Clients</div>
-              <div style="font-size:12px;color:var(--c-text-3);">Gestion commerciale · Leads & Dossiers actifs</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <button onclick="renderClientsPage()" title="Rafraîchir" style="padding:7px 10px;font-size:13px;font-family:var(--font-body);border:1px solid var(--c-border);border-radius:var(--radius-sm);background:var(--c-surface);color:var(--c-text-2);cursor:pointer;">↻</button>
-              <select id="clients-filter-statut" onchange="renderClientsPage()" style="padding:7px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:var(--radius-sm);font-family:var(--font-body);background:var(--c-surface);color:var(--c-text);">
-                <option value="">Tous les statuts</option>
-                <option value="nouveau">Nouveau</option>
-                <option value="qualifie">Qualifié</option>
-                <option value="en_discussion">En discussion</option>
-                <option value="proposition">Proposition</option>
-                <option value="negociation">Négociation</option>
-                <option value="gagne">Gagné</option>
-                <option value="perdu">Perdu</option>
-              </select>
-            </div>
+        <!-- En-tête + filtres -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="section-label" style="margin-bottom:2px;">Portefeuille Clients</div>
+            <div style="font-size:12px;color:var(--c-text-3);">CRM · Filtres avancés · Score ICP · Drawer 360°</div>
           </div>
-          <!-- Stats rapides -->
-          <div id="clients-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;"></div>
-          <!-- Liste prospects -->
-          <div id="clients-list">
-            <div style="padding:40px;text-align:center;color:var(--c-text-3);font-size:13px;">
-              <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">👥</div>
-              Chargement du portefeuille…
-            </div>
-          </div>
+          <button onclick="renderClientsPage()" style="padding:6px 12px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);font-size:12px;cursor:pointer;font-family:var(--font-body);">↻ Actualiser</button>
+        </div>
+
+        <!-- Stats rapides -->
+        <div id="clients-stats" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+
+        <!-- Filtres avancés CRM -->
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;">
+          <select id="cf-statut" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Tous les statuts</option>
+            <option value="nouveau">Nouveau</option>
+            <option value="qualifie">Qualifié</option>
+            <option value="en_discussion">En discussion</option>
+            <option value="proposition">Proposition</option>
+            <option value="negociation">Négociation</option>
+            <option value="dossier_depose">Dossier déposé</option>
+            <option value="gagne">Gagné</option>
+            <option value="perdu">Perdu</option>
+          </select>
+          <select id="cf-taille" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Toutes tailles</option>
+            <option value="tpe">TPE</option>
+            <option value="pme">PME</option>
+            <option value="eti">ETI</option>
+            <option value="ge">GE</option>
+          </select>
+          <select id="cf-source" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Toutes sources</option>
+            <option value="entrant">Entrant</option>
+            <option value="simulateur">Simulateur</option>
+            <option value="direct">Direct</option>
+            <option value="salon">Salon</option>
+            <option value="partenaire">Partenaire</option>
+            <option value="prospection">Prospection</option>
+          </select>
+          <select id="cf-sort" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="score_desc">↓ Score ICP</option>
+            <option value="invest_desc">↓ Investissement</option>
+            <option value="date_desc">↓ Date contact</option>
+            <option value="alert">⚠ Alertes d'abord</option>
+          </select>
+          <span id="clients-count" style="font-size:12px;color:var(--c-text-3);margin-left:auto;"></span>
+        </div>
+
+        <!-- Table dense -->
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;overflow:auto;">
+          <div id="clients-list"></div>
         </div>
       </div>
     </div>
@@ -4549,35 +4672,40 @@
   <div class="client-drawer-header">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;">DOSSIER CLIENT</div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;">DOSSIER CLIENT 360°</div>
         <div id="drawer-nom" style="font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+          <span id="drawer-score-badge" class="score-badge"></span>
           <span id="drawer-siren" style="font-size:11px;color:rgba(255,255,255,.5);font-family:monospace;"></span>
-          <span id="drawer-naf" style="font-size:11px;color:rgba(255,255,255,.4);"></span>
           <span id="drawer-ville" style="font-size:11px;color:rgba(255,255,255,.4);"></span>
         </div>
       </div>
       <button onclick="closeClientDrawer()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;flex-shrink:0;">✕</button>
     </div>
-    <!-- Statut + changement -->
-    <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <span id="drawer-statut-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;"></span>
       <select id="drawer-statut-select" onchange="updateClientStatut(this.value)" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;cursor:pointer;">
         <option value="">Changer le statut…</option>
-        <option value="nouveau">Nouveau</option>
-        <option value="qualifie">Qualifié</option>
-        <option value="en_discussion">En discussion</option>
-        <option value="proposition">Proposition</option>
-        <option value="negociation">Négociation</option>
-        <option value="dossier_depose">📤 Dossier déposé</option>
-        <option value="gagne">✅ Gagné</option>
-        <option value="perdu">❌ Perdu</option>
+        <option value="nouveau">Nouveau</option><option value="qualifie">Qualifié</option>
+        <option value="en_discussion">En discussion</option><option value="proposition">Proposition</option>
+        <option value="negociation">Négociation</option><option value="dossier_depose">📤 Dossier déposé</option>
+        <option value="gagne">✅ Gagné</option><option value="perdu">❌ Perdu</option>
       </select>
       <span id="drawer-admin-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#fef3c7;color:#92400e;">⏳ En revue Admin</span>
     </div>
   </div>
-  <div class="client-drawer-body" id="drawer-body">
-    <div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>
+  <!-- 4 ONGLETS -->
+  <div class="drawer-tabs">
+    <button class="drawer-tab-btn active" onclick="switchDrawerTab('infos',this)">Infos</button>
+    <button class="drawer-tab-btn" onclick="switchDrawerTab('simulations',this)">Simulations <span id="dt-sim-count" style="font-size:10px;"></span></button>
+    <button class="drawer-tab-btn" onclick="switchDrawerTab('historique',this)">Historique</button>
+    <button class="drawer-tab-btn" onclick="switchDrawerTab('documents',this)">Documents <span id="dt-doc-count" style="font-size:10px;"></span></button>
+  </div>
+  <div class="client-drawer-body" style="padding:0;">
+    <div id="drawer-tab-infos" class="drawer-tab-content active"></div>
+    <div id="drawer-tab-simulations" class="drawer-tab-content"></div>
+    <div id="drawer-tab-historique" class="drawer-tab-content"></div>
+    <div id="drawer-tab-documents" class="drawer-tab-content"></div>
   </div>
 </div>
 
@@ -5374,35 +5502,39 @@ function toggleMobileSimulator() {
 
 // ─── NAVIGATION ───
 // All pages show the simulator panel in split-view
-const ALL_PAGES = ['dashboard', 'clients', 'saved', 'resultats', 'scenarios', 'ressources', 'eligibilite', 'aides', 'organismes', 'dossier', 'propositions'];
+// Pages en mode SPLIT-VIEW (panneau simulateur visible)
+const SPLIT_VIEW_PAGES = new Set(['resultats', 'scenarios']);
+
+// Pages en mode FULL-WIDTH (100% largeur, bandeau contexte visible)
+const FULL_WIDTH_PAGES = new Set(['dashboard', 'clients', 'pipeline', 'ressources', 'dossier', 'aides', 'eligibilite', 'organismes']);
+
+const ALL_PAGES = ['dashboard', 'clients', 'pipeline', 'resultats', 'scenarios', 'ressources', 'eligibilite', 'aides', 'organismes', 'dossier'];
 
 // Page labels and subtitles
 const PAGE_LABELS = {
-  dashboard:    'Dashboard',
-  clients:      'Clients',
-  saved:        'Mes simulations',
-  resultats:    'Simulateur',
-  scenarios:    'Scénarios',
-  ressources:   'Ressources',
-  eligibilite:  'Éligibilité',
-  aides:        'Aides',
-  organismes:   'Organismes',
-  dossier:      'Dossier',
-  propositions: 'Propositions',
+  dashboard:   'Dashboard',
+  clients:     'Clients',
+  pipeline:    'Pipeline',
+  resultats:   'Simulateur',
+  scenarios:   'Scénarios',
+  ressources:  'Ressources',
+  eligibilite: 'Éligibilité',
+  aides:       'Aides',
+  organismes:  'Organismes',
+  dossier:     'Dossier',
 };
 
 const PAGE_SUBTITLES = {
-  dashboard:    'Vue d\'ensemble',
-  clients:      'Portefeuille & suivi commercial',
-  saved:        'Historique des simulations',
-  resultats:    'Paramètres & résultats',
-  scenarios:    'Comparateur multi-scénarios',
-  ressources:   'Aides, éligibilité & organismes',
-  eligibilite:  'Scoring par dispositif',
-  aides:        'Dispositifs activés',
-  organismes:   'Aides & subventions disponibles',
-  dossier:      'Parcours de montage',
-  propositions: 'Propositions archivées',
+  dashboard:   'Vue d\'ensemble commerciale',
+  clients:     'Portefeuille & suivi CRM',
+  pipeline:    'Kanban — glisser-déposer pour changer le statut',
+  resultats:   'Paramètres & résultats',
+  scenarios:   'Comparateur multi-scénarios',
+  ressources:  'Aides, éligibilité & organismes',
+  eligibilite: 'Scoring par dispositif',
+  aides:       'Dispositifs activés',
+  organismes:  'Aides & subventions disponibles',
+  dossier:     'Parcours de montage',
 };
 
 // Breadcrumb step order (kept for internal logic)
@@ -5442,7 +5574,11 @@ function switchPage(pageName, navItem) {
 
   const mainContent = document.getElementById('main-content');
   const isMobile = window.innerWidth <= 768;
-  const isFullWidth = (pageName === 'dashboard');
+  // Full-width = toutes les pages SAUF Simulateur et Scénarios
+  const isFullWidth = !SPLIT_VIEW_PAGES.has(pageName);
+
+  // Bandeau de contexte — visible sur pages full-width si simulation active
+  updateContextBand(isFullWidth);
 
   // Hide all pages
   const pages = document.querySelectorAll('.page');
@@ -5532,6 +5668,8 @@ function switchPage(pageName, navItem) {
     renderScenarios();
   } else if (pageName === 'clients') {
     renderClientsPage();
+  } else if (pageName === 'pipeline') {
+    renderPipelinePage();
   } else if (pageName === 'ressources') {
     renderRessourcesPage();
   }
@@ -7017,6 +7155,274 @@ async function renderClientsPage() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// CONTEXT BAND — Bandeau de simulation active sur pages full-width
+// ═══════════════════════════════════════════════════════════════════
+function updateContextBand(show) {
+  const band = document.getElementById('context-band');
+  if (!band) return;
+  const nomClient = document.getElementById('nom-client')?.value?.trim();
+  const inv = parseFloat(document.getElementById('inv')?.value) || 0;
+  const hasContext = nomClient && nomClient !== '' && inv > 0;
+  if (show && hasContext) {
+    band.classList.add('visible');
+    const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':Math.round(n)+'€';
+    document.getElementById('cb-client').textContent = nomClient;
+    document.getElementById('cb-invest').textContent = fek(inv) + ' d\'investissement';
+    // Récupérer les aides du dernier recalcul
+    const amtCEE = parseFloat(document.getElementById('amt-cee')?.textContent)||0;
+    const amtADEME = parseFloat(document.getElementById('amt-ademe')?.textContent)||0;
+    const totalAides = amtCEE + amtADEME;
+    document.getElementById('cb-aides').textContent = totalAides>0 ? fek(totalAides)+' d\'aides' : 'Aides à calculer';
+  } else {
+    band.classList.remove('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SCORE ICP — Algorithme de scoring client (adapté du CRM V3)
+// ═══════════════════════════════════════════════════════════════════
+function calcScoreICP(prospect) {
+  let score = 0;
+  // Simulations liées (+30 max)
+  const nbSims = prospect.nb_sims || 0;
+  score += Math.min(30, nbSims * 15);
+  // Montant investissement (+20 max)
+  const inv = prospect.totalInvest || 0;
+  if (inv > 500000) score += 20;
+  else if (inv > 100000) score += 14;
+  else if (inv > 50000) score += 8;
+  else if (inv > 0) score += 4;
+  // Fraîcheur contact (+20 max)
+  const daysInact = prospect.daysInactive || 999;
+  if (daysInact <= 2) score += 20;
+  else if (daysInact <= 7) score += 14;
+  else if (daysInact <= 15) score += 8;
+  else if (daysInact <= 30) score += 3;
+  // Taille entreprise (+15 max)
+  const taille = prospect.taille || '';
+  if (taille === 'ge') score += 15;
+  else if (taille === 'eti') score += 12;
+  else if (taille === 'pme') score += 8;
+  else if (taille === 'tpe') score += 4;
+  // Données enrichies SIREN (+15)
+  if (prospect.siren) score += 15;
+  return Math.min(100, Math.max(0, score));
+}
+
+function scoreClass(s) { return s >= 70 ? 'score-a' : s >= 40 ? 'score-b' : 'score-c'; }
+
+// ═══════════════════════════════════════════════════════════════════
+// PIPELINE KANBAN — Portage CRM V3 en vanilla JS
+// ═══════════════════════════════════════════════════════════════════
+const PIPELINE_STAGES = [
+  { id: 'nouveau',       label: 'Nouveau Lead',   color: '#64748b', bg: '#f1f5f9' },
+  { id: 'qualifie',     label: 'Qualifié',        color: '#8b5cf6', bg: '#ede9fe' },
+  { id: 'en_discussion', label: 'En discussion',  color: '#0ea5e9', bg: '#e0f2fe' },
+  { id: 'proposition',  label: 'Proposition',     color: '#f59e0b', bg: '#fef3c7' },
+  { id: 'negociation',  label: 'Négociation',     color: '#ea580c', bg: '#ffedd5' },
+  { id: 'dossier_depose', label: 'Dossier déposé', color: '#0d9488', bg: '#f0fdfa' },
+  { id: 'gagne',        label: 'Gagné ✓',         color: '#059669', bg: '#d1fae5' },
+];
+
+let _pipelineClients = [];
+let _pipelineDragId = null;
+
+async function renderPipelinePage() {
+  const board = document.getElementById('pipeline-board');
+  if (!board) return;
+  if (!localStorage.getItem('gef_auth_token')) {
+    board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise</div>';
+    return;
+  }
+  board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
+  try {
+    const [prosp, sims] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }).then(r => r.json()),
+    ]);
+    _pipelineClients = (prosp?.data || []).map(p => {
+      const pSims = (sims?.data || []).filter(s => s.prospect_id === p.id);
+      const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const lastContact = new Date(p.updated_at || p.created_at).getTime();
+      const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact, score: calcScoreICP({...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact}) };
+    });
+    const overdue = _pipelineClients.filter(p => p.daysInactive > 15 && !['gagne','perdu'].includes(p.statut)).length;
+    const badge = document.getElementById('badge-pipeline-overdue');
+    const obadge = document.getElementById('pipeline-overdue-badge');
+    if (badge) badge.textContent = overdue > 0 ? String(overdue) : '';
+    if (obadge) { obadge.textContent = `● ${overdue} en retard`; obadge.style.display = overdue > 0 ? '' : 'none'; }
+    _renderPipelineBoard();
+  } catch(e) {
+    board.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
+  }
+}
+
+function _renderPipelineBoard() {
+  const board = document.getElementById('pipeline-board');
+  if (!board) return;
+  const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':'';
+  board.innerHTML = PIPELINE_STAGES.map(stage => {
+    const cards = _pipelineClients.filter(c => c.statut === stage.id);
+    const total = cards.reduce((a, c) => a + c.totalInvest, 0);
+    return `<div class="pipeline-col">
+      <div class="pipeline-col-header" style="background:${stage.color};color:#fff;">
+        <span>${stage.label}</span>
+        <span class="col-count">${cards.length}</span>
+      </div>
+      <div class="pipeline-col-body" id="pcol-${stage.id}"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');_pipelineDrop('${stage.id}')">
+        ${total > 0 ? `<div style="font-size:10px;font-weight:700;color:${stage.color};text-align:right;padding:2px 4px;">${fek(total)}</div>` : ''}
+        ${cards.map(c => {
+          const overdue = c.daysInactive > 15 && !['gagne','perdu'].includes(c.statut);
+          const score = c.score || 0;
+          return `<div class="pipeline-kanban-card" draggable="true"
+            ondragstart="_pipelineDragStart('${c.id}')" ondragend="_pipelineDragEnd()"
+            onclick="openClientDrawer('${c.id}')">
+            <div class="pkc-name">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</div>
+            <div class="pkc-meta">${c.ville||'—'} · ${c.taille?.toUpperCase()||'—'}</div>
+            ${c.totalInvest > 0 ? `<div class="pkc-amount">${fek(c.totalInvest)}</div>` : ''}
+            <div style="margin-top:6px;"><span class="score-badge ${scoreClass(score)}">${score}</span></div>
+          </div>`;
+        }).join('') || '<div style="font-size:11px;color:var(--c-text-3);text-align:center;padding:12px;">Aucun client</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function _pipelineDragStart(id) { _pipelineDragId = id; setTimeout(() => { document.querySelector(`[ondragstart="_pipelineDragStart('${id}')"]`)?.classList.add('dragging'); }, 0); }
+function _pipelineDragEnd() { document.querySelectorAll('.pipeline-kanban-card').forEach(c => c.classList.remove('dragging')); _pipelineDragId = null; }
+async function _pipelineDrop(newStatut) {
+  if (!_pipelineDragId) return;
+  const client = _pipelineClients.find(c => c.id === _pipelineDragId);
+  if (!client || client.statut === newStatut) return;
+  // Optimistic UI
+  client.statut = newStatut;
+  _renderPipelineBoard();
+  // Sync API
+  await fetch(ADMIN_API + '/prospects/' + _pipelineDragId, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ statut: newStatut }) });
+  _pipelineDragId = null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGE CLIENTS — Table dense + filtres avancés CRM
+// (remplace l'ancienne renderClientsPage)
+// ═══════════════════════════════════════════════════════════════════
+let _clientsAll = [];
+let _clientsFilterStatut = '';
+let _clientsFilterTaille = '';
+let _clientsFilterSource = '';
+let _clientsSort = 'score_desc';
+
+async function renderClientsPage() {
+  const container = document.getElementById('clients-list');
+  const statsEl = document.getElementById('clients-stats');
+  if (!container) return;
+  if (!localStorage.getItem('gef_auth_token')) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise</div>';
+    return;
+  }
+  container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
+  try {
+    const [prosp, sims] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }).then(r => r.json()),
+    ]);
+    const allSims = sims?.data || [];
+    _clientsAll = (prosp?.data || []).map(p => {
+      const pSims = allSims.filter(s => s.prospect_id === p.id);
+      const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total)||0), 0);
+      const lastContact = new Date(p.updated_at || p.created_at).getTime();
+      const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
+      const score = calcScoreICP({ ...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact });
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score, hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
+    });
+    const alertCount = _clientsAll.filter(c => c.hasAlert).length;
+    const badge = document.getElementById('badge-clients-alerte');
+    if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
+    _renderClientsTable();
+  } catch(e) {
+    container.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
+  }
+}
+
+function _renderClientsTable() {
+  const container = document.getElementById('clients-list');
+  const statsEl = document.getElementById('clients-stats');
+  const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':n>0?Math.round(n)+'€':'—';
+  const fd = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+  const STATUT_COLORS = {nouveau:'#3b82f6',qualifie:'#8b5cf6',en_discussion:'#0ea5e9',proposition:'#f59e0b',negociation:'#ea580c',dossier_depose:'#0d9488',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280'};
+  const STATUT_LABELS = {nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif'};
+
+  let filtered = _clientsAll.filter(c => {
+    if (_clientsFilterStatut && c.statut !== _clientsFilterStatut) return false;
+    if (_clientsFilterTaille && c.taille !== _clientsFilterTaille) return false;
+    if (_clientsFilterSource && c.source !== _clientsFilterSource) return false;
+    return true;
+  });
+
+  if (_clientsSort === 'score_desc') filtered.sort((a,b) => b.score - a.score);
+  else if (_clientsSort === 'invest_desc') filtered.sort((a,b) => b.totalInvest - a.totalInvest);
+  else if (_clientsSort === 'date_desc') filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
+  else if (_clientsSort === 'alert') filtered.sort((a,b) => b.hasAlert - a.hasAlert);
+
+  // Stats rapides
+  if (statsEl) {
+    const all = _clientsAll;
+    statsEl.innerHTML = [
+      { icon:'👥', val: all.length, lbl:'Total' },
+      { icon:'🔥', val: all.filter(c=>c.statut==='en_discussion').length, lbl:'En discussion' },
+      { icon:'📤', val: all.filter(c=>c.statut==='dossier_depose').length, lbl:'Dossiers' },
+      { icon:'✅', val: all.filter(c=>c.statut==='gagne').length, lbl:'Gagnés' },
+      { icon:'⚠️', val: all.filter(c=>c.hasAlert).length, lbl:'Alertes' },
+    ].map(({icon,val,lbl}) => `<div style="padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;text-align:center;min-width:80px;">
+      <div style="font-size:16px;margin-bottom:2px;">${icon}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--c-navy);">${val}</div>
+      <div style="font-size:9px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</div>
+    </div>`).join('');
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Aucun client ne correspond aux filtres.</div>';
+    return;
+  }
+
+  container.innerHTML = `<table class="clients-table">
+    <thead><tr>
+      <th>Score</th><th>Entreprise</th><th>Contact</th><th>Secteur / Taille</th><th>Potentiel Aides</th><th>Simulations</th><th>Statut</th><th>Dernier contact</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+    ${filtered.map(c => {
+      const sc = STATUT_COLORS[c.statut]||'#6b7280';
+      const overdue = c.hasAlert;
+      return `<tr onclick="openClientDrawer('${c.id}')">
+        <td><span class="score-badge ${scoreClass(c.score)}">${c.score}</span></td>
+        <td style="font-weight:700;color:var(--c-navy);">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</td>
+        <td style="color:var(--c-text-2);font-size:12px;">${c.contact_nom?c.contact_prenom+' '+c.contact_nom:'—'}</td>
+        <td style="font-size:12px;color:var(--c-text-3);">${c.code_naf||'—'}<br><span style="font-size:10px;background:var(--c-bg);padding:1px 6px;border-radius:4px;">${(c.taille||'—').toUpperCase()}</span></td>
+        <td style="font-weight:600;color:var(--c-teal);font-family:monospace;">${fek(c.totalAides)}</td>
+        <td style="text-align:center;font-size:13px;">${c.nb_sims}</td>
+        <td><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:${sc}18;color:${sc};">${STATUT_LABELS[c.statut]||c.statut}</span></td>
+        <td style="font-size:12px;color:var(--c-text-3);">${fd(c.updated_at||c.created_at)}</td>
+        <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')" style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;">⚙ Simuler</td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+
+function _clientsApplyFilters() {
+  _clientsFilterStatut = document.getElementById('cf-statut')?.value || '';
+  _clientsFilterTaille = document.getElementById('cf-taille')?.value || '';
+  _clientsFilterSource = document.getElementById('cf-source')?.value || '';
+  _clientsSort = document.getElementById('cf-sort')?.value || 'score_desc';
+  _renderClientsTable();
+}
+
 // ─── Drawer état courant ───────────────────────────────────────────
 let _drawerClientId = null;
 let _drawerClientData = null;
@@ -7049,17 +7455,28 @@ function closeClientDrawer() {
   _drawerClientId = null;
 }
 
-function renderDrawerContent(p) {
-  const SCOL = { nouveau:'#3b82f6',qualifie:'#0d9488',en_discussion:'#ea580c',proposition:'#7c3aed',negociation:'#d97706',dossier_depose:'#f59e0b',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280' };
-  const SLBL = { nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif' };
-  const fek  = n => n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M€':n>=1000?Math.round(n/1000)+' k€':Math.round(n)+'€';
-  const c    = p._computed || {};
+function switchDrawerTab(tab, btn) {
+  document.querySelectorAll('.drawer-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.drawer-tab-content').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const el = document.getElementById('drawer-tab-' + tab);
+  if (el) el.classList.add('active');
+}
 
-  // Header
+function renderDrawerContent(p) {
+  const SCOL = { nouveau:'#3b82f6',qualifie:'#8b5cf6',en_discussion:'#0ea5e9',proposition:'#f59e0b',negociation:'#ea580c',dossier_depose:'#0d9488',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280' };
+  const SLBL = { nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif' };
+  const fek  = n => n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M€':n>=1000?Math.round(n/1000)+' k€':Math.round(n||0)+'€';
+  const fd   = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const c    = p._computed || {};
+  const score = calcScoreICP({ ...p, nb_sims: p.simulations?.length||0, totalInvest: c.total_investissement||0, daysInactive: Math.floor((Date.now()-new Date(p.updated_at||p.created_at).getTime())/86400000) });
+
+  // ── Header
   document.getElementById('drawer-nom').textContent = p.raison_sociale || '—';
   document.getElementById('drawer-siren').textContent = p.siren ? 'SIREN '+p.siren : '';
-  document.getElementById('drawer-naf').textContent = p.libelle_naf ? p.code_naf+' — '+p.libelle_naf : (p.code_naf || '');
   document.getElementById('drawer-ville').textContent = p.ville || '';
+  const scoreBadge = document.getElementById('drawer-score-badge');
+  if (scoreBadge) { scoreBadge.textContent = score; scoreBadge.className = 'score-badge ' + scoreClass(score); }
   const badge = document.getElementById('drawer-statut-badge');
   const sc = SCOL[p.statut]||'#6b7280';
   badge.textContent = SLBL[p.statut]||p.statut;
@@ -7067,57 +7484,116 @@ function renderDrawerContent(p) {
   const adminBadge = document.getElementById('drawer-admin-badge');
   if (adminBadge) adminBadge.style.display = p.needs_admin_review ? 'inline-flex' : 'none';
 
-  // Body
-  const body = document.getElementById('drawer-body');
-  body.innerHTML = `
-    <!-- KPIs -->
-    <div class="client-drawer-kpi">
-      ${[
-        { icon:'💰', val: c.total_investissement>0?fek(c.total_investissement):'—', lbl:'Investissement' },
-        { icon:'🎯', val: c.total_aides>0?fek(c.total_aides):'—', lbl:'Aides totales' },
-        { icon:'📈', val: c.roi_moyen>0?c.roi_moyen+' mois':'—', lbl:'ROI moyen' },
-      ].map(k=>`<div class="client-drawer-kpi-card">
-        <div style="font-size:18px;margin-bottom:4px;">${k.icon}</div>
-        <div style="font-size:15px;font-weight:800;color:var(--c-navy);font-family:monospace">${k.val}</div>
-        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.04em;">${k.lbl}</div>
-      </div>`).join('')}
-    </div>
+  // Compteurs onglets
+  const dtSim = document.getElementById('dt-sim-count');
+  const dtDoc = document.getElementById('dt-doc-count');
+  if (dtSim) dtSim.textContent = `(${p.simulations?.length||0})`;
+  if (dtDoc) dtDoc.textContent = `(${p.documents?.length||0})`;
 
-    <!-- Contact -->
-    ${p.contact_nom||p.contact_email?`<div class="client-drawer-section">
-      <div class="client-drawer-section-title">Contact</div>
-      <div style="background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:12px;font-size:13px;">
-        ${p.contact_nom?`<div style="font-weight:600;color:var(--c-navy);">${p.contact_prenom||''} ${p.contact_nom} <span style="font-weight:400;color:var(--c-text-3);">${p.contact_fonction||''}</span></div>`:''}
-        ${p.contact_email?`<div style="color:var(--c-text-2);margin-top:3px;">✉️ ${p.contact_email}</div>`:''}
-        ${p.contact_telephone?`<div style="color:var(--c-text-2);">📞 ${p.contact_telephone}</div>`:''}
+  // Reset onglet actif au premier
+  document.querySelectorAll('.drawer-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+
+  // ── ONGLET 1 : Infos
+  const tabInfos = document.getElementById('drawer-tab-infos');
+  const ICON_TYPES = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎' };
+  if (tabInfos) tabInfos.innerHTML = `
+    <div style="padding:16px 20px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0;">
+        ${[
+          {i:'💰', v:c.total_investissement>0?fek(c.total_investissement):'—', l:'Investissement'},
+          {i:'🎯', v:c.total_aides>0?fek(c.total_aides):'—', l:'Aides totales'},
+          {i:'📈', v:c.roi_moyen>0?c.roi_moyen+'m':'—', l:'ROI moyen'},
+        ].map(k=>`<div style="padding:10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;text-align:center;">
+          <div style="font-size:16px;margin-bottom:3px;">${k.i}</div>
+          <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
+          <div style="font-size:9px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${k.l}</div>
+        </div>`).join('')}
       </div>
-    </div>`:'' }
+    </div>
+    <div style="padding:16px 20px;">
+      <div class="info-grid-2">
+        ${[
+          {l:'Contact',v:(p.contact_prenom||'')+' '+(p.contact_nom||'')||'—'},
+          {l:'Fonction',v:p.contact_fonction||'—'},
+          {l:'Email',v:p.contact_email||'—'},
+          {l:'Téléphone',v:p.contact_telephone||'—'},
+          {l:'Secteur / NAF',v:p.libelle_naf?p.code_naf+' — '+p.libelle_naf:(p.code_naf||'—')},
+          {l:'Taille',v:(p.taille||'—').toUpperCase()},
+          {l:'Effectifs',v:p.effectifs||'—'},
+          {l:'Ville',v:p.ville?p.code_postal+' '+p.ville:'—'},
+          {l:'Source',v:p.source||'—'},
+          {l:'Créé le',v:fd(p.created_at)},
+        ].map(f=>`<div class="info-field"><div class="if-label">${f.l}</div><div class="if-val">${f.v}</div></div>`).join('')}
+      </div>
+      ${p.next_action_label?`<div style="margin-top:14px;padding:12px;background:${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.06)':'rgba(13,148,136,.06)'};border:1px solid ${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.2)':'rgba(13,148,136,.2)'};border-radius:8px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-teal);font-weight:700;margin-bottom:4px;">Prochaine action</div>
+        <div style="font-size:13px;font-weight:600;">${p.prochaine_action||'—'}</div>
+      </div>`:''}
+      ${p.notes?`<div style="margin-top:14px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);font-weight:700;margin-bottom:6px;">Notes</div>
+        <textarea id="drawer-notes" rows="3" placeholder="Ajouter une note…" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box;background:var(--c-surface);">${p.notes||''}</textarea>
+        <button onclick="saveDrawerNotes()" style="margin-top:6px;padding:7px 14px;background:var(--c-navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
+      </div>`:''}
+    </div>`;
 
-    <!-- Simulations -->
-    <div class="client-drawer-section">
-      <div class="client-drawer-section-title">Simulations (${p.simulations?.length||0})</div>
-      ${!p.simulations?.length?`<div style="padding:16px;text-align:center;font-size:12px;color:var(--c-text-3);background:#fff;border:1px dashed var(--c-border);border-radius:8px;">Aucune simulation liée</div>`
+  // ── ONGLET 2 : Simulations
+  const tabSims = document.getElementById('drawer-tab-simulations');
+  if (tabSims) {
+    const SC2 = {brouillon:'#6b7280',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'};
+    const SL2 = {brouillon:'Brouillon',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'};
+    tabSims.innerHTML = `<div style="padding:16px 20px;">
+      ${!p.simulations?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
+        <div style="font-size:28px;margin-bottom:8px;">▣</div><div>Aucune simulation liée</div>
+        <div style="font-size:12px;margin-top:4px;">Utilisez le Simulateur pour créer une simulation</div>
+      </div>`
       :p.simulations.map(s=>{
-        const inv = Number(s.parametres?.investissement)||0;
-        const sc2 = {brouillon:'#6b7280',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'}[s.statut]||'#6b7280';
+        const inv=Number(s.parametres?.investissement)||0;
+        const c2=SC2[s.statut]||'#6b7280';
         return `<div class="client-drawer-sim-row" onclick="loadSimFromDrawer('${s.id}')">
-          <div style="width:8px;height:8px;border-radius:4px;background:${sc2};flex-shrink:0;"></div>
+          <div style="width:8px;height:8px;border-radius:4px;background:${c2};flex-shrink:0;margin-top:3px;"></div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:12px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' investissement':'Simulation'}</div>
-            <div style="font-size:11px;color:var(--c-text-3);">${new Date(s.created_at).toLocaleDateString('fr-FR')} · ${s.montant_aides_total>0?fek(s.montant_aides_total)+' aides':'aucune aide'}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' · investissement':'Simulation'}</div>
+            <div style="font-size:11px;color:var(--c-text-3);">${fd(s.created_at)} · ${s.montant_aides_total>0?fek(s.montant_aides_total)+' d\'aides':'sans aide calculée'}</div>
           </div>
-          <span style="font-size:10px;font-weight:700;color:${sc2};background:${sc2}18;padding:2px 7px;border-radius:6px;">${{brouillon:'Brouillon',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'}[s.statut]||s.statut}</span>
-        </div>`;}).join('')}
-      <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}')" style="width:100%;margin-top:8px;padding:9px;border:2px dashed var(--c-teal);border-radius:8px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nouvelle simulation</button>
-    </div>
+          <span style="font-size:10px;font-weight:700;color:${c2};background:${c2}18;padding:2px 7px;border-radius:6px;flex-shrink:0;">${SL2[s.statut]||s.statut}</span>
+        </div>`;
+      }).join('')}
+      <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}')" style="width:100%;margin-top:10px;padding:10px;border:2px dashed var(--c-teal);border-radius:8px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nouvelle simulation pour ce client</button>
+    </div>`;
+  }
 
-    <!-- Notes -->
-    <div class="client-drawer-section">
-      <div class="client-drawer-section-title">Notes</div>
-      <textarea id="drawer-notes" rows="3" placeholder="Ajouter une note…" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box;background:#fff;">${p.notes||''}</textarea>
-      <button onclick="saveDrawerNotes()" style="margin-top:6px;padding:7px 14px;background:var(--c-navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
-    </div>
-  `;
+  // ── ONGLET 3 : Historique
+  const tabHist = document.getElementById('drawer-tab-historique');
+  if (tabHist) {
+    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤' };
+    tabHist.innerHTML = `<div style="padding:16px 20px;">
+      ${!p.history?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">Aucun événement enregistré</div>`
+      :p.history.slice().reverse().map(h=>`<div class="timeline-entry">
+        <div class="te-icon">${ICONS[h.type]||'•'}</div>
+        <div style="flex:1;"><div class="te-msg">${h.msg||h.action||'—'}</div><div class="te-date">${fd(h.date||h.created_at)}</div></div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // ── ONGLET 4 : Documents
+  const tabDocs = document.getElementById('drawer-tab-documents');
+  if (tabDocs) {
+    const iconFor = n => n?.endsWith('.pdf')?'📕':n?.endsWith('.xlsx')||n?.endsWith('.xls')?'📊':'📄';
+    tabDocs.innerHTML = `<div style="padding:16px 20px;">
+      ${!p.documents?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
+        <div style="font-size:28px;margin-bottom:8px;">📄</div><div>Aucun document</div>
+      </div>`
+      :p.documents.map(doc=>`<div class="doc-entry">
+        <div class="doc-icon-box">${iconFor(doc.nom)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.nom}</div>
+          <div style="font-size:11px;color:var(--c-text-3);">${fd(doc.created_at)} · ${doc.type_document||'document'}</div>
+        </div>
+        <span style="font-size:10px;color:var(--c-text-3);">${doc.statut||'—'}</span>
+      </div>`).join('')}
+      <div style="margin-top:12px;padding:10px;border:2px dashed var(--c-border);border-radius:8px;text-align:center;font-size:12px;color:var(--c-text-3);">📎 Upload disponible depuis le Dossier</div>
+    </div>`;
+  }
 }
 
 // Changer le statut depuis le drawer
@@ -7138,8 +7614,8 @@ async function updateClientStatut(newStatut) {
         _drawerClientData.needs_admin_review = newStatut === 'dossier_depose';
         renderDrawerContent(_drawerClientData);
       }
-      // Rafraîchir la liste Clients
-      setTimeout(renderClientsPage, 300);
+      // Rafraîchir Clients + Pipeline (synchronisation bidirectionnelle)
+      setTimeout(() => { renderClientsPage(); if (pageCourante === 'pipeline') renderPipelinePage(); }, 300);
     }
   } catch(e) { showToast('Erreur : '+e.message, 'error'); }
   if (select) { select.disabled = false; select.value = ''; }
