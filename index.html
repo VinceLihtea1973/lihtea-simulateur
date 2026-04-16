@@ -7563,7 +7563,7 @@ function renderDrawerContent(p) {
         <div id="doc-preview-${doc.id}" style="display:none;margin:-2px 0 8px 42px;padding:10px 12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:12px;color:var(--c-text-2);">
           <div style="font-weight:600;margin-bottom:4px;">📋 ${doc.nom}</div>
           <div style="color:var(--c-text-3);line-height:1.6;">${doc.description||'Aucune description'}</div>
-          <div style="margin-top:6px;color:var(--c-text-3);">Créé le ${fd(doc.created_at)}${doc.simulation_id?` · <span style="color:var(--c-teal);cursor:pointer;font-weight:600;" onclick="downloadDoc('${doc.simulation_id}','${doc.nom}','${doc.mime_type||'')">Regénérer le fichier →</span>`:''}
+          <div style="margin-top:6px;color:var(--c-text-3);">Créé le ${fd(doc.created_at)}${doc.simulation_id ? ' &nbsp;<span style="color:var(--c-teal);cursor:pointer;font-weight:600;" onclick="downloadDoc(this)" data-sim="'+doc.simulation_id+'" data-nom="'+doc.nom+'" data-mime="'+(doc.mime_type||'')+'">Regénérer le fichier →</span>' : ''}
           </div>
         </div>`).join('')}
       <div style="margin-top:12px;padding:10px;border:2px dashed var(--c-border);border-radius:8px;text-align:center;font-size:12px;color:var(--c-text-3);">📎 Upload disponible depuis le Dossier</div>
@@ -7625,7 +7625,12 @@ function previewDocInfo(docId) {
 }
 
 // ─── Télécharger/regénérer un document ───
-async function downloadDoc(simId, nom, mimeType) {
+async function downloadDoc(simIdOrEl, nom, mimeType) {
+  // Accepte soit un élément DOM (data-sim), soit des valeurs directes
+  let simId = simIdOrEl, docNom = nom, docMime = mimeType;
+  if (simIdOrEl && typeof simIdOrEl === 'object' && simIdOrEl.dataset) {
+    simId = simIdOrEl.dataset.sim; docNom = simIdOrEl.dataset.nom; docMime = simIdOrEl.dataset.mime;
+  }
   if (!simId) {
     showToast('Aucune simulation liée — regénérez depuis le simulateur', 'warning');
     return;
@@ -7657,7 +7662,7 @@ async function downloadDoc(simId, nom, mimeType) {
     closeClientDrawer();
     switchPage('resultats', document.querySelector('[data-page="resultats"]'));
 
-    const isExcel = mimeType?.includes('spreadsheet') || nom?.endsWith('.xlsx');
+    const isExcel = docMime?.includes('spreadsheet') || docNom?.endsWith('.xlsx');
     showToast('Simulation restaurée — cliquez sur ' + (isExcel ? 'Excel' : 'PDF') + ' pour télécharger', 'success');
     // Auto-déclencher l'export après un court délai (laisser recalculer() finir)
     setTimeout(() => { isExcel ? exporterExcel() : exporterPDF(); }, 600);
