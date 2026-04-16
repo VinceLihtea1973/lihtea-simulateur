@@ -5153,6 +5153,12 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     console.warn('[Sync] No auth token — cannot create prospect');
     return null;
   }
+  // S'assurer que gef_internal_user_id est résolu avant d'insérer (évite violation FK user_id)
+  if (!localStorage.getItem('gef_internal_user_id')) {
+    try { await resolveInternalUserId(); } catch(e) { console.warn('[Sync] resolveInternalUserId failed:', e); }
+  }
+  // Utiliser UNIQUEMENT l'ID interne (users.id), jamais l'auth UUID
+  const internalUserId = localStorage.getItem('gef_internal_user_id') || null;
   try {
     // Search existing prospect by SIREN or name
     const searchRes = await fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() });
@@ -5176,7 +5182,7 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     const d = currentClientData || {};
     const payload = {
       tenant_id: currentTenantId,
-      user_id: getCurrentUserId(),
+      user_id: internalUserId,   // FK valide : users.id ou null
       raison_sociale: d.raison_sociale || clientName,
       contact_email: clientEmail || null,
       siret: clientSiret || null,
