@@ -5099,14 +5099,29 @@ async function lookupClientSiren() {
       // Pré-remplir la taille
       const tailleSelect = document.getElementById('taille');
       if (tailleSelect && d.taille_calculee) tailleSelect.value = mapTailleInsee(d.taille_calculee);
-      // Afficher le badge
+
+      // ── Créer immédiatement la fiche client dans l'onglet Clients ──
+      const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
       if (badge) {
-        const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
-        badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — prospect créé automatiquement à la sauvegarde';
+        badge.textContent = '⏳ Création de la fiche client…';
         badge.style.display = 'block';
-        badge.style.color = 'var(--c-teal-bright)';
+        badge.style.color = 'var(--c-text-3)';
       }
-      showToast('Entreprise enrichie ✓', 'success');
+      const prospectId = await syncFindOrCreateProspect(
+        d.raison_sociale || siren, null, siren,
+        d.taille_calculee ? mapTailleInsee(d.taille_calculee) : 'pme'
+      );
+      if (badge) {
+        if (prospectId) {
+          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — fiche client créée';
+          badge.style.color = 'var(--c-teal-bright)';
+          showToast('Fiche client créée dans l\'onglet Clients ✓', 'success');
+        } else {
+          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' (connexion requise pour créer la fiche)';
+          badge.style.color = '#f59e0b';
+          showToast('Entreprise enrichie ✓ — connectez-vous pour créer la fiche client', 'warning');
+        }
+      }
     } else {
       const msg = json?.error || 'SIREN ' + siren + ' non trouvé (Pappers + INSEE)';
       if (badge) { badge.textContent = '⚠ ' + msg; badge.style.display = 'block'; badge.style.color = '#f59e0b'; }
