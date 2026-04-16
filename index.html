@@ -2008,13 +2008,10 @@
     .crm-kpi-card.kpi-won .crm-kpi-val { color: var(--c-green); }
     .crm-kpi-card.kpi-active .crm-kpi-val { color: var(--c-teal); }
 
-    .filters-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; padding: 12px 14px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
-    .filter-select { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--c-text-2); font-size: 12px; font-family: var(--font-body); cursor: pointer; outline: none; transition: border-color .15s; }
+    .filters-bar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; overflow-x: auto; }
+    .filter-select { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--c-text-2); font-size: 12px; font-family: var(--font-body); cursor: pointer; outline: none; transition: border-color .15s; white-space: nowrap; flex-shrink: 0; }
     .filter-select:focus { border-color: var(--c-teal); }
-    .filter-search { flex: 1; min-width: 160px; background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--c-text); font-size: 12px; font-family: var(--font-body); outline: none; transition: border-color .15s; }
-    .filter-search:focus { border-color: var(--c-teal); }
-    .filter-search::placeholder { color: var(--c-text-3); }
-    .filter-count { font-size: 12px; color: var(--c-text-3); margin-left: auto; white-space: nowrap; }
+    .filter-count { font-size: 12px; color: var(--c-text-3); white-space: nowrap; flex-shrink: 0; }
 
     .prospect-table { width: 100%; border-collapse: collapse; }
     .prospect-table th { text-align: left; padding: 10px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-3); border-bottom: 1px solid var(--c-border); font-weight: 600; white-space: nowrap; background: var(--c-bg); }
@@ -4563,60 +4560,63 @@
 
     <!-- PAGE: CLIENTS (Full-Width, table CRM) -->
     <div class="page" id="page-clients">
-      <div class="app">
 
-        <!-- En-tête + filtres compacts (même ligne) -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-          <h1 style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--c-navy);margin-right:6px;">Clients</h1>
-          <select id="cf-statut" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Tous les statuts</option>
-            <option value="nouveau">Nouveau</option>
-            <option value="qualifie">Qualifié</option>
-            <option value="en_discussion">En discussion</option>
-            <option value="proposition">Proposition</option>
-            <option value="negociation">Négociation</option>
-            <option value="dossier_depose">Dossier déposé</option>
-            <option value="gagne">Gagné</option>
-            <option value="perdu">Perdu</option>
-          </select>
-          <select id="cf-source" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Toutes les sources</option>
-            <option value="entrant">Entrant</option>
-            <option value="simulateur">Simulateur</option>
-            <option value="direct">Direct</option>
-            <option value="salon">Salon</option>
-            <option value="partenaire">Partenaire</option>
-            <option value="prospection">Prospection</option>
-          </select>
-          <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Toutes les tailles</option>
-            <option value="tpe">TPE</option>
-            <option value="pme">PME</option>
-            <option value="eti">ETI</option>
-            <option value="ge">GE</option>
-          </select>
-          <select id="cf-sort" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Tous les secteurs</option>
-            <option value="score_desc">↓ Score ICP</option>
-            <option value="invest_desc">↓ Investissement</option>
-            <option value="date_desc">↓ Dernière activité</option>
-            <option value="alert">⚠ Alertes d'abord</option>
-          </select>
-          <span id="clients-count" class="filter-count" style="margin-left:4px;"></span>
-          <div style="margin-left:auto;display:flex;gap:6px;">
-            <button onclick="renderClientsPage()" class="crm-btn crm-btn-ghost" style="padding:5px 10px;font-size:11px;">↻</button>
-            <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" class="crm-btn" style="padding:5px 12px;font-size:11px;">+ Nouvelle simulation</button>
-          </div>
-        </div>
-
-        <!-- Stats inline (hidden, updated by JS for sidebar badge) -->
-        <div id="clients-stats" style="display:none;"></div>
-
-        <!-- Table CRM pleine page -->
-        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);overflow:hidden;">
-          <div id="clients-list" style="overflow-x:auto;"></div>
-        </div>
+      <!-- Titre (exactement CRM V3) -->
+      <div style="margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--c-navy);">Clients</h2>
+        <p style="font-size:12px;color:var(--c-text-3);margin-top:2px;">Liste complète avec filtres avancés</p>
       </div>
+
+      <!-- Barre de filtres (CRM V3 — compact, pas de wrap forcé) -->
+      <div class="filters-bar">
+        <select id="cf-statut" onchange="_clientsApplyFilters()" class="filter-select">
+          <option value="">Tous les statuts</option>
+          <option value="nouveau">Nouveau</option>
+          <option value="qualifie">Qualifié</option>
+          <option value="en_discussion">En discussion</option>
+          <option value="proposition">Proposition</option>
+          <option value="negociation">Négociation</option>
+          <option value="dossier_depose">Dossier déposé</option>
+          <option value="gagne">Gagné</option>
+          <option value="perdu">Perdu</option>
+        </select>
+        <select id="cf-source" onchange="_clientsApplyFilters()" class="filter-select">
+          <option value="">Toutes les sources</option>
+          <option value="entrant">Entrant</option>
+          <option value="simulateur">Simulateur</option>
+          <option value="direct">Direct</option>
+          <option value="salon">Salon</option>
+          <option value="partenaire">Partenaire</option>
+          <option value="prospection">Prospection</option>
+        </select>
+        <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
+          <option value="">Toutes les tailles</option>
+          <option value="tpe">TPE</option>
+          <option value="pme">PME</option>
+          <option value="eti">ETI</option>
+          <option value="ge">GE</option>
+        </select>
+        <select id="cf-sort" onchange="_clientsApplyFilters()" class="filter-select">
+          <option value="">Tous les secteurs</option>
+          <option value="score_desc">↓ Score ICP</option>
+          <option value="invest_desc">↓ Investissement</option>
+          <option value="date_desc">↓ Récents d'abord</option>
+          <option value="alert">⚠ Alertes d'abord</option>
+        </select>
+        <span id="clients-count" class="filter-count"></span>
+        <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))"
+          style="margin-left:auto;padding:6px 12px;background:var(--c-teal);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">
+          + Simulation
+        </button>
+      </div>
+
+      <!-- Tableau clients (pleine largeur, CRM V3 style) -->
+      <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);overflow:hidden;">
+        <div id="clients-list" style="overflow-x:auto;"></div>
+      </div>
+
+      <!-- Stats (masqué, sert uniquement au badge sidebar) -->
+      <div id="clients-stats" style="display:none;"></div>
     </div>
 
     <!-- PAGE: RESSOURCES (hub — navigue vers les vraies pages sans cloner) -->
@@ -7215,13 +7215,12 @@ let _clientsSort = 'score_desc';
 
 async function renderClientsPage() {
   const container = document.getElementById('clients-list');
-  const statsEl = document.getElementById('clients-stats');
   if (!container) return;
   if (!localStorage.getItem('gef_auth_token')) {
-    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise</div>';
+    container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise pour accéder au portefeuille clients.</div>';
     return;
   }
-  container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
+  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:14px;height:14px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>';
   try {
     const [prosp, sims] = await Promise.all([
       fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
@@ -7230,13 +7229,14 @@ async function renderClientsPage() {
     const allSims = sims?.data || [];
     _clientsAll = (prosp?.data || []).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
-      const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
-      const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total)||0), 0);
-      const lastContact = new Date(p.updated_at || p.created_at).getTime();
-      const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
+      const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
+      const daysInact = Math.floor((Date.now() - new Date(p.updated_at||p.created_at).getTime()) / 86400000);
       const score = calcScoreICP({ ...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact });
-      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score, hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score,
+               hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
     });
+    // Badge alerte sidebar
     const alertCount = _clientsAll.filter(c => c.hasAlert).length;
     const badge = document.getElementById('badge-clients-alerte');
     if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
