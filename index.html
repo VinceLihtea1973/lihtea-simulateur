@@ -5224,8 +5224,11 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
 
 // --- Sync simulation to Supabase ---
 async function syncSimulationToSupabase(simData) {
-  const userId = getCurrentUserId();
-  if (!userId) { console.log('[Sync] No auth user, skip simulation sync'); return null; }
+  if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip simulation sync'); return null; }
+  if (!localStorage.getItem('gef_internal_user_id')) {
+    try { await resolveInternalUserId(); } catch(e) {}
+  }
+  const userId = localStorage.getItem('gef_internal_user_id') || null;
   try {
     const prospectId = await syncFindOrCreateProspect(
       simData.clientName, null, currentClientSiret, simData.params?.taille
@@ -5292,8 +5295,12 @@ async function syncSimulationToSupabase(simData) {
 
 // --- Sync proposition (PDF/Excel export) to Supabase ---
 async function syncPropositionToSupabase(propData) {
-  const userId = getCurrentUserId();
-  if (!userId) { console.log('[Sync] No auth user, skip proposition sync'); return null; }
+  if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip proposition sync'); return null; }
+  // Résoudre l'ID interne si nécessaire (évite violation FK user_id)
+  if (!localStorage.getItem('gef_internal_user_id')) {
+    try { await resolveInternalUserId(); } catch(e) { console.warn('[Sync] resolveInternalUserId failed:', e); }
+  }
+  const userId = localStorage.getItem('gef_internal_user_id') || null;
   try {
     const prospectId = await syncFindOrCreateProspect(
       propData.clientName, null, currentClientSiret,
@@ -5348,6 +5355,26 @@ async function syncPropositionToSupabase(propData) {
       );
     }
 
+    // Enregistrer la proposition comme document (visible dans onglet Documents du drawer)
+    if (prospectId) {
+      const docNom = 'Proposition_' + (propData.clientName || 'Client').replace(/\s+/g,'-') + '_' + new Date().toISOString().slice(0,10) + '.' + (propData.type || 'pdf');
+      fetch(ADMIN_API + '/documents', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          tenant_id: currentTenantId,
+          prospect_id: prospectId,
+          simulation_id: simId || null,
+          nom: docNom,
+          type_document: 'proposition',
+          description: 'Proposition commerciale générée — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
+          statut: 'genere',
+          date_document: new Date().toISOString().slice(0,10),
+          mime_type: propData.type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf'
+        })
+      }).catch(e => console.warn('[Sync] Document creation error:', e));
+    }
+
     // Update prospect status and montant_potentiel
     if (prospectId) {
       fetch(ADMIN_API + '/prospects/' + prospectId, {
@@ -5371,8 +5398,8 @@ async function syncPropositionToSupabase(propData) {
 
 // --- Log activity to Supabase ---
 async function syncLogActivity(type, titre, simulationId, prospectId) {
-  const userId = getCurrentUserId();
-  if (!userId) return;
+  if (!localStorage.getItem('gef_auth_token')) return;
+  const userId = localStorage.getItem('gef_internal_user_id') || null;
   try {
     await fetch(ADMIN_API + '/activites', {
       method: 'POST',
@@ -7493,15 +7520,16 @@ function renderDrawerContent(p) {
     </div>`;
   }
 
-  // ── ONGLET 3 : Historique
+  // ── ONGLET 3 : Historique (source : activites de l'API)
   const tabHist = document.getElementById('drawer-tab-historique');
   if (tabHist) {
-    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤' };
+    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤', proposition:'📋', connexion:'🔑', update:'✏️' };
+    const acts = p.activites || [];
     tabHist.innerHTML = `<div style="padding:16px 20px;">
-      ${!p.history?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">Aucun événement enregistré</div>`
-      :p.history.slice().reverse().map(h=>`<div class="timeline-entry">
+      ${!acts.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">Aucun événement enregistré</div>`
+      :acts.slice().reverse().map(h=>`<div class="timeline-entry">
         <div class="te-icon">${ICONS[h.type]||'•'}</div>
-        <div style="flex:1;"><div class="te-msg">${h.msg||h.action||'—'}</div><div class="te-date">${fd(h.date||h.created_at)}</div></div>
+        <div style="flex:1;"><div class="te-msg">${h.titre||h.description||'—'}</div><div class="te-date">${fd(h.date_realisee||h.created_at)}</div></div>
       </div>`).join('')}
     </div>`;
   }
