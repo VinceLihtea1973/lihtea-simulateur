@@ -5080,11 +5080,16 @@ async function lookupClientSiren() {
     showToast('SIREN invalide — 9 chiffres requis', 'warning');
     return;
   }
+  // Vérification auth avant enrichissement
+  if (!localStorage.getItem('gef_auth_token')) {
+    showToast('Connectez-vous pour enrichir la fiche client', 'warning');
+    return;
+  }
   const btn = document.getElementById('btn-siren-lookup');
   if (btn) { btn.textContent = '⏳ Recherche…'; btn.disabled = true; }
   try {
     const res = await fetch(CONNECTORS_API + '/siret?siret=' + siren, {
-      headers: { 'apikey': SUPABASE_ANON }
+      headers: getAuthHeaders()
     });
     const json = await res.json();
     console.log('[SIREN] Response:', res.status, JSON.stringify(json).slice(0, 200));
@@ -5115,11 +5120,14 @@ async function lookupClientSiren() {
         if (prospectId) {
           badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — fiche client créée';
           badge.style.color = 'var(--c-teal-bright)';
-          showToast('Fiche client créée dans l\'onglet Clients ✓', 'success');
+          showToast('Fiche client créée dans l\'onglet Clients et Pipeline ✓', 'success');
+          // Rafraîchir la liste clients et le pipeline si ouverts
+          if (pageCourante === 'clients') setTimeout(() => renderClientsPage(), 400);
+          if (pageCourante === 'pipeline') setTimeout(() => renderPipelinePage(), 400);
         } else {
-          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' (connexion requise pour créer la fiche)';
+          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — erreur création fiche (voir console)';
           badge.style.color = '#f59e0b';
-          showToast('Entreprise enrichie ✓ — connectez-vous pour créer la fiche client', 'warning');
+          showToast('Enrichissement OK mais création fiche échouée — vérifiez la connexion', 'warning');
         }
       }
     } else {
@@ -5140,9 +5148,18 @@ async function lookupClientSiren() {
 // --- Find or create prospect from client info ---
 async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, clientTaille) {
   if (!clientName || clientName === 'Sans nom') return null;
+  const token = localStorage.getItem('gef_auth_token');
+  if (!token) {
+    console.warn('[Sync] No auth token — cannot create prospect');
+    return null;
+  }
   try {
-    // Search existing prospect by name
+    // Search existing prospect by SIREN or name
     const searchRes = await fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() });
+    if (!searchRes.ok) {
+      console.warn('[Sync] Search prospects failed:', searchRes.status, await searchRes.text());
+      return null;
+    }
     const searchData = await searchRes.json();
     const prospects = searchData?.data || [];
     // Déduplication : SIREN en priorité, puis nom
@@ -5150,37 +5167,49 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
       (clientSiret && (p.siret === clientSiret || p.siren === clientSiret)) ||
       p.raison_sociale?.toLowerCase() === clientName.toLowerCase()
     );
-    if (existing) return existing.id;
+    if (existing) {
+      console.log('[Sync] Existing prospect found:', existing.id);
+      return existing.id;
+    }
 
     // Construire le payload avec données enrichies si disponibles
     const d = currentClientData || {};
+    const payload = {
+      tenant_id: currentTenantId,
+      user_id: getCurrentUserId(),
+      raison_sociale: d.raison_sociale || clientName,
+      contact_email: clientEmail || null,
+      siret: clientSiret || null,
+      siren: clientSiret ? clientSiret.slice(0, 9) : null,
+      code_naf: d.code_naf || null,
+      libelle_naf: d.libelle_naf || null,
+      taille: d.taille_calculee ? mapTailleInsee(d.taille_calculee) : (clientTaille || 'pme'),
+      effectifs: d.effectifs || null,
+      adresse: d.adresse || null,
+      code_postal: d.code_postal || null,
+      ville: d.ville || null,
+      region: d.region || null,
+      source: 'entrant',
+      statut: 'nouveau',
+      score_lead: clientSiret ? 50 : 30,
+      montant_potentiel: 0,
+      date_premier_contact: new Date().toISOString().slice(0, 10)
+    };
+    console.log('[Sync] Creating prospect:', payload.raison_sociale, '/ tenant:', payload.tenant_id, '/ user:', payload.user_id);
     const createRes = await fetch(ADMIN_API + '/prospects', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        tenant_id: currentTenantId,
-        user_id: getCurrentUserId(),
-        raison_sociale: d.raison_sociale || clientName,
-        contact_email: clientEmail || null,
-        siret: clientSiret || null,
-        siren: clientSiret ? clientSiret.slice(0, 9) : null,
-        code_naf: d.code_naf || null,
-        libelle_naf: d.libelle_naf || null,
-        taille: d.taille_calculee ? mapTailleInsee(d.taille_calculee) : (clientTaille || 'pme'),
-        effectifs: d.effectifs || null,
-        adresse: d.adresse || null,
-        code_postal: d.code_postal || null,
-        ville: d.ville || null,
-        region: d.region || null,
-        source: 'entrant',
-        statut: 'nouveau',
-        score_lead: clientSiret ? 50 : 30,
-        montant_potentiel: 0,
-        date_premier_contact: new Date().toISOString().slice(0, 10)
-      })
+      body: JSON.stringify(payload)
     });
+    if (!createRes.ok) {
+      const errBody = await createRes.text();
+      console.warn('[Sync] Create prospect failed:', createRes.status, errBody);
+      return null;
+    }
     const created = await createRes.json();
-    return created?.data?.id || created?.data?.[0]?.id || null;
+    const newId = created?.data?.id || created?.data?.[0]?.id || null;
+    console.log('[Sync] Prospect created:', newId);
+    return newId;
   } catch(e) {
     console.warn('[Sync] Prospect sync error:', e);
     return null;
