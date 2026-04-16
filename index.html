@@ -5366,9 +5366,9 @@ async function syncPropositionToSupabase(propData) {
           prospect_id: prospectId,
           simulation_id: simId || null,
           nom: docNom,
-          type_document: 'proposition',
-          description: 'Proposition commerciale générée — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
-          statut: 'genere',
+          type_document: 'devis',
+          description: 'Proposition commerciale ' + (propData.type||'').toUpperCase() + ' — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
+          statut: 'envoye',
           date_document: new Date().toISOString().slice(0,10),
           mime_type: propData.type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf'
         })
