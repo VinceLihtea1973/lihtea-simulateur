@@ -4565,24 +4565,9 @@
     <div class="page" id="page-clients">
       <div class="app">
 
-        <!-- En-tête CRM -->
-        <div class="crm-page-header">
-          <div>
-            <h1>Clients</h1>
-            <p>Portefeuille commercial · Filtres avancés · Score ICP · Drawer 360°</p>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button onclick="renderClientsPage()" class="crm-btn crm-btn-ghost">↻ Actualiser</button>
-            <button onclick="switchPage('simulateur')" class="crm-btn">+ Nouvelle simulation</button>
-          </div>
-        </div>
-
-        <!-- KPIs -->
-        <div id="clients-stats" class="crm-kpi-row"></div>
-
-        <!-- Filtres avancés CRM -->
-        <div class="filters-bar">
-          <input id="cf-search" type="text" class="filter-search" placeholder="🔍  Rechercher un client…" oninput="_clientsApplyFilters()">
+        <!-- En-tête + filtres compacts (même ligne) -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <h1 style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--c-navy);margin-right:6px;">Clients</h1>
           <select id="cf-statut" onchange="_clientsApplyFilters()" class="filter-select">
             <option value="">Tous les statuts</option>
             <option value="nouveau">Nouveau</option>
@@ -4591,18 +4576,11 @@
             <option value="proposition">Proposition</option>
             <option value="negociation">Négociation</option>
             <option value="dossier_depose">Dossier déposé</option>
-            <option value="gagne">Gagné ✓</option>
+            <option value="gagne">Gagné</option>
             <option value="perdu">Perdu</option>
           </select>
-          <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Toutes tailles</option>
-            <option value="tpe">TPE</option>
-            <option value="pme">PME</option>
-            <option value="eti">ETI</option>
-            <option value="ge">GE</option>
-          </select>
           <select id="cf-source" onchange="_clientsApplyFilters()" class="filter-select">
-            <option value="">Toutes sources</option>
+            <option value="">Toutes les sources</option>
             <option value="entrant">Entrant</option>
             <option value="simulateur">Simulateur</option>
             <option value="direct">Direct</option>
@@ -4610,16 +4588,31 @@
             <option value="partenaire">Partenaire</option>
             <option value="prospection">Prospection</option>
           </select>
+          <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
+            <option value="">Toutes les tailles</option>
+            <option value="tpe">TPE</option>
+            <option value="pme">PME</option>
+            <option value="eti">ETI</option>
+            <option value="ge">GE</option>
+          </select>
           <select id="cf-sort" onchange="_clientsApplyFilters()" class="filter-select">
+            <option value="">Tous les secteurs</option>
             <option value="score_desc">↓ Score ICP</option>
             <option value="invest_desc">↓ Investissement</option>
             <option value="date_desc">↓ Dernière activité</option>
             <option value="alert">⚠ Alertes d'abord</option>
           </select>
-          <span id="clients-count" class="filter-count"></span>
+          <span id="clients-count" class="filter-count" style="margin-left:4px;"></span>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button onclick="renderClientsPage()" class="crm-btn crm-btn-ghost" style="padding:5px 10px;font-size:11px;">↻</button>
+            <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" class="crm-btn" style="padding:5px 12px;font-size:11px;">+ Nouvelle simulation</button>
+          </div>
         </div>
 
-        <!-- Table CRM -->
+        <!-- Stats inline (hidden, updated by JS for sidebar badge) -->
+        <div id="clients-stats" style="display:none;"></div>
+
+        <!-- Table CRM pleine page -->
         <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);overflow:hidden;">
           <div id="clients-list" style="overflow-x:auto;"></div>
         </div>
@@ -7267,21 +7260,13 @@ const STATUT_STAGES = {
 
 function _renderClientsTable() {
   const container = document.getElementById('clients-list');
-  const statsEl   = document.getElementById('clients-stats');
   const countEl   = document.getElementById('clients-count');
-  const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':n>0?Math.round(n)+'€':'—';
   const fd  = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
-
-  const search = (document.getElementById('cf-search')?.value||'').toLowerCase().trim();
 
   let filtered = _clientsAll.filter(c => {
     if (_clientsFilterStatut && c.statut !== _clientsFilterStatut) return false;
     if (_clientsFilterTaille && c.taille !== _clientsFilterTaille) return false;
     if (_clientsFilterSource && c.source !== _clientsFilterSource) return false;
-    if (search) {
-      const hay = [c.raison_sociale, c.contact_nom, c.contact_prenom, c.siren, c.ville].join(' ').toLowerCase();
-      if (!hay.includes(search)) return false;
-    }
     return true;
   });
 
@@ -7290,66 +7275,42 @@ function _renderClientsTable() {
   else if (_clientsSort === 'date_desc')   filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
   else if (_clientsSort === 'alert')  filtered.sort((a,b) => b.hasAlert - a.hasAlert);
 
-  // ─── KPI cards ───────────────────────────────────────────────────
-  if (statsEl) {
-    const all = _clientsAll;
-    const totalInv = all.reduce((s,c)=>s+c.totalInvest,0);
-    statsEl.innerHTML = [
-      { lbl:'Total clients', val: all.length,                                        cls:'' },
-      { lbl:'En discussion',  val: all.filter(c=>c.statut==='en_discussion').length, cls:'kpi-active' },
-      { lbl:'Dossiers déposés',val: all.filter(c=>c.statut==='dossier_depose').length,cls:'' },
-      { lbl:'Gagnés',          val: all.filter(c=>c.statut==='gagne').length,         cls:'kpi-won' },
-      { lbl:'Alertes',         val: all.filter(c=>c.hasAlert).length,                cls:'kpi-alert' },
-      { lbl:'Volume potentiel',val: fek(totalInv),                                   cls:'' },
-    ].map(({lbl,val,cls}) => `<div class="crm-kpi-card ${cls}">
-      <div class="crm-kpi-label">${lbl}</div>
-      <div class="crm-kpi-val">${val}</div>
-    </div>`).join('');
-  }
-
-  if (countEl) countEl.textContent = filtered.length + ' client' + (filtered.length>1?'s':'');
+  if (countEl) countEl.textContent = filtered.length + ' prospect' + (filtered.length>1?'s':'');
 
   if (filtered.length === 0) {
     container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);font-size:13px;">Aucun client ne correspond aux filtres.</div>';
     return;
   }
 
+  // Columns: Score | Entreprise | Contact | Secteur | Ville | Statut | Dernier contact | Action
   container.innerHTML = `<table class="prospect-table">
     <thead><tr>
-      <th style="width:52px;">Score</th>
+      <th>Score</th>
       <th>Entreprise</th>
       <th>Contact</th>
-      <th>Secteur&nbsp;/&nbsp;Taille</th>
+      <th>Secteur</th>
+      <th>Ville</th>
       <th>Statut</th>
-      <th>Aides potentielles</th>
-      <th>Sims</th>
-      <th>Dernière activité</th>
-      <th></th>
+      <th>Dernier contact</th>
+      <th>Action</th>
     </tr></thead>
     <tbody>
     ${filtered.map(c => {
       const stage   = STATUT_STAGES[c.statut] || { label: c.statut||'—', bg:'rgba(107,114,128,0.1)', color:'#6b7280' };
       const overdue = c.hasAlert;
-      const contact = c.contact_nom ? [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') : '—';
-      const taille  = c.taille ? `<span style="font-size:10px;background:var(--c-bg);border:1px solid var(--c-border);padding:1px 6px;border-radius:4px;margin-top:3px;display:inline-block;">${c.taille.toUpperCase()}</span>` : '';
-      const secteur = c.code_naf || c.secteur || '—';
+      const contact = [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') || '—';
+      const secteur = c.libelle_naf || c.code_naf || '—';
+      const ville   = c.ville || '—';
       return `<tr onclick="openClientDrawer('${c.id}')">
-        <td><span class="score-badge ${scoreClass(c.score)}">★ ${c.score}</span></td>
-        <td style="font-weight:600;color:var(--c-navy);max-width:180px;">
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.raison_sociale||'—'}</span>
-            ${overdue ? '<span class="overdue-dot"></span>' : ''}
-          </div>
-          ${c.siren ? `<div style="font-size:10px;color:var(--c-text-3);font-family:var(--font-mono);">SIREN ${c.siren}</div>` : ''}
-        </td>
-        <td style="color:var(--c-text-2);font-size:12px;">${contact}</td>
-        <td style="font-size:12px;color:var(--c-text-2);">${secteur}<br>${taille}</td>
+        <td><span class="score-badge ${scoreClass(c.score)}">${c.score}</span></td>
+        <td style="font-weight:600;color:var(--c-navy);">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</td>
+        <td style="font-size:12px;">${contact}</td>
+        <td style="font-size:12px;color:var(--c-text-3);">${secteur}</td>
+        <td style="font-size:12px;color:var(--c-text-3);">${ville}</td>
         <td><span class="stage-badge" style="background:${stage.bg};color:${stage.color};">${stage.label}</span></td>
-        <td style="font-weight:600;color:var(--c-teal);font-family:var(--font-mono);font-size:12px;">${fek(c.totalAides)}</td>
-        <td style="text-align:center;font-size:13px;color:${c.nb_sims>0?'var(--c-navy)':'var(--c-text-3)'};">${c.nb_sims||'—'}</td>
         <td style="font-size:12px;color:var(--c-text-3);">${fd(c.updated_at||c.created_at)}</td>
         <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')"
-            style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;padding:12px 16px;">
+            style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;">
           ⚡ Simuler
         </td>
       </tr>`;
@@ -7375,11 +7336,27 @@ async function openClientDrawer(prospectId) {
   _drawerClientId = prospectId;
   const overlay = document.getElementById('client-drawer-overlay');
   const drawer  = document.getElementById('client-drawer');
-  const body    = document.getElementById('drawer-body');
   if (!overlay || !drawer) return;
   overlay.classList.add('open');
   drawer.classList.add('open');
-  body.innerHTML = `<div style="padding:40px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>`;
+
+  // ── Afficher le spinner DANS le premier onglet sans détruire les autres divs
+  const tabInfos = document.getElementById('drawer-tab-infos');
+  const tabSims  = document.getElementById('drawer-tab-simulations');
+  const tabHist  = document.getElementById('drawer-tab-historique');
+  const tabDocs  = document.getElementById('drawer-tab-documents');
+  if (tabInfos) tabInfos.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Chargement…</div>';
+  if (tabSims)  tabSims.innerHTML  = '';
+  if (tabHist)  tabHist.innerHTML  = '';
+  if (tabDocs)  tabDocs.innerHTML  = '';
+  // Réinitialiser sur le premier onglet
+  document.querySelectorAll('.drawer-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.drawer-tab-content').forEach((c,i) => c.classList.toggle('active', i===0));
+  // Reset header
+  document.getElementById('drawer-nom').textContent = '…';
+  document.getElementById('drawer-siren').textContent = '';
+  document.getElementById('drawer-ville').textContent = '';
+
   try {
     const res  = await fetch(ADMIN_API + '/prospects/' + prospectId + '/detail', { headers: getAuthHeaders() });
     const data = await res.json();
@@ -7388,7 +7365,7 @@ async function openClientDrawer(prospectId) {
     _drawerClientData = p;
     renderDrawerContent(p);
   } catch(e) {
-    body.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
+    if (tabInfos) tabInfos.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
   }
 }
 
@@ -7432,9 +7409,6 @@ function renderDrawerContent(p) {
   const dtDoc = document.getElementById('dt-doc-count');
   if (dtSim) dtSim.textContent = `(${p.simulations?.length||0})`;
   if (dtDoc) dtDoc.textContent = `(${p.documents?.length||0})`;
-
-  // Reset onglet actif au premier
-  document.querySelectorAll('.drawer-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
 
   // ── ONGLET 1 : Infos
   const tabInfos = document.getElementById('drawer-tab-infos');
