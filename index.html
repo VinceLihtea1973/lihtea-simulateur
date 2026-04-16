@@ -7031,7 +7031,8 @@ async function renderSavedSimulations() {
         const aides = s.montant_aides_total || s.resultats?.total_aides || 0;
         const pct = inv > 0 ? Math.round(aides/inv*100) : 0;
         const id = JSON.stringify(s.id);
-        return `<div class="saved-sim-card" onclick="loadSimulationFromAPI(window.__cloudSim_${s.id})">
+        const safeKey = s.id.replace(/-/g, '');
+        return `<div class="saved-sim-card" onclick="loadSimulationFromAPI(window.__cloudSim_${safeKey})">
           <div class="saved-sim-info">
             <div class="saved-sim-name">${s.client_entreprise||s.client_nom||'Sans nom'}</div>
             <div class="saved-sim-meta">
@@ -7044,12 +7045,12 @@ async function renderSavedSimulations() {
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">${statusBadge(s.statut||'brouillon')}</div>
           <div class="saved-sim-actions">
-            <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulationFromAPI(window.__cloudSim_${s.id})">Charger</button>
+            <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulationFromAPI(window.__cloudSim_${safeKey})">Charger</button>
           </div>
         </div>`;
       }).join('');
-      // Expose cloud sims globally for click access
-      cloudSims.forEach(s => { window['__cloudSim_' + s.id] = s; });
+      // Expose cloud sims globally — clé sans tirets (UUID avec tirets = soustraction JS)
+      cloudSims.forEach(s => { window['__cloudSim_' + s.id.replace(/-/g, '')] = s; });
     }
     html += '</div>';
   }
