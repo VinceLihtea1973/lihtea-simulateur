@@ -4290,142 +4290,10 @@
     </div>
 
     <!-- PAGE: ÉLIGIBILITÉ -->
-    <div class="page" id="page-eligibilite">
-      <div class="app">
-<div class="card">
-          <div class="section-label">Scoring d'éligibilité par dispositif</div>
-          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
-            Évaluation automatique basée sur les paramètres saisis. Cliquez sur un dispositif pour voir le détail des critères.
-          </p>
-          <div class="scoring-grid" id="scoring-grid">
-            <!-- Généré dynamiquement par JS -->
-          </div>
-        </div>
-
-        <div class="scoring-summary" id="scoring-global-summary">
-          <!-- Généré dynamiquement par JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE: AIDES -->
-    <div class="page" id="page-aides">
-      <div class="app">
-<div class="card">
-          <div class="section-label">Dispositifs activés</div>
-          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
-            Activez / désactivez chaque aide selon l'éligibilité du projet de votre client.
-            Les montants sont recalculés en temps réel.
-          </p>
-
-          <div class="aide-row" onclick="toggleAide('cee')">
-            <div class="toggle on" id="toggle-cee"></div>
-            <div class="aide-info">
-              <div class="aide-name">
-                Prime CEE (P6 — 2026-2030)
-                <span class="info-pill" data-tip="Le cours CEE fluctue chaque mois sur le marché.&#10;&#10;Cours de référence :&#10;• Valeur par défaut simulateur : 8,00 €/MWh cumac (prudent)&#10;• Marché EMMY — déc. 2025 : 8,78 €/MWh cumac&#10;&#10;→ Modifier le cours depuis admin.lihtea.com&#10;&#10;Source : registre EMMY / C2E Market (mensuel).">?</span>
-              </div>
-              <div class="aide-desc" id="cee-desc">Fournisseur énergie → bénéficiaire. Fiches IND-UT standardisées.</div>
-            </div>
-            <div class="aide-montant" id="amt-cee">0 €</div>
-          </div>
-
-          <div class="aide-row" onclick="toggleAide('ademe')">
-            <div class="toggle on" id="toggle-ademe"></div>
-            <div class="aide-info">
-              <div class="aide-name">
-                Fonds Chaleur / DECARB FLASH ADEME
-                <span class="info-pill" data-tip="Le taux ADEME affiché est un PLAFOND indicatif, pas un montant garanti.&#10;&#10;L'ADEME calcule l'aide projet par projet pour équilibrer son économie. Le taux réel dépend :&#10;• Du type et de la taille de l'installation&#10;• Du secteur et de la région&#10;• De la taille de l'entreprise (PME bénéficient d'un bonus +10 à +20%)&#10;&#10;Conditions d'éligibilité Fonds Chaleur :&#10;• Production minimale de 1 200 MWh/an (chaleur)&#10;• Temps de retour brut > 3 ans&#10;• Audit énergétique préalable requis&#10;&#10;→ Contacter la Direction Régionale ADEME pour valider l'aide réelle.">?</span>
-              </div>
-              <div class="aide-desc" id="ademe-desc">Jusqu'à X% selon équipement — plafond indicatif. PME : bonus +10%.</div>
-            </div>
-            <div class="aide-montant" id="amt-ademe">0 €</div>
-          </div>
-
-          <div class="aide-row" onclick="toggleAide('bpi')">
-            <div class="toggle on" id="toggle-bpi"></div>
-            <div class="aide-info">
-              <div class="aide-name">Prêt Vert Bpifrance</div>
-              <div class="aide-desc">Réduction du taux (-0,8%/an) → économie sur les intérêts. Jusqu'à 1 M€.</div>
-            </div>
-            <div class="aide-montant" id="amt-bpi">0 €</div>
-          </div>
-
-          <div class="aide-row" onclick="toggleAide('feder')">
-            <div class="toggle" id="toggle-feder"></div>
-            <div class="aide-info">
-              <div class="aide-name">FEDER régional (si éligible)</div>
-              <div class="aide-desc">50% des investissements. Selon région et appel à projets en cours.</div>
-            </div>
-            <div class="aide-montant" id="amt-feder">0 €</div>
-          </div>
-
-          <hr class="divider">
-          <div class="total-row">
-            <span class="total-label">Total aides mobilisées</span>
-            <span class="total-val color-green" id="total-aides">0 €</span>
-          </div>
-          <div class="total-row" style="padding-top:4px;">
-            <span style="font-size:13px;color:var(--c-text-2);">Capital à financer (net)</span>
-            <span style="font-size:18px;font-weight:700;color:var(--c-navy);font-family:var(--font-mono);" id="cout-net-mini">0 €</span>
-          </div>
-        </div>
-
-        <!-- Pitch mode: simplified hero card -->
-        <div class="pitch-only" id="pitch-card">
-          <div class="pitch-card">
-            <div class="pitch-headline">Synthèse de votre projet</div>
-            <div class="pitch-metrics">
-              <div class="pitch-metric">
-                <div class="pitch-metric-label">Vous investissez</div>
-                <div class="pitch-metric-value white" id="pitch-invest">—</div>
-              </div>
-              <div class="pitch-metric">
-                <div class="pitch-metric-label">Vous payez</div>
-                <div class="pitch-metric-value gold" id="pitch-loyer">—</div>
-                <div class="pitch-metric-sub">par mois</div>
-              </div>
-              <div class="pitch-metric">
-                <div class="pitch-metric-label">Vous économisez</div>
-                <div class="pitch-metric-value teal" id="pitch-eco">—</div>
-                <div class="pitch-metric-sub">par mois en énergie</div>
-              </div>
-              <div class="pitch-metric">
-                <div class="pitch-metric-label">Aides obtenues</div>
-                <div class="pitch-metric-value teal" id="pitch-aides">—</div>
-                <div class="pitch-metric-sub" id="pitch-pct">— de l'investissement</div>
-              </div>
-            </div>
-            <div class="pitch-verdict" id="pitch-verdict"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Waterfall — Décomposition du financement</div>
-          <div id="waterfall-chart"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE: ORGANISMES -->
-    <div class="page" id="page-organismes">
-      <div class="app">
-<div class="section-label" style="margin-bottom:6px;">Aides & subventions disponibles</div>
-        <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">Dispositifs français et européens pour le remplacement d'équipements industriels énergivores.</p>
-
-        <div id="tab-organismes" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-          <button class="tab-btn active" onclick="filterOrganismes('all', this)">Tous</button>
-          <button class="tab-btn" onclick="filterOrganismes('calculable', this)">⚡ Calculables</button>
-          <button class="tab-btn" onclick="filterOrganismes('informatif', this)">📋 Informatifs</button>
-          <button class="tab-btn" onclick="filterOrganismes('france', this)">🇫🇷 France</button>
-          <button class="tab-btn" onclick="filterOrganismes('europe', this)">🇪🇺 Europe</button>
-        </div>
-
-        <div id="organismes-list">
-          <!-- Généré par JS -->
-        </div>
-      </div>
-    </div>
+    <!-- Les contenus aides/eligibilite/organismes sont maintenant dans page-ressources -->
+    <div class="page" id="page-eligibilite" style="display:none!important;"></div>
+    <div class="page" id="page-aides" style="display:none!important;"></div>
+    <div class="page" id="page-organismes" style="display:none!important;"></div>
 
     <!-- PAGE: SCÉNARIOS -->
     <div class="page" id="page-scenarios">
@@ -4619,33 +4487,129 @@
       <div id="clients-stats" style="display:none;"></div>
     </div>
 
-    <!-- PAGE: RESSOURCES (hub — navigue vers les vraies pages sans cloner) -->
+    <!-- PAGE: RESSOURCES (3 onglets icônes + contenu inline) -->
     <div class="page" id="page-ressources">
       <div class="app">
-        <div style="padding:8px 0 20px;">
-          <div class="section-label" style="margin-bottom:4px;">Ressources</div>
-          <div style="font-size:12px;color:var(--c-text-3);">Aides disponibles, éligibilité et organismes financeurs</div>
-        </div>
-        <div id="ressources-hub" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
-          <div onclick="switchRessourcesTab('aides',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-teal);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
-            onmouseover="this.style.boxShadow='0 4px 20px rgba(13,148,136,0.2)'" onmouseout="this.style.boxShadow='none'">
-            <div style="font-size:32px;margin-bottom:10px;">💰</div>
-            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Aides & Subventions</div>
-            <div style="font-size:11px;color:var(--c-text-3);">Activer/désactiver les dispositifs et voir les montants calculés</div>
+
+        <!-- 3 cartes de navigation -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;" id="ressources-hub">
+          <div id="res-card-aides" onclick="switchRessourcesTab('aides')"
+            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-teal);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:30px;margin-bottom:8px;">💰</div>
+            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Aides & Subventions</div>
+            <div style="font-size:11px;color:var(--c-text-3);">Activer/désactiver les dispositifs</div>
           </div>
-          <div onclick="switchRessourcesTab('eligibilite',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
-            onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-            <div style="font-size:32px;margin-bottom:10px;">✅</div>
-            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Éligibilité</div>
-            <div style="font-size:11px;color:var(--c-text-3);">Scoring détaillé par dispositif selon les paramètres actuels</div>
+          <div id="res-card-eligibilite" onclick="switchRessourcesTab('eligibilite')"
+            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:30px;margin-bottom:8px;">✅</div>
+            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Éligibilité</div>
+            <div style="font-size:11px;color:var(--c-text-3);">Scoring détaillé par dispositif</div>
           </div>
-          <div onclick="switchRessourcesTab('organismes',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
-            onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-            <div style="font-size:32px;margin-bottom:10px;">🏛</div>
-            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Organismes</div>
-            <div style="font-size:11px;color:var(--c-text-3);">ADEME, Bpifrance, CEE — sources de financement disponibles</div>
+          <div id="res-card-organismes" onclick="switchRessourcesTab('organismes')"
+            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:30px;margin-bottom:8px;">🏛</div>
+            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Organismes</div>
+            <div style="font-size:11px;color:var(--c-text-3);">ADEME, Bpifrance, CEE…</div>
           </div>
         </div>
+
+        <!-- ─── PANNEAU AIDES & SUBVENTIONS ─── -->
+        <div id="res-panel-aides" style="display:none;">
+          <div class="card">
+            <div class="section-label">Dispositifs activés</div>
+            <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
+              Activez / désactivez chaque aide selon l'éligibilité du projet de votre client. Les montants sont recalculés en temps réel.
+            </p>
+            <div class="aide-row" onclick="toggleAide('cee')">
+              <div class="toggle on" id="toggle-cee"></div>
+              <div class="aide-info">
+                <div class="aide-name">Prime CEE (P6 — 2026-2030)
+                  <span class="info-pill" data-tip="Le cours CEE fluctue chaque mois sur le marché.&#10;&#10;Cours de référence :&#10;• Valeur par défaut simulateur : 8,00 €/MWh cumac (prudent)&#10;• Marché EMMY — déc. 2025 : 8,78 €/MWh cumac&#10;&#10;→ Modifier le cours depuis admin.lihtea.com&#10;&#10;Source : registre EMMY / C2E Market (mensuel).">?</span>
+                </div>
+                <div class="aide-desc" id="cee-desc">Fournisseur énergie → bénéficiaire. Fiches IND-UT standardisées.</div>
+              </div>
+              <div class="aide-montant" id="amt-cee">0 €</div>
+            </div>
+            <div class="aide-row" onclick="toggleAide('ademe')">
+              <div class="toggle on" id="toggle-ademe"></div>
+              <div class="aide-info">
+                <div class="aide-name">Fonds Chaleur / DECARB FLASH ADEME
+                  <span class="info-pill" data-tip="Le taux ADEME affiché est un PLAFOND indicatif, pas un montant garanti.&#10;&#10;L'ADEME calcule l'aide projet par projet pour équilibrer son économie. Le taux réel dépend :&#10;• Du type et de la taille de l'installation&#10;• Du secteur et de la région&#10;• De la taille de l'entreprise (PME bénéficient d'un bonus +10 à +20%)&#10;&#10;Conditions d'éligibilité Fonds Chaleur :&#10;• Production minimale de 1 200 MWh/an (chaleur)&#10;• Temps de retour brut > 3 ans&#10;• Audit énergétique préalable requis&#10;&#10;→ Contacter la Direction Régionale ADEME pour valider l'aide réelle.">?</span>
+                </div>
+                <div class="aide-desc" id="ademe-desc">Jusqu'à X% selon équipement — plafond indicatif. PME : bonus +10%.</div>
+              </div>
+              <div class="aide-montant" id="amt-ademe">0 €</div>
+            </div>
+            <div class="aide-row" onclick="toggleAide('bpi')">
+              <div class="toggle on" id="toggle-bpi"></div>
+              <div class="aide-info">
+                <div class="aide-name">Prêt Vert Bpifrance</div>
+                <div class="aide-desc">Réduction du taux (-0,8%/an) → économie sur les intérêts. Jusqu'à 1 M€.</div>
+              </div>
+              <div class="aide-montant" id="amt-bpi">0 €</div>
+            </div>
+            <div class="aide-row" onclick="toggleAide('feder')">
+              <div class="toggle" id="toggle-feder"></div>
+              <div class="aide-info">
+                <div class="aide-name">FEDER régional (si éligible)</div>
+                <div class="aide-desc">50% des investissements. Selon région et appel à projets en cours.</div>
+              </div>
+              <div class="aide-montant" id="amt-feder">0 €</div>
+            </div>
+            <hr class="divider">
+            <div class="total-row">
+              <span class="total-label">Total aides mobilisées</span>
+              <span class="total-val color-green" id="total-aides">0 €</span>
+            </div>
+            <div class="total-row" style="padding-top:4px;">
+              <span style="font-size:13px;color:var(--c-text-2);">Capital à financer (net)</span>
+              <span style="font-size:18px;font-weight:700;color:var(--c-navy);font-family:var(--font-mono);" id="cout-net-mini">0 €</span>
+            </div>
+          </div>
+          <div class="pitch-only" id="pitch-card">
+            <div class="pitch-card">
+              <div class="pitch-headline">Synthèse de votre projet</div>
+              <div class="pitch-metrics">
+                <div class="pitch-metric"><div class="pitch-metric-label">Vous investissez</div><div class="pitch-metric-value white" id="pitch-invest">—</div></div>
+                <div class="pitch-metric"><div class="pitch-metric-label">Vous payez</div><div class="pitch-metric-value gold" id="pitch-loyer">—</div><div class="pitch-metric-sub">par mois</div></div>
+                <div class="pitch-metric"><div class="pitch-metric-label">Vous économisez</div><div class="pitch-metric-value teal" id="pitch-eco">—</div><div class="pitch-metric-sub">par mois en énergie</div></div>
+                <div class="pitch-metric"><div class="pitch-metric-label">Aides obtenues</div><div class="pitch-metric-value teal" id="pitch-aides">—</div><div class="pitch-metric-sub" id="pitch-pct">— de l'investissement</div></div>
+              </div>
+              <div class="pitch-verdict" id="pitch-verdict"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-label">Waterfall — Décomposition du financement</div>
+            <div id="waterfall-chart"></div>
+          </div>
+        </div>
+
+        <!-- ─── PANNEAU ÉLIGIBILITÉ ─── -->
+        <div id="res-panel-eligibilite" style="display:none;">
+          <div class="card">
+            <div class="section-label">Scoring d'éligibilité par dispositif</div>
+            <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
+              Évaluation automatique basée sur les paramètres saisis. Cliquez sur un dispositif pour voir le détail des critères.
+            </p>
+            <div class="scoring-grid" id="scoring-grid"></div>
+          </div>
+          <div class="scoring-summary" id="scoring-global-summary"></div>
+        </div>
+
+        <!-- ─── PANNEAU ORGANISMES ─── -->
+        <div id="res-panel-organismes" style="display:none;">
+          <div class="section-label" style="margin-bottom:6px;">Aides & subventions disponibles</div>
+          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">Dispositifs français et européens pour le remplacement d'équipements industriels énergivores.</p>
+          <div id="tab-organismes" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="filterOrganismes('all', this)">Tous</button>
+            <button class="tab-btn" onclick="filterOrganismes('calculable', this)">⚡ Calculables</button>
+            <button class="tab-btn" onclick="filterOrganismes('informatif', this)">📋 Informatifs</button>
+            <button class="tab-btn" onclick="filterOrganismes('france', this)">🇫🇷 France</button>
+            <button class="tab-btn" onclick="filterOrganismes('europe', this)">🇪🇺 Europe</button>
+          </div>
+          <div id="organismes-list"></div>
+        </div>
+
       </div>
     </div>
 
@@ -5673,20 +5637,14 @@ function switchPage(pageName, navItem) {
   // Call render functions based on page
   if (pageName === 'resultats') {
     recalculer();
-  } else if (pageName === 'eligibilite') {
-    renderScoring();
   } else if (pageName === 'dossier') {
     renderTimeline();
   } else if (pageName === 'saved') {
     renderSavedSimulations();
   } else if (pageName === 'dashboard') {
     renderGlobalDashboard();
-  } else if (pageName === 'organismes') {
-    renderOrganismesFront();
   } else if (pageName === 'propositions') {
     renderPropositions();
-  } else if (pageName === 'aides') {
-    recalculer();
   } else if (pageName === 'scenarios') {
     renderScenarios();
   } else if (pageName === 'clients') {
@@ -5695,6 +5653,12 @@ function switchPage(pageName, navItem) {
     renderPipelinePage();
   } else if (pageName === 'ressources') {
     renderRessourcesPage();
+  } else if (pageName === 'eligibilite' || pageName === 'aides' || pageName === 'organismes') {
+    // Ces sous-pages sont maintenant intégrées dans Ressources
+    const tabMap = { eligibilite:'eligibilite', aides:'aides', organismes:'organismes' };
+    switchPage('ressources', document.querySelector('[data-page="ressources"]'));
+    setTimeout(() => switchRessourcesTab(tabMap[pageName]), 50);
+    return;
   }
 
   // Update mobile navigation (closes sidebar and updates active state)
@@ -7571,38 +7535,49 @@ function startSimForClient(raison, siren) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// PAGE RESSOURCES — Hub de navigation vers Aides / Éligibilité / Organismes
+// PAGE RESSOURCES — 3 onglets icônes + contenu inline (pas de navigation)
 // ═══════════════════════════════════════════════════════════════════
-// Approche sans clonage : les onglets naviguent vers les vraies pages
-// pour éviter les IDs dupliqués (toggles, montants, etc.)
+
+let _ressourcesCurrentTab = null;
 
 function renderRessourcesPage() {
-  // Afficher le hub de sélection
-  const hub = document.getElementById('ressources-hub');
-  if (hub) hub.style.display = 'grid';
+  // Si aucun onglet actif, ouvrir Aides par défaut
+  if (!_ressourcesCurrentTab) switchRessourcesTab('aides');
 }
 
-function switchRessourcesTab(tab, btn) {
-  // Naviguer directement vers la vraie page — pas de clonage
-  const pageMap = { aides: 'aides', eligibilite: 'eligibilite', organismes: 'organismes' };
-  const targetPage = pageMap[tab];
-  if (!targetPage) return;
+function switchRessourcesTab(tab) {
+  _ressourcesCurrentTab = tab;
 
-  // Naviguer (garde le sidebar item "Ressources" actif)
-  const navItem = document.querySelector('[data-page="ressources"]');
-  switchPage(targetPage, navItem);
+  // ─── 1. Masquer tous les panneaux
+  ['aides','eligibilite','organismes'].forEach(t => {
+    const panel = document.getElementById('res-panel-' + t);
+    if (panel) panel.style.display = 'none';
+    const card  = document.getElementById('res-card-' + t);
+    if (card) {
+      card.style.border = '2px solid var(--c-border)';
+      card.style.background = 'var(--c-surface)';
+    }
+  });
 
-  // Forcer le highlight "Ressources" dans le sidebar (switchPage aura mis aides actif)
-  setTimeout(() => {
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    if (navItem) navItem.classList.add('active');
-    // Mettre à jour le sous-titre header
-    const subEl = document.getElementById('header-page-sub');
-    const sepEl = document.getElementById('header-page-sep');
-    const subLabel = {aides:'Aides & Subventions', eligibilite:'Éligibilité', organismes:'Organismes'}[tab];
-    if (subEl) subEl.textContent = subLabel;
-    if (sepEl) sepEl.style.display = '';
-  }, 0);
+  // ─── 2. Afficher le panneau sélectionné
+  const panel = document.getElementById('res-panel-' + tab);
+  if (panel) panel.style.display = 'block';
+
+  // ─── 3. Mettre la carte active en surbrillance teal
+  const card = document.getElementById('res-card-' + tab);
+  if (card) {
+    card.style.border = '2px solid var(--c-teal)';
+    card.style.background = 'var(--c-teal-bg,#f0fdfa)';
+  }
+
+  // ─── 4. Appeler la fonction de rendu correspondante
+  if (tab === 'aides') {
+    recalculer();
+  } else if (tab === 'eligibilite') {
+    renderScoring();
+  } else if (tab === 'organismes') {
+    renderOrganismesFront();
+  }
 }
 
 // Initialiser le badge clients au chargement (si connecté)
