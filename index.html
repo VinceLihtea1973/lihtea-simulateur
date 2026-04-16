@@ -7551,8 +7551,9 @@ function renderDrawerContent(p) {
             <div style="font-size:11px;color:var(--c-text-3);">${fd(doc.created_at)} · ${doc.type_document||'document'} · <span style="text-transform:capitalize;">${doc.statut||'—'}</span></div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button onclick="previewDocInfo('${doc.id}')"
-              title="Aperçu"
+            <button data-sim="${doc.simulation_id||''}" data-mime="${doc.mime_type||''}" data-nom="${doc.nom||''}"
+              onclick="previewDocInfo(this.dataset.sim,this.dataset.mime,this.dataset.nom)"
+              title="Aperçu PDF"
               style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
               onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">👁</button>
             <button onclick="downloadDoc('${doc.simulation_id||''}','${doc.nom}','${doc.mime_type||''}')"
@@ -7561,12 +7562,7 @@ function renderDrawerContent(p) {
               onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">⬇</button>
           </div>
         </div>
-        <div id="doc-preview-${doc.id}" style="display:none;margin:-2px 0 8px 42px;padding:10px 12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:12px;color:var(--c-text-2);">
-          <div style="font-weight:600;margin-bottom:4px;">📋 ${doc.nom}</div>
-          <div style="color:var(--c-text-3);line-height:1.6;">${doc.description||'Aucune description'}</div>
-          <div style="margin-top:6px;color:var(--c-text-3);">Créé le ${fd(doc.created_at)}${doc.simulation_id ? ' &nbsp;<span style="color:var(--c-teal);cursor:pointer;font-weight:600;" onclick="downloadDoc(this)" data-sim="'+doc.simulation_id+'" data-nom="'+doc.nom+'" data-mime="'+(doc.mime_type||'')+'">Regénérer le fichier →</span>' : ''}
-          </div>
-        </div>`).join('')}
+        `).join('')}
       <div style="margin-top:12px;padding:10px;border:2px dashed var(--c-border);border-radius:8px;text-align:center;font-size:12px;color:var(--c-text-3);">📎 Upload disponible depuis le Dossier</div>
     </div>`;
   }
@@ -7615,14 +7611,89 @@ function loadSimFromDrawer(simId) {
   switchPage('saved', document.querySelector('[data-page="saved"]'));
 }
 
-// ─── Aperçu inline d'un document ───
-function previewDocInfo(docId) {
-  const panel = document.getElementById('doc-preview-' + docId);
-  if (!panel) return;
-  const isOpen = panel.style.display !== 'none';
-  // Fermer tous les autres panneaux ouverts
-  document.querySelectorAll('[id^="doc-preview-"]').forEach(p => p.style.display = 'none');
-  if (!isOpen) panel.style.display = 'block';
+// ─── Aperçu PDF dans modal ───
+let _pdfPreviewBlobUrl = null;
+let _pdfPreviewFilename = '';
+
+async function previewDocInfo(simId, mimeType, nom) {
+  if (!simId) { showToast('Aucune simulation liée à ce document', 'warning'); return; }
+
+  // Ouvrir le modal avec loader
+  const modal = document.getElementById('pdf-preview-modal');
+  const frame = document.getElementById('pdf-preview-frame');
+  const loader = document.getElementById('pdf-preview-loader');
+  const title  = document.getElementById('pdf-preview-title');
+  const sub    = document.getElementById('pdf-preview-subtitle');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  loader.style.display = 'flex';
+  frame.style.opacity = '0';
+  frame.src = 'about:blank';
+  title.textContent = nom || 'Aperçu de la proposition';
+  sub.textContent = 'Chargement de la simulation…';
+
+  try {
+    // 1. Charger la simulation
+    const res = await fetch(ADMIN_API + '/simulations/' + simId, { headers: getAuthHeaders() });
+    const data = await res.json();
+    const sim  = data?.data;
+    if (!sim) throw new Error('Simulation introuvable');
+
+    sub.textContent = 'Génération du PDF…';
+
+    // 2. Restaurer les paramètres dans les champs du simulateur
+    const p = sim.parametres || {};
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    setVal('inv',   p.investissement);
+    setVal('conso', p.consommation);
+    setVal('gain',  p.gain_energetique);
+    setVal('duree', p.duree_ans);
+    setVal('taux',  p.taux);
+    setVal('prix',  p.prix_energie);
+    setVal('kwh',   p.kwh_cumac);
+    setVal('cours', p.cours_cee);
+    if (sim.client_taille) { const el = document.getElementById('taille'); if (el) el.value = sim.client_taille; }
+    if (sim.client_entreprise || sim.client_nom) {
+      const el = document.getElementById('nom-client');
+      if (el) el.value = sim.client_entreprise || sim.client_nom || '';
+    }
+    recalculer();
+    await new Promise(r => setTimeout(r, 80)); // laisser recalculer() se stabiliser
+
+    // 3. Générer le PDF en mode aperçu (blob URL, pas de téléchargement)
+    const blobUrl = await exporterPDF(true);
+    if (!blobUrl) throw new Error('Échec de la génération PDF');
+
+    // 4. Stocker pour le téléchargement éventuel
+    _pdfPreviewBlobUrl = blobUrl;
+    _pdfPreviewFilename = nom || ('Proposition_' + (sim.client_entreprise || 'Client') + '.pdf');
+    sub.textContent = sim.client_entreprise || sim.client_nom || '';
+
+    // 5. Afficher dans l'iframe
+    frame.src = blobUrl;
+
+  } catch(e) {
+    loader.style.display = 'none';
+    frame.style.opacity = '1';
+    frame.srcdoc = `<div style="font-family:sans-serif;padding:40px;color:#dc2626;text-align:center;"><b>Erreur : </b>${e.message}</div>`;
+    showToast('Erreur aperçu : ' + e.message, 'error');
+  }
+}
+
+function closePdfPreviewModal() {
+  const modal = document.getElementById('pdf-preview-modal');
+  if (modal) modal.style.display = 'none';
+  const frame = document.getElementById('pdf-preview-frame');
+  if (frame) frame.src = 'about:blank';
+  if (_pdfPreviewBlobUrl) { URL.revokeObjectURL(_pdfPreviewBlobUrl); _pdfPreviewBlobUrl = null; }
+}
+
+function pdfPreviewDownload() {
+  if (!_pdfPreviewBlobUrl) return;
+  const a = document.createElement('a');
+  a.href = _pdfPreviewBlobUrl;
+  a.download = _pdfPreviewFilename;
+  a.click();
 }
 
 // ─── Télécharger/regénérer un document ───
@@ -8094,10 +8165,9 @@ function lireParametres() {
 }
 
 // ─── PDF EXPORT REFONDU ───
-async function exporterPDF() {
+async function exporterPDF(previewOnly = false) {
   const btn = document.querySelector('.export-btn-pdf');
-  btn.disabled = true;
-  btn.textContent = 'Generation...';
+  if (!previewOnly && btn) { btn.disabled = true; btn.textContent = 'Generation...'; }
   await new Promise(r => setTimeout(r, 50));
 
   try {
@@ -8711,6 +8781,11 @@ async function exporterPDF() {
     // Sauvegarde
     const nomFichier = 'Lihtea_' + d.nomClient.replace(/\s+/g, '-') + '_' + d.date.replace(/\//g, '-') + '.pdf';
 
+    // Mode aperçu : retourner la blob URL sans sauvegarder
+    if (previewOnly) {
+      return doc.output('bloburl');
+    }
+
     // Sauvegarder la proposition dans l'historique AVANT le téléchargement
     sauvegarderProposition(d.nomClient || 'Sans nom', d.inv, d.totalAides, d.coutNet, 'pdf');
 
@@ -8719,9 +8794,12 @@ async function exporterPDF() {
   } catch (err) {
     console.error('Erreur PDF :', err);
     showToast('Erreur lors de la génération du PDF', 'error');
+    if (previewOnly) return null;
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Synthese PDF';
+    if (!previewOnly && btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Synthese PDF';
+    }
   }
 }
 
@@ -11475,5 +11553,33 @@ document.addEventListener('DOMContentLoaded', async function() {
 var pageCourante = 'dashboard';
 
 </script>
+<!-- ═══ MODAL APERÇU PDF ═══ -->
+<div id="pdf-preview-modal" style="display:none;position:fixed;inset:0;z-index:99999;flex-direction:column;background:rgba(10,20,40,0.92);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#0f2b46;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:18px;">📋</span>
+      <div>
+        <div id="pdf-preview-title" style="color:#fff;font-weight:700;font-size:14px;letter-spacing:-0.01em;">Aperçu de la proposition</div>
+        <div id="pdf-preview-subtitle" style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:1px;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="pdf-preview-download-btn" onclick="pdfPreviewDownload()"
+        style="padding:7px 16px;background:var(--c-teal);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        ⬇ Télécharger
+      </button>
+      <button onclick="closePdfPreviewModal()"
+        style="width:32px;height:32px;background:rgba(255,255,255,0.1);border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow:hidden;position:relative;">
+    <div id="pdf-preview-loader" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:14px;flex-direction:column;gap:12px;">
+      <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--c-teal);border-radius:50%;animation:spin .7s linear infinite;"></div>
+      Génération de l'aperçu…
+    </div>
+    <iframe id="pdf-preview-frame" style="width:100%;height:100%;border:none;opacity:0;transition:opacity .3s;" onload="document.getElementById('pdf-preview-loader').style.display='none';this.style.opacity='1';" src="about:blank"></iframe>
+  </div>
+</div>
+
 </body>
 </html>
