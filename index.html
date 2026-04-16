@@ -7542,14 +7542,30 @@ function renderDrawerContent(p) {
       ${!p.documents?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
         <div style="font-size:28px;margin-bottom:8px;">📄</div><div>Aucun document</div>
       </div>`
-      :p.documents.map(doc=>`<div class="doc-entry">
-        <div class="doc-icon-box">${iconFor(doc.nom)}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.nom}</div>
-          <div style="font-size:11px;color:var(--c-text-3);">${fd(doc.created_at)} · ${doc.type_document||'document'}</div>
+      :p.documents.map(doc=>`
+        <div class="doc-entry" id="doc-row-${doc.id}">
+          <div class="doc-icon-box">${iconFor(doc.nom)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.nom}</div>
+            <div style="font-size:11px;color:var(--c-text-3);">${fd(doc.created_at)} · ${doc.type_document||'document'} · <span style="text-transform:capitalize;">${doc.statut||'—'}</span></div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button onclick="previewDocInfo('${doc.id}')"
+              title="Aperçu"
+              style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
+              onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">👁</button>
+            <button onclick="downloadDoc('${doc.simulation_id||''}','${doc.nom}','${doc.mime_type||''}')"
+              title="Regénérer / Télécharger"
+              style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
+              onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">⬇</button>
+          </div>
         </div>
-        <span style="font-size:10px;color:var(--c-text-3);">${doc.statut||'—'}</span>
-      </div>`).join('')}
+        <div id="doc-preview-${doc.id}" style="display:none;margin:-2px 0 8px 42px;padding:10px 12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:12px;color:var(--c-text-2);">
+          <div style="font-weight:600;margin-bottom:4px;">📋 ${doc.nom}</div>
+          <div style="color:var(--c-text-3);line-height:1.6;">${doc.description||'Aucune description'}</div>
+          <div style="margin-top:6px;color:var(--c-text-3);">Créé le ${fd(doc.created_at)}${doc.simulation_id?` · <span style="color:var(--c-teal);cursor:pointer;font-weight:600;" onclick="downloadDoc('${doc.simulation_id}','${doc.nom}','${doc.mime_type||'')">Regénérer le fichier →</span>`:''}
+          </div>
+        </div>`).join('')}
       <div style="margin-top:12px;padding:10px;border:2px dashed var(--c-border);border-radius:8px;text-align:center;font-size:12px;color:var(--c-text-3);">📎 Upload disponible depuis le Dossier</div>
     </div>`;
   }
@@ -7596,6 +7612,58 @@ function loadSimFromDrawer(simId) {
   closeClientDrawer();
   showToast('Simulation chargée depuis la fiche client', 'success');
   switchPage('saved', document.querySelector('[data-page="saved"]'));
+}
+
+// ─── Aperçu inline d'un document ───
+function previewDocInfo(docId) {
+  const panel = document.getElementById('doc-preview-' + docId);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  // Fermer tous les autres panneaux ouverts
+  document.querySelectorAll('[id^="doc-preview-"]').forEach(p => p.style.display = 'none');
+  if (!isOpen) panel.style.display = 'block';
+}
+
+// ─── Télécharger/regénérer un document ───
+async function downloadDoc(simId, nom, mimeType) {
+  if (!simId) {
+    showToast('Aucune simulation liée — regénérez depuis le simulateur', 'warning');
+    return;
+  }
+  showToast('⏳ Chargement de la simulation…', 'info');
+  try {
+    const res  = await fetch(ADMIN_API + '/simulations/' + simId, { headers: getAuthHeaders() });
+    const data = await res.json();
+    const sim  = data?.data;
+    if (!sim) throw new Error('Simulation introuvable');
+
+    const p = sim.parametres || {};
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    setVal('inv',   p.investissement);
+    setVal('conso', p.consommation);
+    setVal('gain',  p.gain_energetique);
+    setVal('duree', p.duree_ans);
+    setVal('taux',  p.taux);
+    setVal('prix',  p.prix_energie);
+    setVal('kwh',   p.kwh_cumac);
+    setVal('cours', p.cours_cee);
+    if (sim.client_nom) {
+      const nomEl = document.getElementById('nom-client');
+      if (nomEl) { nomEl.value = sim.client_nom; }
+    }
+    if (sim.client_siret) currentClientSiret = sim.client_siret;
+
+    recalculer();
+    closeClientDrawer();
+    switchPage('resultats', document.querySelector('[data-page="resultats"]'));
+
+    const isExcel = mimeType?.includes('spreadsheet') || nom?.endsWith('.xlsx');
+    showToast('Simulation restaurée — cliquez sur ' + (isExcel ? 'Excel' : 'PDF') + ' pour télécharger', 'success');
+    // Auto-déclencher l'export après un court délai (laisser recalculer() finir)
+    setTimeout(() => { isExcel ? exporterExcel() : exporterPDF(); }, 600);
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
 }
 
 // Lance une simulation pré-remplie avec le client
