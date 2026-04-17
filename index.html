@@ -3870,7 +3870,7 @@
             <div class="dash-kpi-text">
               <div class="dash-kpi-label">Économie énergie</div>
               <div class="dash-kpi-value" style="color:#d97706;" id="dk-eco">0 €</div>
-              <div class="dash-kpi-sub">moyenne par an</div>
+              <div class="dash-kpi-sub">économies /an cumulées</div>
             </div>
             <div class="dash-kpi-icon" style="background:#fef3c7;">⚡</div>
           </div>
@@ -9593,13 +9593,13 @@ function renderGlobalDashboard() {
   const count = sims.length;
   const totalVol = sims.reduce((s, x) => s + ((x.params && x.params.inv) || 0), 0);
   const totalAides = sims.reduce((s, x) => s + ((x.results && x.results.totalAides) || 0), 0);
-  const avgEco = count > 0 ? sims.reduce((s, x) => s + ((x.results && x.results.ecoAn) || 0), 0) / count : 0;
+  const totalEco = sims.reduce((s, x) => s + ((x.results && x.results.ecoAn) || 0), 0);
 
   const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   el('dk-count', count);
   el('dk-volume', formaterEuros(totalVol, true));
   el('dk-aides', formaterEuros(totalAides, true));
-  el('dk-eco', formaterEuros(avgEco, true) + '/an');
+  el('dk-eco', formaterEuros(totalEco, true) + '/an');
 
   // Date
   const dateEl = document.getElementById('dash-date');
