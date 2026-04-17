@@ -3611,6 +3611,82 @@
       /* Desktop uses the default non-media-query styles */
     }
 
+    /* ══ DOSSIER PAGE — v2 ══ */
+    .dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    @media(max-width:900px){.dossier-grid{grid-template-columns:1fr;}}
+    .dossier-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius,10px);padding:20px;}
+    .dossier-card-full{grid-column:1/-1;}
+    .dossier-card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .dossier-card-title span{font-size:15px;}
+    .dossier-progress-wrap{background:#e2e8f0;border-radius:99px;height:8px;margin-bottom:8px;overflow:hidden;}
+    .dossier-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--c-teal),var(--c-teal-light,#14b8a6));transition:width .4s;}
+    .dossier-progress-label{font-size:12px;color:var(--c-text-2);display:flex;justify-content:space-between;margin-bottom:14px;}
+    .dossier-checklist{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+    .dossier-check-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-bg,#f1f5f9);cursor:pointer;transition:all .15s;user-select:none;}
+    .dossier-check-item:hover{border-color:var(--c-teal);background:#f0fdfa;}
+    .dossier-check-item.done{background:#f0fdf4;border-color:#86efac;}
+    .dossier-check-item.done .dossier-check-label{color:var(--c-text-3);text-decoration:line-through;}
+    .dossier-check-box{width:18px;height:18px;border:2px solid var(--c-border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;}
+    .dossier-check-item.done .dossier-check-box{background:var(--c-green,#059669);border-color:var(--c-green,#059669);color:#fff;}
+    .dossier-check-label{font-size:12px;font-weight:500;flex:1;}
+    .dossier-check-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+    .dossier-tag-critique{background:#fef2f2;color:#dc2626;}
+    .doc-lib-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+    .doc-lib-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--c-border);background:var(--c-bg,#f1f5f9);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--c-text-2);}
+    .doc-lib-tab.active{background:var(--c-navy);color:#fff;border-color:var(--c-navy);}
+    .doc-lib-tab:hover:not(.active){border-color:var(--c-teal);color:var(--c-teal);}
+    .doc-lib-panel{display:none;}
+    .doc-lib-panel.active{display:flex;flex-direction:column;gap:8px;}
+    .doc-lib-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-bg,#f1f5f9);transition:border-color .15s;}
+    .doc-lib-row:hover{border-color:var(--c-teal);}
+    .doc-lib-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center;}
+    .doc-lib-info{flex:1;min-width:0;}
+    .doc-lib-name{font-size:12px;font-weight:600;color:var(--c-text-1);}
+    .doc-lib-desc{font-size:11px;color:var(--c-text-3);margin-top:1px;}
+    .doc-lib-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap;}
+    .dlbadge-collect{background:#fef9c3;color:#854d0e;}
+    .dlbadge-template{background:#ede9fe;color:#5b21b6;}
+    .dlbadge-link{background:#dbeafe;color:#2563eb;}
+    .dlbadge-sign{background:#fce7f3;color:#be185d;}
+    .dlbadge-auto{background:#dcfce7;color:#15803d;}
+    .doc-lib-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-surface);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--c-text-2);transition:all .15s;white-space:nowrap;}
+    .doc-lib-btn:hover{background:var(--c-navy);color:#fff;border-color:var(--c-navy);}
+    .doc-lib-btn.teal{background:var(--c-teal);color:#fff;border-color:var(--c-teal);}
+    .doc-lib-btn.teal:hover{background:#0f766e;}
+    .dossier-alert-box{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:6px;font-size:12px;line-height:1.6;margin-bottom:8px;}
+    .dossier-alert-critique{background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #dc2626;color:#991b1b;}
+    .dossier-alert-warn{background:#fffbeb;border:1px solid #fde68a;border-left:3px solid #d97706;color:#92400e;}
+    .dossier-alert-info{background:#f0fdfa;border:1px solid #99f6e4;border-left:3px solid var(--c-teal);color:#065f46;}
+    .dossier-alert-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+    .dossier-partners-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    @media(max-width:700px){.dossier-partners-grid{grid-template-columns:1fr;}}
+    .dossier-partner-card{padding:14px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg,#f1f5f9);text-align:center;}
+    .dossier-partner-icon{font-size:24px;margin-bottom:6px;}
+    .dossier-partner-name{font-size:12px;font-weight:700;color:var(--c-navy);margin-bottom:4px;}
+    .dossier-partner-desc{font-size:11px;color:var(--c-text-3);margin-bottom:10px;line-height:1.5;}
+    .dossier-partner-btn{display:inline-block;padding:5px 12px;background:var(--c-navy);color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:background .15s;}
+    .dossier-partner-btn:hover{background:var(--c-navy-light,#1a3560);}
+    .dossier-tl{display:flex;flex-direction:column;gap:0;}
+    .dossier-tl-step{display:flex;gap:12px;padding-bottom:16px;position:relative;}
+    .dossier-tl-step:last-child{padding-bottom:0;}
+    .dossier-tl-step:last-child .dossier-tl-line{display:none;}
+    .dossier-tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:28px;}
+    .dossier-tl-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+    .dossier-tl-dot.done{background:var(--c-green,#059669);color:#fff;}
+    .dossier-tl-dot.active{background:var(--c-teal);color:#fff;box-shadow:0 0 0 4px #ccfbf1;}
+    .dossier-tl-dot.alert{background:#dc2626;color:#fff;}
+    .dossier-tl-dot.pending{background:var(--c-border);color:var(--c-text-3);}
+    .dossier-tl-line{flex:1;width:2px;background:var(--c-border);margin-top:2px;}
+    .dossier-tl-content{flex:1;padding-bottom:4px;}
+    .dossier-tl-title{font-size:12px;font-weight:700;color:var(--c-navy);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .dossier-tl-duree{font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;background:#e2e8f0;color:var(--c-text-2);}
+    .dossier-tl-alerte-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:#fef2f2;color:#dc2626;}
+    .dossier-tl-desc{font-size:11px;color:var(--c-text-2);margin-top:3px;line-height:1.5;}
+    .dossier-kpi-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+    .dossier-kpi-pill{padding:5px 13px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:20px;font-size:12px;font-weight:600;color:var(--c-text-2);}
+    .dossier-kpi-pill strong{color:var(--c-navy);}
+    .dossier-kpi-pill.teal strong{color:var(--c-teal);}
+
   </style>
 </head>
 
@@ -4333,32 +4409,293 @@
     <!-- PAGE: DOSSIER -->
     <div class="page" id="page-dossier">
       <div class="app">
-<div class="card">
-          <div class="section-label">Parcours de montage du dossier</div>
-          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">
-            Les étapes clés pour monter un dossier complet. L'ordre est critique — respectez le séquencement.
-          </p>
-          <div class="timeline" id="timeline-dossier">
-            <!-- Généré par JS -->
-          </div>
+
+        <!-- KPI pills -->
+        <div class="dossier-kpi-bar" id="dossier-kpi-bar">
+          <div class="dossier-kpi-pill">Client : <strong id="dossier-kpi-client">—</strong></div>
+          <div class="dossier-kpi-pill">Investissement : <strong id="dossier-kpi-invest">—</strong></div>
+          <div class="dossier-kpi-pill">Dispositifs : <strong id="dossier-kpi-dispositifs">—</strong></div>
+          <div class="dossier-kpi-pill teal">Avancement : <strong id="dossier-pct-label">0%</strong></div>
         </div>
 
-        <!-- Tremplin PME banner -->
-        <div class="tremplin-banner" id="tremplin-banner">
-          <span class="tremplin-icon">🚀</span>
-          <div>
-            <strong>Tremplin PME ADEME</strong> — Votre projet est < 100 000 € et vous êtes TPE/PME.<br>
-            Le programme Tremplin offre jusqu'à 200 000 € d'aide forfaitaire, sans analyse économique ADEME.
-            Processus simplifié : candidature en ligne, réponse sous 2 mois.
-          </div>
-        </div>
+        <div class="dossier-grid">
 
-        <div class="card" style="margin-top:16px;">
-          <div class="section-label">Alertes de séquencement</div>
-          <div id="timeline-alerts">
-            <!-- Généré par JS -->
+          <!-- ══ BLOC 1 : AVANCEMENT ══ -->
+          <div class="dossier-card">
+            <div class="dossier-card-title"><span>✅</span> Avancement du dossier</div>
+            <div class="dossier-progress-wrap"><div class="dossier-progress-fill" id="dossier-prog-fill" style="width:0%"></div></div>
+            <div class="dossier-progress-label">
+              <span id="dossier-prog-done">0 étape complétée</span>
+              <span id="dossier-prog-total">sur 12</span>
+            </div>
+            <div class="dossier-checklist" id="dossier-checklist"><!-- Généré par JS --></div>
           </div>
-        </div>
+
+          <!-- ══ BLOC 2 : SÉQUENCEMENT ══ -->
+          <div class="dossier-card">
+            <div class="dossier-card-title"><span>🗓</span> Séquencement critique</div>
+            <div class="dossier-tl">
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot active">1</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Audit énergétique préalable <span class="dossier-tl-duree">2-4 sem.</span></div>
+                  <div class="dossier-tl-desc">Bureau d'études certifié OPQIBI. Dimensionne le projet et confirme les kWh cumac.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot alert">2</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Dépôt dossier CEE <span class="dossier-tl-alerte-tag">⚠ AVANT BC</span> <span class="dossier-tl-duree">1-2 sem.</span></div>
+                  <div class="dossier-tl-desc">Engagement délégataire CEE obligatoirement AVANT tout bon de commande ou acompte.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot pending">3</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Dossier ADEME — Fonds Chaleur <span class="dossier-tl-duree">3-6 mois</span></div>
+                  <div class="dossier-tl-desc">Dépôt sur plateforme Agir ADEME. Analyse économique par la Direction Régionale.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot pending">4</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Demande Prêt Vert Bpifrance <span class="dossier-tl-duree">2-4 sem.</span></div>
+                  <div class="dossier-tl-desc">Cumulable avec CEE + ADEME. Réduction de taux de 0,8%/an sur la location.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot pending">5</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Bon de commande & contrat Lihtea <span class="dossier-tl-duree">1 sem.</span></div>
+                  <div class="dossier-tl-desc">Signature du contrat de location financière UNIQUEMENT après validation CEE.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot pending">6</div><div class="dossier-tl-line"></div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Installation & mise en service <span class="dossier-tl-duree">4-12 sem.</span></div>
+                  <div class="dossier-tl-desc">PV de réception à conserver impérativement pour la clôture du dossier CEE.</div>
+                </div>
+              </div>
+
+              <div class="dossier-tl-step">
+                <div class="dossier-tl-left"><div class="dossier-tl-dot pending">7</div></div>
+                <div class="dossier-tl-content">
+                  <div class="dossier-tl-title">Clôture CEE & versement primes <span class="dossier-tl-duree">1-2 mois</span></div>
+                  <div class="dossier-tl-desc">Envoi justificatifs au délégataire. Versement prime CEE sous 4-8 semaines.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ══ BLOC 3 : BIBLIOTHÈQUE DOCUMENTS ══ -->
+          <div class="dossier-card dossier-card-full">
+            <div class="dossier-card-title"><span>📚</span> Bibliothèque de documents</div>
+
+            <div class="doc-lib-tabs">
+              <div class="doc-lib-tab active" onclick="showDocLibPanel('cee',this)">⚡ CEE</div>
+              <div class="doc-lib-tab" onclick="showDocLibPanel('ademe',this)">🌿 ADEME</div>
+              <div class="doc-lib-tab" onclick="showDocLibPanel('bpi',this)">🏦 Bpifrance</div>
+              <div class="doc-lib-tab" onclick="showDocLibPanel('lihtea',this)">📄 Lihtea</div>
+            </div>
+
+            <!-- CEE -->
+            <div id="doc-lib-panel-cee" class="doc-lib-panel active">
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📋</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Attestation de non-engagement</div><div class="doc-lib-desc">Prouve que le BC n'a pas été signé avant le dépôt CEE — pièce CRITIQUE</div></div>
+                <span class="doc-lib-badge dlbadge-template">📋 Modèle</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📝</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Attestation sur l'honneur IND-UT-xxx</div><div class="doc-lib-desc">Attestation technique CEE signée par l'installateur + le bénéficiaire</div></div>
+                <span class="doc-lib-badge dlbadge-collect">📥 À collecter</span>
+                <button class="doc-lib-btn" onclick="window.open('https://www.ecologie.gouv.fr/politiques-publiques/operations-standardisees-deconomies-denergie')">🔗 Fiches officielles</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🔬</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Rapport d'audit énergétique</div><div class="doc-lib-desc">Produit par un bureau d'études certifié OPQIBI avant tout engagement</div></div>
+                <span class="doc-lib-badge dlbadge-collect">📥 À collecter</span>
+                <button class="doc-lib-btn">📎 Uploader</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🧾</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Devis conforme CEE</div><div class="doc-lib-desc">Mention obligatoire du volume kWh cumac + référence fiche standardisée</div></div>
+                <span class="doc-lib-badge dlbadge-template">📋 Modèle</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">✅</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">PV de réception des travaux</div><div class="doc-lib-desc">Signé par le client à la mise en service — à conserver 6 ans minimum</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Modèle</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📊</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Fiche de synthèse CEE (générée depuis le simulateur)</div><div class="doc-lib-desc">Récapitulatif automatique : kWh cumac, prime estimée, délégataire, référence fiche</div></div>
+                <span class="doc-lib-badge dlbadge-auto">⚡ Auto-générée</span>
+                <button class="doc-lib-btn teal" onclick="switchPage('resultats')">⚡ Générer PDF</button>
+              </div>
+            </div>
+
+            <!-- ADEME -->
+            <div id="doc-lib-panel-ademe" class="doc-lib-panel">
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🌿</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Dossier Fonds Chaleur — Volet technique</div><div class="doc-lib-desc">Formulaire ADEME : description technique, puissance installée, EnR, performance</div></div>
+                <span class="doc-lib-badge dlbadge-link">🔗 Plateforme</span>
+                <button class="doc-lib-btn" onclick="window.open('https://fondschaleur.ademe.fr/financement-de-votre-projet-entreprise/')">🔗 Ouvrir Agir</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📈</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Étude de faisabilité technique & économique</div><div class="doc-lib-desc">Obligatoire avant dépôt. Feuille de route décarbonation du site industriel</div></div>
+                <span class="doc-lib-badge dlbadge-collect">📥 À collecter</span>
+                <button class="doc-lib-btn">📎 Uploader</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">💡</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Tremplin PME — Formulaire candidature</div><div class="doc-lib-desc">Pour projets &lt;100k€ TPE/PME. Processus simplifié, réponse sous 2 mois</div></div>
+                <span class="doc-lib-badge dlbadge-link">🔗 Plateforme</span>
+                <button class="doc-lib-btn" onclick="window.open('https://agirpourlatransition.ademe.fr/entreprises/aides-financieres')">🔗 Candidater</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🏢</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Plan de financement du projet</div><div class="doc-lib-desc">Structure du financement : autofinancement + location Lihtea + subventions</div></div>
+                <span class="doc-lib-badge dlbadge-template">📋 Modèle</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📋</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Attestation CEE jointe ADEME (cumul)</div><div class="doc-lib-desc">Si cumul CEE + ADEME : le dossier ADEME doit mentionner explicitement la demande CEE</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Modèle</button>
+              </div>
+            </div>
+
+            <!-- BPI -->
+            <div id="doc-lib-panel-bpi" class="doc-lib-panel">
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🏦</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Formulaire Prêt Vert Bpifrance</div><div class="doc-lib-desc">Dépôt en ligne sur bpifrance.fr. Prêt de 50k€ à 5M€ sur 2-10 ans</div></div>
+                <span class="doc-lib-badge dlbadge-link">🔗 Plateforme</span>
+                <button class="doc-lib-btn" onclick="window.open('https://www.bpifrance.fr/catalogue-offres/pret-vert')">🔗 Déposer</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📊</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Bilans 3 derniers exercices (N, N-1, N-2)</div><div class="doc-lib-desc">Liasse fiscale complète. Obligatoire pour l'analyse financière Bpifrance</div></div>
+                <span class="doc-lib-badge dlbadge-collect">📥 À collecter</span>
+                <button class="doc-lib-btn">📎 Uploader</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📄</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Extrait Kbis (moins de 3 mois)</div><div class="doc-lib-desc">Justificatif d'existence légale de l'entreprise</div></div>
+                <span class="doc-lib-badge dlbadge-collect">📥 À collecter</span>
+                <button class="doc-lib-btn" onclick="window.open('https://www.infogreffe.fr')">🔗 Infogreffe</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">💼</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Business plan & plan de financement</div><div class="doc-lib-desc">Prévisions 3 ans avec le projet d'investissement intégré</div></div>
+                <span class="doc-lib-badge dlbadge-template">📋 Modèle</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🏛</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Attestation co-financement partenaire bancaire</div><div class="doc-lib-desc">Le Prêt Vert BPI est obligatoirement associé à un co-financement (1 pour 1)</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Modèle</button>
+              </div>
+            </div>
+
+            <!-- LIHTEA -->
+            <div id="doc-lib-panel-lihtea" class="doc-lib-panel">
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📜</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Contrat de location financière Lihtea</div><div class="doc-lib-desc">Contrat cadre + conditions particulières adaptées à votre projet</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🛒</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Bon de commande équipement</div><div class="doc-lib-desc">À signer UNIQUEMENT après validation du dossier CEE — voir alerte critique</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Modèle</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">📕</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Proposition commerciale Lihtea (PDF simulateur)</div><div class="doc-lib-desc">Synthèse investissement, aides, loyer net, gains énergétiques — générée depuis le simulateur</div></div>
+                <span class="doc-lib-badge dlbadge-auto">⚡ Auto-générée</span>
+                <button class="doc-lib-btn teal" onclick="switchPage('resultats')">📕 Générer</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">⚖️</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Conditions générales de location</div><div class="doc-lib-desc">CGV et conditions générales de la location financière Lihtea</div></div>
+                <span class="doc-lib-badge dlbadge-link">🔗 Document</span>
+                <button class="doc-lib-btn">🔗 Consulter</button>
+              </div>
+              <div class="doc-lib-row">
+                <div class="doc-lib-icon">🔒</div>
+                <div class="doc-lib-info"><div class="doc-lib-name">Mandat de prélèvement SEPA</div><div class="doc-lib-desc">Autorisation de prélèvement pour les loyers mensuels</div></div>
+                <span class="doc-lib-badge dlbadge-sign">✍ À signer</span>
+                <button class="doc-lib-btn teal">⬇ Télécharger</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══ BLOC 4 : ALERTES RÉGLEMENTAIRES ══ -->
+          <div class="dossier-card">
+            <div class="dossier-card-title"><span>🚨</span> Alertes réglementaires</div>
+            <div class="dossier-alert-box dossier-alert-critique">
+              <span class="dossier-alert-icon">🚨</span>
+              <span><strong>BLOQUANT — Séquencement CEE :</strong> Le dossier CEE doit être déposé et validé AVANT tout bon de commande, devis signé ou acompte. Tout engagement ferme avant le dépôt invalide définitivement l'éligibilité à la prime CEE.</span>
+            </div>
+            <div class="dossier-alert-box dossier-alert-warn">
+              <span class="dossier-alert-icon">⚠️</span>
+              <span><strong>Cumul CEE + ADEME :</strong> Le dossier Fonds Chaleur doit expressément mentionner la demande CEE en cours pour permettre à l'ADEME de calculer le complément de subvention.</span>
+            </div>
+            <div class="dossier-alert-box dossier-alert-info">
+              <span class="dossier-alert-icon">ℹ️</span>
+              <span><strong>Fiche standardisée :</strong> Les opérations IND-UT (industrie) nécessitent une fiche standardisée précise. Le volume kWh cumac sera validé par le délégataire selon la fiche applicable à votre équipement.</span>
+            </div>
+            <div class="dossier-alert-box dossier-alert-info">
+              <span class="dossier-alert-icon">📅</span>
+              <span><strong>Archive 6 ans :</strong> Les pièces justificatives CEE (factures, PV, attestations) doivent être archivées pendant 6 ans minimum — contrôle ministériel possible.</span>
+            </div>
+          </div>
+
+          <!-- ══ BLOC 5 : PARTENAIRES ══ -->
+          <div class="dossier-card">
+            <div class="dossier-card-title"><span>🤝</span> Réseau de partenaires</div>
+            <div class="dossier-partners-grid">
+              <div class="dossier-partner-card">
+                <div class="dossier-partner-icon">🔬</div>
+                <div class="dossier-partner-name">Bureaux d'études</div>
+                <div class="dossier-partner-desc">Auditeurs certifiés OPQIBI pour audits énergétiques et fiches CEE</div>
+                <a class="dossier-partner-btn" href="https://www.opqibi.com/trouver-un-bureau-d-etudes" target="_blank">Trouver →</a>
+              </div>
+              <div class="dossier-partner-card">
+                <div class="dossier-partner-icon">⚡</div>
+                <div class="dossier-partner-name">Délégataires CEE</div>
+                <div class="dossier-partner-desc">Liste officielle des obligés et mandataires CEE agréés par le ministère</div>
+                <a class="dossier-partner-btn" href="https://www.ecologie.gouv.fr/politiques-publiques/dispositif-certificats-deconomies-denergie" target="_blank">Consulter →</a>
+              </div>
+              <div class="dossier-partner-card">
+                <div class="dossier-partner-icon">🌿</div>
+                <div class="dossier-partner-name">Plateforme ADEME</div>
+                <div class="dossier-partner-desc">Portail Agir pour la transition — dépôt des dossiers Fonds Chaleur 2026</div>
+                <a class="dossier-partner-btn" href="https://agirpourlatransition.ademe.fr/entreprises/aides-financieres" target="_blank">Agir →</a>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /dossier-grid -->
       </div>
     </div>
 
@@ -5708,7 +6045,8 @@ function switchPage(pageName, navItem) {
   if (pageName === 'resultats') {
     recalculer();
   } else if (pageName === 'dossier') {
-    renderTimeline();
+    renderDossierChecklist();
+    refreshDossierKpis();
   } else if (pageName === 'saved') {
     renderSavedSimulations();
   } else if (pageName === 'dashboard') {
@@ -11544,6 +11882,94 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Declare page tracker variable
 var pageCourante = 'dashboard';
+
+// ══ DOSSIER PAGE — v2 ══
+const DOSSIER_STEPS = [
+  { id:'ds1', label:'Audit énergétique commandé', critique:false },
+  { id:'ds2', label:'Délégataire CEE identifié', critique:false },
+  { id:'ds3', label:'Attestation non-engagement signée', critique:true },
+  { id:'ds4', label:'Dossier CEE déposé (AVANT BC)', critique:true },
+  { id:'ds5', label:'Dossier ADEME / Tremplin déposé', critique:false },
+  { id:'ds6', label:'Accord de principe BPI obtenu', critique:false },
+  { id:'ds7', label:'Contrat Lihtea signé', critique:false },
+  { id:'ds8', label:'Bon de commande équipement émis', critique:false },
+  { id:'ds9', label:'Installation planifiée', critique:false },
+  { id:'ds10', label:'PV de réception signé', critique:false },
+  { id:'ds11', label:'Justificatifs CEE transmis au délégataire', critique:false },
+  { id:'ds12', label:'Prime CEE reçue', critique:false },
+];
+
+var dossierDone = new Set();
+try { dossierDone = new Set(JSON.parse(localStorage.getItem('lihtea_dossier_check') || '[]')); } catch(e){}
+
+function renderDossierChecklist() {
+  var container = document.getElementById('dossier-checklist');
+  if (!container) return;
+  container.innerHTML = DOSSIER_STEPS.map(function(s) {
+    var isDone = dossierDone.has(s.id);
+    return '<div class="dossier-check-item' + (isDone?' done':'') + '" onclick="toggleDossierCheck(\'' + s.id + '\')">'
+      + '<div class="dossier-check-box">' + (isDone?'✓':'') + '</div>'
+      + '<span class="dossier-check-label">' + s.label + '</span>'
+      + (s.critique ? '<span class="dossier-check-tag dossier-tag-critique">CRITIQUE</span>' : '')
+      + '</div>';
+  }).join('');
+  updateDossierProgress();
+}
+
+function toggleDossierCheck(id) {
+  if (dossierDone.has(id)) dossierDone.delete(id); else dossierDone.add(id);
+  try { localStorage.setItem('lihtea_dossier_check', JSON.stringify([...dossierDone])); } catch(e){}
+  renderDossierChecklist();
+}
+
+function updateDossierProgress() {
+  var pct = Math.round(dossierDone.size / DOSSIER_STEPS.length * 100);
+  var fill = document.getElementById('dossier-prog-fill');
+  var done = document.getElementById('dossier-prog-done');
+  var total = document.getElementById('dossier-prog-total');
+  var pctLabel = document.getElementById('dossier-pct-label');
+  if (fill) fill.style.width = pct + '%';
+  if (done) done.textContent = dossierDone.size + ' étape' + (dossierDone.size>1?'s':'') + ' complétée' + (dossierDone.size>1?'s':'');
+  if (total) total.textContent = 'sur ' + DOSSIER_STEPS.length;
+  if (pctLabel) pctLabel.textContent = pct + '%';
+}
+
+function showDocLibPanel(tab, btn) {
+  document.querySelectorAll('.doc-lib-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.doc-lib-tab').forEach(function(b){ b.classList.remove('active'); });
+  var panel = document.getElementById('doc-lib-panel-' + tab);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function refreshDossierKpis() {
+  try {
+    var sims = JSON.parse(localStorage.getItem('lihtea_saved_sims') || '[]');
+    var last = sims.length > 0 ? sims[sims.length-1] : null;
+    var clientEl = document.getElementById('dossier-kpi-client');
+    var investEl = document.getElementById('dossier-kpi-invest');
+    var disposEl = document.getElementById('dossier-kpi-dispositifs');
+    if (last && clientEl) {
+      clientEl.textContent = (last.client && last.client.raisonSociale) ? last.client.raisonSociale : '—';
+      if (investEl) investEl.textContent = last.params && last.params.montant ? formaterEuros(last.params.montant, true) : '—';
+      if (disposEl && last.results && last.results.dispositifs) {
+        var dispos = last.results.dispositifs.filter(function(d){ return d.eligible; }).map(function(d){ return d.code || d.nom; });
+        disposEl.textContent = dispos.length > 0 ? dispos.join(' + ') : '—';
+      }
+    }
+  } catch(e) {}
+}
+
+// Init dossier page when switching to it
+(function() {
+  var origSwitchPage = typeof switchPage === 'function' ? switchPage : null;
+  // Hook into switchPage — call renderDossierChecklist when dossier page is shown
+  // This is done via a MutationObserver on the page-dossier div
+  document.addEventListener('DOMContentLoaded', function() {
+    renderDossierChecklist();
+    refreshDossierKpis();
+  });
+})();
 
 </script>
 <!-- ═══ MODAL APERÇU PDF ═══ -->
