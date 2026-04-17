@@ -4918,14 +4918,14 @@
     <button onclick="fermerPopupProposition()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;line-height:1;">×</button>
     <div style="font-size:26px;margin-bottom:8px;">📤</div>
     <div style="font-size:17px;font-weight:800;color:#0f2b46;margin-bottom:6px;">Générer la proposition commerciale</div>
-    <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Ce PDF sera archivé dans l'onglet <strong>Propositions</strong> et envoyé au client. La génération fait automatiquement évoluer le statut du dossier dans le <strong>Pipeline</strong>.</p>
+    <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Ce PDF sera archivé dans l'onglet <strong>Propositions</strong>. La génération fait automatiquement évoluer le statut du dossier dans le <strong>Pipeline</strong>.</p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
       <div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:8px;">📋 Processus de génération</div>
       <div style="font-size:12px;color:#047857;line-height:1.8;">
         <div>① La simulation actuelle est sauvegardée</div>
         <div>② Le PDF est généré avec vos données client</div>
         <div>③ La proposition est archivée dans <strong>Propositions</strong></div>
-        <div>④ Le pipeline passe au statut <strong>« Proposition envoyée »</strong></div>
+        <div>④ Le pipeline passe au statut <strong>« Proposition »</strong></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;">
@@ -8660,7 +8660,7 @@ function lireParametres() {
 
   const mwhEco = conso * gain / 100;
   const ecoAn = mwhEco * prix;
-  const HORIZON = 12;
+  const HORIZON = Math.max(12, Math.ceil(duree) + 5); // même logique que recalculer()
   const ecoTotal = ecoAn * HORIZON;
   const totalLoyers = a.mensNette * a.nbMois;
   const roi = ecoAn * HORIZON - totalLoyers;
@@ -8691,7 +8691,7 @@ function lireParametres() {
   }
 
   return {
-    nomClient, inv, conso, gain, duree, taux, prix, kwh, cours, taille,
+    nomClient, inv, conso, gain, duree, taux, prix, kwh, cours, taille, horizon: HORIZON,
     typeLabel, primeCEE: a.primeCEE, primeADEME: a.primeADEME, gainBPI: a.gainBPI_euros,
     primeFEDER: a.primeFEDER, totalAides: a.totalAidesAffichage, coutNet: a.coutNet,
     pctCouvert: a.pctCouvert, mensBrute: a.mensBrute, mensNette: a.mensNette,
@@ -8864,19 +8864,25 @@ async function exporterPDF(previewOnly = false) {
     Y += 6;
 
     const aidesDonnees = [
-      ['Prime CEE (P6 2026-2030)', aidesActives.cee ? fe(d.primeCEE) : 'Desactive', aidesActives.cee],
-      ['Fonds Chaleur / DECARB FLASH ADEME', aidesActives.ademe ? fe(d.primeADEME) : 'Desactive', aidesActives.ademe],
-      ['Pret Vert Bpifrance (gain taux)', aidesActives.bpi ? fe(d.gainBPI) : 'Desactive', aidesActives.bpi],
-      ['FEDER regional', aidesActives.feder ? fe(d.primeFEDER) : 'Non active', aidesActives.feder],
-    ];
-    aidesDonnees.forEach(([label, montant, actif], i) => {
-      rect(MARG, Y, CONTENU, 8, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
-      doc.setFillColor(...(actif ? PDF_COLORS.teal : PDF_COLORS.bordure));
-      doc.circle(MARG + 4, Y + 4, 1.3, 'F');
-      txt(label, MARG + 9, Y + 5.5, 8.5, actif ? PDF_COLORS.grisfonce : PDF_COLORS.gris);
-      txt(montant, W - MARG - 2, Y + 5.5, 8.5, actif ? PDF_COLORS.teal : PDF_COLORS.gris, actif, 'right');
+      aidesActives.cee  && d.primeCEE   > 0 ? ['Prime CEE (P6 2026-2030)', fe(d.primeCEE)] : null,
+      aidesActives.ademe && d.primeADEME > 0 ? ['Fonds Chaleur / DECARB FLASH ADEME', fe(d.primeADEME)] : null,
+      aidesActives.bpi  && d.gainBPI    > 0 ? ['Pret Vert Bpifrance (reduction de taux)', fe(d.gainBPI)] : null,
+      aidesActives.feder && d.primeFEDER > 0 ? ['FEDER regional', fe(d.primeFEDER)] : null,
+    ].filter(Boolean);
+    if (aidesDonnees.length === 0) {
+      rect(MARG, Y, CONTENU, 8, PDF_COLORS.grisClair);
+      txt('Aucune aide activee pour cette simulation', MARG + 4, Y + 5.5, 8.5, PDF_COLORS.gris, false);
       Y += 8;
-    });
+    } else {
+      aidesDonnees.forEach(([label, montant], i) => {
+        rect(MARG, Y, CONTENU, 8, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
+        doc.setFillColor(...PDF_COLORS.teal);
+        doc.circle(MARG + 4, Y + 4, 1.3, 'F');
+        txt(label, MARG + 9, Y + 5.5, 8.5, PDF_COLORS.grisfonce);
+        txt(montant, W - MARG - 2, Y + 5.5, 8.5, PDF_COLORS.teal, true, 'right');
+        Y += 8;
+      });
+    }
 
     rect(MARG, Y, CONTENU, 9, PDF_COLORS.teal);
     txt('TOTAL AIDES MOBILISEES', MARG + 4, Y + 6, 8.5, PDF_COLORS.blanc, true);
@@ -8890,9 +8896,9 @@ async function exporterPDF(previewOnly = false) {
 
     const lignesFin = [
       ['Investissement total HT', fe(d.inv), PDF_COLORS.gris],
-      ['- Prime CEE', '- ' + fe(d.primeCEE), PDF_COLORS.teal],
-      ['- Subvention ADEME', '- ' + fe(d.primeADEME), PDF_COLORS.teal],
-      ...(aidesActives.feder ? [['- FEDER regional', '- ' + fe(d.primeFEDER), PDF_COLORS.teal]] : []),
+      ...(aidesActives.cee   && d.primeCEE   > 0 ? [['- Prime CEE', '- ' + fe(d.primeCEE), PDF_COLORS.teal]] : []),
+      ...(aidesActives.ademe && d.primeADEME > 0 ? [['- Subvention ADEME', '- ' + fe(d.primeADEME), PDF_COLORS.teal]] : []),
+      ...(aidesActives.feder && d.primeFEDER > 0 ? [['- FEDER regional', '- ' + fe(d.primeFEDER), PDF_COLORS.teal]] : []),
       ['= Capital net a financer', fe(d.coutNet), PDF_COLORS.navy],
       ['Duree / Taux brut / Taux net', d.duree + ' ans  |  ' + d.taux.toFixed(1) + '%  |  ' + d.tauxNet.toFixed(1) + '%', PDF_COLORS.grisfonce],
       ['Loyer mensuel brut', fe(Math.round(d.mensBrute)) + ' /mois', PDF_COLORS.gris],
@@ -8919,9 +8925,9 @@ async function exporterPDF(previewOnly = false) {
       ['Gain energetique', d.gain.toFixed(0) + '% soit ' + Math.round(d.mwhEco) + ' MWh economises', PDF_COLORS.teal],
       ['Prix de l\'energie', d.prix + ' EUR/MWh', PDF_COLORS.grisfonce],
       ['Economie annuelle', fe(d.ecoAn) + ' /an', PDF_COLORS.teal],
-      ['Economie totale (' + d.duree + ' ans)', fe(d.ecoTotal), PDF_COLORS.teal],
+      ['Economie totale (' + d.horizon + ' ans)', fe(d.ecoTotal), PDF_COLORS.teal],
       ['Delai de retour', d.paybackMois > 120 ? 'Plus de 10 ans' : d.paybackMois + ' mois', d.paybackMois <= 36 ? PDF_COLORS.teal : PDF_COLORS.amber],
-      ['Gain net total', (d.roi >= 0 ? '+' : '') + fe(d.roi) + ' sur ' + d.duree + ' ans', d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge],
+      ['Gain net total', (d.roi >= 0 ? '+' : '') + fe(d.roi) + ' sur ' + d.horizon + ' ans', d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge],
     ];
     lignesEco.forEach(([l, v, c], i) => {
       rect(MARG, Y, CONTENU, 7, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
