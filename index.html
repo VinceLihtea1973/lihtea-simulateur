@@ -3612,6 +3612,8 @@
     }
 
     /* ══ DOSSIER PAGE — v2 ══ */
+    .dossier-client-selector{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius,10px);padding:14px 18px;margin-bottom:16px;}
+    .dossier-client-selector select:focus{outline:2px solid var(--c-teal);outline-offset:1px;}
     .dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
     @media(max-width:900px){.dossier-grid{grid-template-columns:1fr;}}
     .dossier-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius,10px);padding:20px;}
@@ -4410,12 +4412,26 @@
     <div class="page" id="page-dossier">
       <div class="app">
 
-        <!-- KPI pills -->
-        <div class="dossier-kpi-bar" id="dossier-kpi-bar">
-          <div class="dossier-kpi-pill">Client : <strong id="dossier-kpi-client">—</strong></div>
-          <div class="dossier-kpi-pill">Investissement : <strong id="dossier-kpi-invest">—</strong></div>
-          <div class="dossier-kpi-pill">Dispositifs : <strong id="dossier-kpi-dispositifs">—</strong></div>
-          <div class="dossier-kpi-pill teal">Avancement : <strong id="dossier-pct-label">0%</strong></div>
+        <!-- ── Sélecteur client ── -->
+        <div class="dossier-client-selector">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:700;color:var(--c-text-2);white-space:nowrap;">📋 Dossier client :</span>
+            <select id="dossier-client-select"
+              style="flex:1;min-width:220px;max-width:380px;padding:7px 10px;border-radius:8px;border:1px solid var(--c-border);font-size:12px;font-family:inherit;background:var(--c-surface);color:var(--c-navy);font-weight:600;cursor:pointer;"
+              onchange="setDossierClientFromSelect(this.value, this.options[this.selectedIndex].text)">
+              <option value="">— Sélectionner un client —</option>
+            </select>
+            <span id="dossier-no-client-hint" style="font-size:11px;color:var(--c-text-3);display:none;">
+              Ou ouvrez un dossier depuis <a href="#" onclick="switchPage('clients',null);return false;" style="color:var(--c-teal);text-decoration:none;font-weight:600;">la liste clients →</a>
+            </span>
+          </div>
+          <!-- KPI pills (visibles seulement quand un client est sélectionné) -->
+          <div class="dossier-kpi-bar" id="dossier-kpi-bar" style="margin-top:10px;display:none;">
+            <div class="dossier-kpi-pill">Client : <strong id="dossier-kpi-client">—</strong></div>
+            <div class="dossier-kpi-pill">Investissement : <strong id="dossier-kpi-invest">—</strong></div>
+            <div class="dossier-kpi-pill">Dispositifs : <strong id="dossier-kpi-dispositifs">—</strong></div>
+            <div class="dossier-kpi-pill teal">Avancement : <strong id="dossier-pct-label">0%</strong></div>
+          </div>
         </div>
 
         <div class="dossier-grid">
@@ -4678,7 +4694,7 @@
                 <div class="dossier-partner-icon">🔬</div>
                 <div class="dossier-partner-name">Bureaux d'études</div>
                 <div class="dossier-partner-desc">Auditeurs certifiés OPQIBI pour audits énergétiques et fiches CEE</div>
-                <a class="dossier-partner-btn" href="https://www.opqibi.com/trouver-un-bureau-d-etudes" target="_blank">Trouver →</a>
+                <a class="dossier-partner-btn" href="https://www.opqibi.com/recherche-plus" target="_blank">Trouver →</a>
               </div>
               <div class="dossier-partner-card">
                 <div class="dossier-partner-icon">⚡</div>
@@ -5009,6 +5025,7 @@
     <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <span id="drawer-statut-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;"></span>
       <span id="drawer-admin-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#fef3c7;color:#92400e;">⏳ En revue Admin</span>
+      <button onclick="openDossierForClient()" style="margin-left:auto;padding:5px 13px;background:var(--c-teal);border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;" title="Ouvrir le dossier de montage pour ce client">📋 Dossier</button>
     </div>
   </div>
   <!-- 4 ONGLETS -->
@@ -6045,6 +6062,7 @@ function switchPage(pageName, navItem) {
   if (pageName === 'resultats') {
     recalculer();
   } else if (pageName === 'dossier') {
+    populateDossierClientSelect();
     renderDossierChecklist();
     refreshDossierKpis();
   } else if (pageName === 'saved') {
@@ -11883,32 +11901,146 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Declare page tracker variable
 var pageCourante = 'dashboard';
 
-// ══ DOSSIER PAGE — v2 ══
+// ══ DOSSIER PAGE — v2 (per-client tracking) ══
 const DOSSIER_STEPS = [
-  { id:'ds1', label:'Audit énergétique commandé', critique:false },
-  { id:'ds2', label:'Délégataire CEE identifié', critique:false },
-  { id:'ds3', label:'Attestation non-engagement signée', critique:true },
-  { id:'ds4', label:'Dossier CEE déposé (AVANT BC)', critique:true },
-  { id:'ds5', label:'Dossier ADEME / Tremplin déposé', critique:false },
-  { id:'ds6', label:'Accord de principe BPI obtenu', critique:false },
-  { id:'ds7', label:'Contrat Lihtea signé', critique:false },
-  { id:'ds8', label:'Bon de commande équipement émis', critique:false },
-  { id:'ds9', label:'Installation planifiée', critique:false },
-  { id:'ds10', label:'PV de réception signé', critique:false },
+  { id:'ds1',  label:'Audit énergétique commandé',           critique:false },
+  { id:'ds2',  label:'Délégataire CEE identifié',            critique:false },
+  { id:'ds3',  label:'Attestation non-engagement signée',    critique:true  },
+  { id:'ds4',  label:'Dossier CEE déposé (AVANT BC)',        critique:true  },
+  { id:'ds5',  label:'Dossier ADEME / Tremplin déposé',      critique:false },
+  { id:'ds6',  label:'Accord de principe BPI obtenu',        critique:false },
+  { id:'ds7',  label:'Contrat Lihtea signé',                 critique:false },
+  { id:'ds8',  label:'Bon de commande équipement émis',      critique:false },
+  { id:'ds9',  label:'Installation planifiée',               critique:false },
+  { id:'ds10', label:'PV de réception signé',                critique:false },
   { id:'ds11', label:'Justificatifs CEE transmis au délégataire', critique:false },
-  { id:'ds12', label:'Prime CEE reçue', critique:false },
+  { id:'ds12', label:'Prime CEE reçue',                      critique:false },
 ];
 
-var dossierDone = new Set();
-try { dossierDone = new Set(JSON.parse(localStorage.getItem('lihtea_dossier_check') || '[]')); } catch(e){}
+// Current client context for dossier
+var _dossierClientId   = '';
+var _dossierClientName = '';
+var _dossierDone       = new Set();
 
+// Restore last client from localStorage
+try {
+  _dossierClientId   = localStorage.getItem('lihtea_dossier_client_id')   || '';
+  _dossierClientName = localStorage.getItem('lihtea_dossier_client_name') || '';
+  if (_dossierClientId) {
+    _dossierDone = new Set(JSON.parse(localStorage.getItem('lihtea_dossier_check_' + _dossierClientId) || '[]'));
+  }
+} catch(e) {}
+
+/* ── Sélection d'un client ─────────────────────────────── */
+function setDossierClient(id, name) {
+  _dossierClientId   = id   || '';
+  _dossierClientName = name || id || '';
+  // Remove "— Sélectionner…" prefix if present
+  if (_dossierClientName.startsWith('— ')) _dossierClientName = _dossierClientName.slice(2);
+  try {
+    localStorage.setItem('lihtea_dossier_client_id',   _dossierClientId);
+    localStorage.setItem('lihtea_dossier_client_name', _dossierClientName);
+  } catch(e) {}
+  // Load this client's checklist
+  _dossierDone = new Set();
+  if (_dossierClientId) {
+    try { _dossierDone = new Set(JSON.parse(localStorage.getItem('lihtea_dossier_check_' + _dossierClientId) || '[]')); } catch(e) {}
+  }
+  // Sync select value
+  var sel = document.getElementById('dossier-client-select');
+  if (sel && _dossierClientId) sel.value = _dossierClientId;
+  // Show/hide KPI bar
+  var kpiBar = document.getElementById('dossier-kpi-bar');
+  if (kpiBar) kpiBar.style.display = _dossierClientId ? 'flex' : 'none';
+  renderDossierChecklist();
+  refreshDossierKpis();
+}
+
+// Called by <select> onchange
+function setDossierClientFromSelect(id, label) {
+  setDossierClient(id, label);
+}
+
+// Called from client drawer button "📋 Dossier"
+function openDossierForClient() {
+  if (!_drawerClientId) return;
+  var name = (_drawerClientData && (_drawerClientData.raison_sociale || _drawerClientData.name)) || _drawerClientId;
+  setDossierClient(_drawerClientId, name);
+  closeClientDrawer();
+  switchPage('dossier');
+}
+
+/* ── Popule le <select> avec les clients Supabase ─────── */
+function populateDossierClientSelect() {
+  var sel = document.getElementById('dossier-client-select');
+  if (!sel) return;
+  var opts = '<option value="">— Sélectionner un client —</option>';
+  var clients = (typeof _clientsAll !== 'undefined' && _clientsAll) ? _clientsAll : [];
+  if (clients.length > 0) {
+    // Actifs d'abord, puis autres
+    var actifs  = clients.filter(function(c){ return !['perdu','inactif'].includes(c.statut); });
+    var inactifs = clients.filter(function(c){ return ['perdu','inactif'].includes(c.statut); });
+    if (actifs.length) {
+      opts += '<optgroup label="Dossiers actifs">';
+      actifs.forEach(function(c) {
+        var n = c.raison_sociale || c.name || c.id;
+        var sel2 = c.id === _dossierClientId ? ' selected' : '';
+        opts += '<option value="' + c.id + '"' + sel2 + '>' + n + '</option>';
+      });
+      opts += '</optgroup>';
+    }
+    if (inactifs.length) {
+      opts += '<optgroup label="Perdus / Inactifs">';
+      inactifs.forEach(function(c) {
+        var n = c.raison_sociale || c.name || c.id;
+        var sel2 = c.id === _dossierClientId ? ' selected' : '';
+        opts += '<option value="' + c.id + '"' + sel2 + '>' + n + '</option>';
+      });
+      opts += '</optgroup>';
+    }
+  } else {
+    // Fallback: depuis simulations localStorage
+    try {
+      var sims = JSON.parse(localStorage.getItem('lihtea_saved_sims') || '[]');
+      var seen = {};
+      sims.forEach(function(s) {
+        var n = s.client && s.client.raisonSociale;
+        if (n && !seen[n]) {
+          seen[n] = true;
+          var sel2 = n === _dossierClientName ? ' selected' : '';
+          opts += '<option value="' + n + '"' + sel2 + '>' + n + '</option>';
+        }
+      });
+    } catch(e) {}
+    // Show hint
+    var hint = document.getElementById('dossier-no-client-hint');
+    if (hint && clients.length === 0) hint.style.display = '';
+  }
+  sel.innerHTML = opts;
+  // Show KPI bar if client already selected
+  var kpiBar = document.getElementById('dossier-kpi-bar');
+  if (kpiBar) kpiBar.style.display = _dossierClientId ? 'flex' : 'none';
+}
+
+/* ── Checklist ─────────────────────────────────────────── */
 function renderDossierChecklist() {
   var container = document.getElementById('dossier-checklist');
   if (!container) return;
+  if (!_dossierClientId) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--c-text-3);font-size:12px;">Sélectionnez un client ci-dessus pour suivre l\'avancement de son dossier.</div>';
+    // Reset progress to 0
+    var fill = document.getElementById('dossier-prog-fill');
+    var done = document.getElementById('dossier-prog-done');
+    var total = document.getElementById('dossier-prog-total');
+    if (fill) fill.style.width = '0%';
+    if (done) done.textContent = '—';
+    if (total) total.textContent = 'sur ' + DOSSIER_STEPS.length;
+    return;
+  }
   container.innerHTML = DOSSIER_STEPS.map(function(s) {
-    var isDone = dossierDone.has(s.id);
+    var isDone = _dossierDone.has(s.id);
     return '<div class="dossier-check-item' + (isDone?' done':'') + '" onclick="toggleDossierCheck(\'' + s.id + '\')">'
-      + '<div class="dossier-check-box">' + (isDone?'✓':'') + '</div>'
+      + '<div class="dossier-check-box">' + (isDone ? '✓' : '') + '</div>'
       + '<span class="dossier-check-label">' + s.label + '</span>'
       + (s.critique ? '<span class="dossier-check-tag dossier-tag-critique">CRITIQUE</span>' : '')
       + '</div>';
@@ -11917,23 +12049,25 @@ function renderDossierChecklist() {
 }
 
 function toggleDossierCheck(id) {
-  if (dossierDone.has(id)) dossierDone.delete(id); else dossierDone.add(id);
-  try { localStorage.setItem('lihtea_dossier_check', JSON.stringify([...dossierDone])); } catch(e){}
+  if (!_dossierClientId) return; // Guard: no client selected
+  if (_dossierDone.has(id)) _dossierDone.delete(id); else _dossierDone.add(id);
+  try { localStorage.setItem('lihtea_dossier_check_' + _dossierClientId, JSON.stringify([..._dossierDone])); } catch(e) {}
   renderDossierChecklist();
 }
 
 function updateDossierProgress() {
-  var pct = Math.round(dossierDone.size / DOSSIER_STEPS.length * 100);
+  var pct  = _dossierClientId ? Math.round(_dossierDone.size / DOSSIER_STEPS.length * 100) : 0;
   var fill = document.getElementById('dossier-prog-fill');
-  var done = document.getElementById('dossier-prog-done');
-  var total = document.getElementById('dossier-prog-total');
+  var doneEl = document.getElementById('dossier-prog-done');
+  var total  = document.getElementById('dossier-prog-total');
   var pctLabel = document.getElementById('dossier-pct-label');
   if (fill) fill.style.width = pct + '%';
-  if (done) done.textContent = dossierDone.size + ' étape' + (dossierDone.size>1?'s':'') + ' complétée' + (dossierDone.size>1?'s':'');
+  if (doneEl) doneEl.textContent = _dossierDone.size + ' étape' + (_dossierDone.size>1?'s':'') + ' complétée' + (_dossierDone.size>1?'s':'');
   if (total) total.textContent = 'sur ' + DOSSIER_STEPS.length;
   if (pctLabel) pctLabel.textContent = pct + '%';
 }
 
+/* ── Bibliothèque docs ─────────────────────────────────── */
 function showDocLibPanel(tab, btn) {
   document.querySelectorAll('.doc-lib-panel').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.doc-lib-tab').forEach(function(b){ b.classList.remove('active'); });
@@ -11942,34 +12076,54 @@ function showDocLibPanel(tab, btn) {
   if (btn) btn.classList.add('active');
 }
 
+/* ── KPI bar ───────────────────────────────────────────── */
 function refreshDossierKpis() {
-  try {
-    var sims = JSON.parse(localStorage.getItem('lihtea_saved_sims') || '[]');
-    var last = sims.length > 0 ? sims[sims.length-1] : null;
-    var clientEl = document.getElementById('dossier-kpi-client');
-    var investEl = document.getElementById('dossier-kpi-invest');
-    var disposEl = document.getElementById('dossier-kpi-dispositifs');
-    if (last && clientEl) {
-      clientEl.textContent = (last.client && last.client.raisonSociale) ? last.client.raisonSociale : '—';
-      if (investEl) investEl.textContent = last.params && last.params.montant ? formaterEuros(last.params.montant, true) : '—';
-      if (disposEl && last.results && last.results.dispositifs) {
-        var dispos = last.results.dispositifs.filter(function(d){ return d.eligible; }).map(function(d){ return d.code || d.nom; });
-        disposEl.textContent = dispos.length > 0 ? dispos.join(' + ') : '—';
+  var clientEl = document.getElementById('dossier-kpi-client');
+  var investEl = document.getElementById('dossier-kpi-invest');
+  var disposEl = document.getElementById('dossier-kpi-dispositifs');
+  var pctLabel = document.getElementById('dossier-pct-label');
+
+  if (!_dossierClientId) {
+    if (clientEl) clientEl.textContent = '—';
+    if (investEl) investEl.textContent = '—';
+    if (disposEl) disposEl.textContent = '—';
+    if (pctLabel) pctLabel.textContent = '0%';
+    return;
+  }
+
+  if (clientEl) clientEl.textContent = _dossierClientName || _dossierClientId;
+
+  // Try to get data from _clientsAll (Supabase)
+  var clientData = null;
+  if (typeof _clientsAll !== 'undefined' && _clientsAll) {
+    clientData = _clientsAll.find(function(c){ return c.id === _dossierClientId; });
+  }
+
+  if (clientData) {
+    if (investEl) investEl.textContent = clientData.totalInvest > 0 ? (clientData.totalInvest >= 1000 ? Math.round(clientData.totalInvest/1000) + ' k€' : clientData.totalInvest + '€') : '—';
+    if (disposEl) disposEl.textContent = '—'; // pas dispo au niveau prospect
+  } else {
+    // Fallback: saved sims matching client name
+    try {
+      var sims = JSON.parse(localStorage.getItem('lihtea_saved_sims') || '[]');
+      var match = sims.filter(function(s){ return s.client && (s.client.raisonSociale === _dossierClientName || s.client.raisonSociale === _dossierClientId); });
+      if (match.length > 0) {
+        var last = match[match.length-1];
+        if (investEl) investEl.textContent = last.params && last.params.montant ? (Math.round(last.params.montant/1000) + ' k€') : '—';
+        if (disposEl && last.results && last.results.dispositifs) {
+          var dispos = last.results.dispositifs.filter(function(d){ return d.eligible; }).map(function(d){ return d.code || d.nom; });
+          if (disposEl) disposEl.textContent = dispos.length > 0 ? dispos.join(' + ') : '—';
+        }
       }
-    }
-  } catch(e) {}
+    } catch(e) {}
+  }
 }
 
-// Init dossier page when switching to it
-(function() {
-  var origSwitchPage = typeof switchPage === 'function' ? switchPage : null;
-  // Hook into switchPage — call renderDossierChecklist when dossier page is shown
-  // This is done via a MutationObserver on the page-dossier div
-  document.addEventListener('DOMContentLoaded', function() {
-    renderDossierChecklist();
-    refreshDossierKpis();
-  });
-})();
+/* ── Init ──────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  // Show initial state (empty until client is picked)
+  renderDossierChecklist();
+});
 
 </script>
 <!-- ═══ MODAL APERÇU PDF ═══ -->
