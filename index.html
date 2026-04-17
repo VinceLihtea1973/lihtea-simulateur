@@ -5713,7 +5713,7 @@ async function syncSimulationToSupabase(simData) {
     const equipLabel = equipSelect?.options[equipSelect?.selectedIndex]?.text || '';
 
     const payload = {
-      tenant_id: LIHTEA_TENANT_ID,
+      tenant_id: currentTenantId,
       user_id: userId,
       prospect_id: prospectId,
       client_nom: simData.clientName || 'Sans nom',
@@ -5722,7 +5722,9 @@ async function syncSimulationToSupabase(simData) {
       parametres: {
         investissement: simData.params?.inv,
         consommation: simData.params?.conso,
+        consommation_kwh: simData.params?.conso,    // alias pour dashboard ecoKwh
         gain_energetique: simData.params?.gain,
+        gain_pct: simData.params?.gain,             // alias pour dashboard ecoKwh
         duree_ans: simData.params?.duree,
         taux: simData.params?.taux,
         prix_energie: simData.params?.prix,
@@ -5785,7 +5787,7 @@ async function syncPropositionToSupabase(propData) {
     const equipLabel = propData.equipType || '';
 
     const payload = {
-      tenant_id: LIHTEA_TENANT_ID,
+      tenant_id: currentTenantId,
       user_id: userId,
       prospect_id: prospectId,
       client_nom: propData.clientName || 'Sans nom',
@@ -5794,7 +5796,9 @@ async function syncPropositionToSupabase(propData) {
       parametres: {
         investissement: parseFloat(propData.fullParams?.inv) || propData.investissement,
         consommation: parseFloat(propData.fullParams?.conso) || 0,
+        consommation_kwh: parseFloat(propData.fullParams?.conso) || 0,
         gain_energetique: parseFloat(propData.fullParams?.gain) || 0,
+        gain_pct: parseFloat(propData.fullParams?.gain) || 0,
         duree_ans: parseFloat(propData.fullParams?.duree) || 0,
         taux: parseFloat(propData.fullParams?.taux) || 0,
         prix_energie: parseFloat(propData.fullParams?.prix) || 0,
@@ -7667,10 +7671,14 @@ async function renderPipelinePage() {
   }
   board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
   try {
-    const [prosp, sims] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }).then(r => r.json()),
+    const [prospRes, simsRes] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
     ]);
+    if (!prospRes.ok) throw new Error('Prospects API ' + prospRes.status);
+    if (!simsRes.ok)  throw new Error('Simulations API ' + simsRes.status);
+    const prosp = await prospRes.json();
+    const sims  = await simsRes.json();
     _pipelineClients = (prosp?.data || []).map(p => {
       const pSims = (sims?.data || []).filter(s => s.prospect_id === p.id);
       const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
@@ -7729,11 +7737,21 @@ async function _pipelineDrop(newStatut) {
   if (!_pipelineDragId) return;
   const client = _pipelineClients.find(c => c.id === _pipelineDragId);
   if (!client || client.statut === newStatut) return;
-  // Optimistic UI
+  const prevStatut = client.statut;
+  // Optimistic UI update
   client.statut = newStatut;
   _renderPipelineBoard();
-  // Sync API
-  await fetch(ADMIN_API + '/prospects/' + _pipelineDragId, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ statut: newStatut }) });
+  try {
+    const res = await fetch(ADMIN_API + '/prospects/' + _pipelineDragId, {
+      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ statut: newStatut })
+    });
+    if (!res.ok) throw new Error('PUT /prospects ' + res.status);
+  } catch(e) {
+    // Rollback UI on failure
+    client.statut = prevStatut;
+    _renderPipelineBoard();
+    showToast('Erreur mise à jour statut : ' + e.message, 'error');
+  }
   _pipelineDragId = null;
 }
 
@@ -7756,10 +7774,14 @@ async function renderClientsPage() {
   }
   container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:14px;height:14px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>';
   try {
-    const [prosp, sims] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }).then(r => r.json()),
+    const [prospRes, simsRes] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
     ]);
+    if (!prospRes.ok) throw new Error('Prospects API ' + prospRes.status);
+    if (!simsRes.ok)  throw new Error('Simulations API ' + simsRes.status);
+    const prosp = await prospRes.json();
+    const sims  = await simsRes.json();
     const allSims = sims?.data || [];
     _clientsAll = (prosp?.data || []).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
@@ -10264,12 +10286,14 @@ async function renderGlobalDashboard() {
 
     // ── Pipeline bar chart (by statut)
     const STAGE_MAP = [
-      {key:'prospect',  label:'Prospect', c:'#6366f1'},
-      {key:'qualification', label:'Qualif.', c:'#0891b2'},
-      {key:'proposition', label:'Proposit.', c:'#2563eb'},
-      {key:'negociation', label:'Négoc.', c:'#d97706'},
-      {key:'gagne',    label:'Gagné', c:'#059669'},
-      {key:'perdu',    label:'Perdu', c:'#dc2626'},
+      {key:'nouveau',        label:'Nouveau',       c:'#6366f1'},
+      {key:'qualifie',       label:'Qualifié',      c:'#0891b2'},
+      {key:'en_discussion',  label:'Discussion',    c:'#2563eb'},
+      {key:'proposition',    label:'Proposition',   c:'#d97706'},
+      {key:'negociation',    label:'Négociation',   c:'#ea580c'},
+      {key:'dossier_depose', label:'Dossier',       c:'#0d9488'},
+      {key:'gagne',          label:'Gagné',         c:'#059669'},
+      {key:'perdu',          label:'Perdu',         c:'#dc2626'},
     ];
     const pipeData = STAGE_MAP.map(s => ({
       label: s.label, c: s.c,
