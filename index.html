@@ -1991,35 +1991,13 @@
     .score-b { background: rgba(217,119,6,0.15); color: #d97706; }
     .score-c { background: rgba(220,38,38,0.12); color: #dc2626; }
 
-    /* ─── CLIENTS CRM ─── */
-    .crm-page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .crm-page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--c-navy); }
-    .crm-page-header p { font-size: 12px; color: var(--c-text-3); margin-top: 2px; }
-    .crm-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all .15s; border: 1px solid var(--c-teal); background: var(--c-teal); color: #fff; }
-    .crm-btn:hover { background: #0b8075; border-color: #0b8075; }
-    .crm-btn-ghost { background: var(--c-surface); color: var(--c-text-2); border: 1px solid var(--c-border); }
-    .crm-btn-ghost:hover { background: var(--c-bg); border-color: var(--c-teal); color: var(--c-teal); }
-
-    .crm-kpi-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .crm-kpi-card { flex: 1; min-width: 100px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
-    .crm-kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); font-weight: 600; }
-    .crm-kpi-val { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; color: var(--c-navy); }
-    .crm-kpi-card.kpi-alert .crm-kpi-val { color: var(--c-red); }
-    .crm-kpi-card.kpi-won .crm-kpi-val { color: var(--c-green); }
-    .crm-kpi-card.kpi-active .crm-kpi-val { color: var(--c-teal); }
-
-    .filters-bar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; overflow-x: auto; }
-    .filter-select { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 6px 8px; color: var(--c-text-2); font-size: 12px; font-family: var(--font-body); cursor: pointer; outline: none; transition: border-color .15s; white-space: nowrap; flex-shrink: 0; max-width: 160px; width: auto; }
-    .filter-select:focus { border-color: var(--c-teal); }
-    .filter-count { font-size: 12px; color: var(--c-text-3); white-space: nowrap; flex-shrink: 0; }
-
-    .prospect-table { width: 100%; border-collapse: collapse; }
-    .prospect-table th { text-align: left; padding: 10px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-3); border-bottom: 1px solid var(--c-border); font-weight: 600; white-space: nowrap; background: var(--c-bg); }
-    .prospect-table td { padding: 12px; border-bottom: 1px solid var(--c-border); font-size: 13px; cursor: pointer; vertical-align: middle; }
-    .prospect-table tbody tr { transition: background .1s; }
-    .prospect-table tbody tr:hover td { background: var(--c-teal-bg); }
-    .stage-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; white-space: nowrap; }
-    .overdue-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #dc2626; animation: pulse 1.5s infinite; margin-left: 6px; vertical-align: middle; }
+    /* ─── CLIENTS TABLE ─── */
+    .clients-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .clients-table th { text-align: left; padding: 9px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); border-bottom: 2px solid var(--c-border); font-weight: 600; white-space: nowrap; }
+    .clients-table td { padding: 11px 12px; border-bottom: 1px solid var(--c-border); vertical-align: middle; }
+    .clients-table tbody tr { cursor: pointer; transition: background .12s; }
+    .clients-table tbody tr:hover td { background: var(--c-bg); }
+    .overdue-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #dc2626; animation: pulse 1.5s infinite; margin-left: 5px; }
 
     /* ─── PIPELINE KANBAN ─── */
     .pipeline-board { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; min-height: 60vh; }
@@ -4290,10 +4268,142 @@
     </div>
 
     <!-- PAGE: ÉLIGIBILITÉ -->
-    <!-- Les contenus aides/eligibilite/organismes sont maintenant dans page-ressources -->
-    <div class="page" id="page-eligibilite" style="display:none!important;"></div>
-    <div class="page" id="page-aides" style="display:none!important;"></div>
-    <div class="page" id="page-organismes" style="display:none!important;"></div>
+    <div class="page" id="page-eligibilite">
+      <div class="app">
+<div class="card">
+          <div class="section-label">Scoring d'éligibilité par dispositif</div>
+          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
+            Évaluation automatique basée sur les paramètres saisis. Cliquez sur un dispositif pour voir le détail des critères.
+          </p>
+          <div class="scoring-grid" id="scoring-grid">
+            <!-- Généré dynamiquement par JS -->
+          </div>
+        </div>
+
+        <div class="scoring-summary" id="scoring-global-summary">
+          <!-- Généré dynamiquement par JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: AIDES -->
+    <div class="page" id="page-aides">
+      <div class="app">
+<div class="card">
+          <div class="section-label">Dispositifs activés</div>
+          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
+            Activez / désactivez chaque aide selon l'éligibilité du projet de votre client.
+            Les montants sont recalculés en temps réel.
+          </p>
+
+          <div class="aide-row" onclick="toggleAide('cee')">
+            <div class="toggle on" id="toggle-cee"></div>
+            <div class="aide-info">
+              <div class="aide-name">
+                Prime CEE (P6 — 2026-2030)
+                <span class="info-pill" data-tip="Le cours CEE fluctue chaque mois sur le marché.&#10;&#10;Cours de référence :&#10;• Valeur par défaut simulateur : 8,00 €/MWh cumac (prudent)&#10;• Marché EMMY — déc. 2025 : 8,78 €/MWh cumac&#10;&#10;→ Modifier le cours depuis admin.lihtea.com&#10;&#10;Source : registre EMMY / C2E Market (mensuel).">?</span>
+              </div>
+              <div class="aide-desc" id="cee-desc">Fournisseur énergie → bénéficiaire. Fiches IND-UT standardisées.</div>
+            </div>
+            <div class="aide-montant" id="amt-cee">0 €</div>
+          </div>
+
+          <div class="aide-row" onclick="toggleAide('ademe')">
+            <div class="toggle on" id="toggle-ademe"></div>
+            <div class="aide-info">
+              <div class="aide-name">
+                Fonds Chaleur / DECARB FLASH ADEME
+                <span class="info-pill" data-tip="Le taux ADEME affiché est un PLAFOND indicatif, pas un montant garanti.&#10;&#10;L'ADEME calcule l'aide projet par projet pour équilibrer son économie. Le taux réel dépend :&#10;• Du type et de la taille de l'installation&#10;• Du secteur et de la région&#10;• De la taille de l'entreprise (PME bénéficient d'un bonus +10 à +20%)&#10;&#10;Conditions d'éligibilité Fonds Chaleur :&#10;• Production minimale de 1 200 MWh/an (chaleur)&#10;• Temps de retour brut > 3 ans&#10;• Audit énergétique préalable requis&#10;&#10;→ Contacter la Direction Régionale ADEME pour valider l'aide réelle.">?</span>
+              </div>
+              <div class="aide-desc" id="ademe-desc">Jusqu'à X% selon équipement — plafond indicatif. PME : bonus +10%.</div>
+            </div>
+            <div class="aide-montant" id="amt-ademe">0 €</div>
+          </div>
+
+          <div class="aide-row" onclick="toggleAide('bpi')">
+            <div class="toggle on" id="toggle-bpi"></div>
+            <div class="aide-info">
+              <div class="aide-name">Prêt Vert Bpifrance</div>
+              <div class="aide-desc">Réduction du taux (-0,8%/an) → économie sur les intérêts. Jusqu'à 1 M€.</div>
+            </div>
+            <div class="aide-montant" id="amt-bpi">0 €</div>
+          </div>
+
+          <div class="aide-row" onclick="toggleAide('feder')">
+            <div class="toggle" id="toggle-feder"></div>
+            <div class="aide-info">
+              <div class="aide-name">FEDER régional (si éligible)</div>
+              <div class="aide-desc">50% des investissements. Selon région et appel à projets en cours.</div>
+            </div>
+            <div class="aide-montant" id="amt-feder">0 €</div>
+          </div>
+
+          <hr class="divider">
+          <div class="total-row">
+            <span class="total-label">Total aides mobilisées</span>
+            <span class="total-val color-green" id="total-aides">0 €</span>
+          </div>
+          <div class="total-row" style="padding-top:4px;">
+            <span style="font-size:13px;color:var(--c-text-2);">Capital à financer (net)</span>
+            <span style="font-size:18px;font-weight:700;color:var(--c-navy);font-family:var(--font-mono);" id="cout-net-mini">0 €</span>
+          </div>
+        </div>
+
+        <!-- Pitch mode: simplified hero card -->
+        <div class="pitch-only" id="pitch-card">
+          <div class="pitch-card">
+            <div class="pitch-headline">Synthèse de votre projet</div>
+            <div class="pitch-metrics">
+              <div class="pitch-metric">
+                <div class="pitch-metric-label">Vous investissez</div>
+                <div class="pitch-metric-value white" id="pitch-invest">—</div>
+              </div>
+              <div class="pitch-metric">
+                <div class="pitch-metric-label">Vous payez</div>
+                <div class="pitch-metric-value gold" id="pitch-loyer">—</div>
+                <div class="pitch-metric-sub">par mois</div>
+              </div>
+              <div class="pitch-metric">
+                <div class="pitch-metric-label">Vous économisez</div>
+                <div class="pitch-metric-value teal" id="pitch-eco">—</div>
+                <div class="pitch-metric-sub">par mois en énergie</div>
+              </div>
+              <div class="pitch-metric">
+                <div class="pitch-metric-label">Aides obtenues</div>
+                <div class="pitch-metric-value teal" id="pitch-aides">—</div>
+                <div class="pitch-metric-sub" id="pitch-pct">— de l'investissement</div>
+              </div>
+            </div>
+            <div class="pitch-verdict" id="pitch-verdict"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Waterfall — Décomposition du financement</div>
+          <div id="waterfall-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: ORGANISMES -->
+    <div class="page" id="page-organismes">
+      <div class="app">
+<div class="section-label" style="margin-bottom:6px;">Aides & subventions disponibles</div>
+        <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">Dispositifs français et européens pour le remplacement d'équipements industriels énergivores.</p>
+
+        <div id="tab-organismes" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="tab-btn active" onclick="filterOrganismes('all', this)">Tous</button>
+          <button class="tab-btn" onclick="filterOrganismes('calculable', this)">⚡ Calculables</button>
+          <button class="tab-btn" onclick="filterOrganismes('informatif', this)">📋 Informatifs</button>
+          <button class="tab-btn" onclick="filterOrganismes('france', this)">🇫🇷 France</button>
+          <button class="tab-btn" onclick="filterOrganismes('europe', this)">🇪🇺 Europe</button>
+        </div>
+
+        <div id="organismes-list">
+          <!-- Généré par JS -->
+        </div>
+      </div>
+    </div>
 
     <!-- PAGE: SCÉNARIOS -->
     <div class="page" id="page-scenarios">
@@ -4428,188 +4538,91 @@
 
     <!-- PAGE: CLIENTS (Full-Width, table CRM) -->
     <div class="page" id="page-clients">
+      <div class="app">
+        <!-- En-tête + filtres -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="section-label" style="margin-bottom:2px;">Portefeuille Clients</div>
+            <div style="font-size:12px;color:var(--c-text-3);">CRM · Filtres avancés · Score ICP · Drawer 360°</div>
+          </div>
+          <button onclick="renderClientsPage()" style="padding:6px 12px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-surface);font-size:12px;cursor:pointer;font-family:var(--font-body);">↻ Actualiser</button>
+        </div>
 
-      <!-- Titre (exactement CRM V3) -->
-      <div style="margin-bottom:16px;">
-        <h2 style="font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--c-navy);">Clients</h2>
-        <p style="font-size:12px;color:var(--c-text-3);margin-top:2px;">Liste complète avec filtres avancés</p>
+        <!-- Stats rapides -->
+        <div id="clients-stats" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+
+        <!-- Filtres avancés CRM -->
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;">
+          <select id="cf-statut" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Tous les statuts</option>
+            <option value="nouveau">Nouveau</option>
+            <option value="qualifie">Qualifié</option>
+            <option value="en_discussion">En discussion</option>
+            <option value="proposition">Proposition</option>
+            <option value="negociation">Négociation</option>
+            <option value="dossier_depose">Dossier déposé</option>
+            <option value="gagne">Gagné</option>
+            <option value="perdu">Perdu</option>
+          </select>
+          <select id="cf-taille" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Toutes tailles</option>
+            <option value="tpe">TPE</option>
+            <option value="pme">PME</option>
+            <option value="eti">ETI</option>
+            <option value="ge">GE</option>
+          </select>
+          <select id="cf-source" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="">Toutes sources</option>
+            <option value="entrant">Entrant</option>
+            <option value="simulateur">Simulateur</option>
+            <option value="direct">Direct</option>
+            <option value="salon">Salon</option>
+            <option value="partenaire">Partenaire</option>
+            <option value="prospection">Prospection</option>
+          </select>
+          <select id="cf-sort" onchange="_clientsApplyFilters()" style="padding:6px 10px;font-size:12px;border:1px solid var(--c-border);border-radius:6px;font-family:var(--font-body);background:var(--c-bg);color:var(--c-text);">
+            <option value="score_desc">↓ Score ICP</option>
+            <option value="invest_desc">↓ Investissement</option>
+            <option value="date_desc">↓ Date contact</option>
+            <option value="alert">⚠ Alertes d'abord</option>
+          </select>
+          <span id="clients-count" style="font-size:12px;color:var(--c-text-3);margin-left:auto;"></span>
+        </div>
+
+        <!-- Table dense -->
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;overflow:auto;">
+          <div id="clients-list"></div>
+        </div>
       </div>
-
-      <!-- Barre de filtres (CRM V3 — compact, pas de wrap forcé) -->
-      <div class="filters-bar">
-        <select id="cf-statut" onchange="_clientsApplyFilters()" class="filter-select">
-          <option value="">Tous les statuts</option>
-          <option value="nouveau">Nouveau</option>
-          <option value="qualifie">Qualifié</option>
-          <option value="en_discussion">En discussion</option>
-          <option value="proposition">Proposition</option>
-          <option value="negociation">Négociation</option>
-          <option value="dossier_depose">Dossier déposé</option>
-          <option value="gagne">Gagné</option>
-          <option value="perdu">Perdu</option>
-        </select>
-        <select id="cf-source" onchange="_clientsApplyFilters()" class="filter-select">
-          <option value="">Toutes les sources</option>
-          <option value="entrant">Entrant</option>
-          <option value="simulateur">Simulateur</option>
-          <option value="direct">Direct</option>
-          <option value="salon">Salon</option>
-          <option value="partenaire">Partenaire</option>
-          <option value="prospection">Prospection</option>
-        </select>
-        <select id="cf-taille" onchange="_clientsApplyFilters()" class="filter-select">
-          <option value="">Toutes les tailles</option>
-          <option value="tpe">TPE</option>
-          <option value="pme">PME</option>
-          <option value="eti">ETI</option>
-          <option value="ge">GE</option>
-        </select>
-        <select id="cf-sort" onchange="_clientsApplyFilters()" class="filter-select">
-          <option value="">Tous les secteurs</option>
-          <option value="score_desc">↓ Score ICP</option>
-          <option value="invest_desc">↓ Investissement</option>
-          <option value="date_desc">↓ Récents d'abord</option>
-          <option value="alert">⚠ Alertes d'abord</option>
-        </select>
-        <span id="clients-count" class="filter-count"></span>
-        <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))"
-          style="margin-left:auto;padding:6px 12px;background:var(--c-teal);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">
-          + Simulation
-        </button>
-      </div>
-
-      <!-- Tableau clients (pleine largeur, CRM V3 style) -->
-      <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);overflow:hidden;">
-        <div id="clients-list" style="overflow-x:auto;"></div>
-      </div>
-
-      <!-- Stats (masqué, sert uniquement au badge sidebar) -->
-      <div id="clients-stats" style="display:none;"></div>
     </div>
 
-    <!-- PAGE: RESSOURCES (3 onglets icônes + contenu inline) -->
+    <!-- PAGE: RESSOURCES (hub — navigue vers les vraies pages sans cloner) -->
     <div class="page" id="page-ressources">
       <div class="app">
-
-        <!-- 3 cartes de navigation -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;" id="ressources-hub">
-          <div id="res-card-aides" onclick="switchRessourcesTab('aides')"
-            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-teal);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:30px;margin-bottom:8px;">💰</div>
-            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Aides & Subventions</div>
-            <div style="font-size:11px;color:var(--c-text-3);">Activer/désactiver les dispositifs</div>
+        <div style="padding:8px 0 20px;">
+          <div class="section-label" style="margin-bottom:4px;">Ressources</div>
+          <div style="font-size:12px;color:var(--c-text-3);">Aides disponibles, éligibilité et organismes financeurs</div>
+        </div>
+        <div id="ressources-hub" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <div onclick="switchRessourcesTab('aides',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-teal);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
+            onmouseover="this.style.boxShadow='0 4px 20px rgba(13,148,136,0.2)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:32px;margin-bottom:10px;">💰</div>
+            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Aides & Subventions</div>
+            <div style="font-size:11px;color:var(--c-text-3);">Activer/désactiver les dispositifs et voir les montants calculés</div>
           </div>
-          <div id="res-card-eligibilite" onclick="switchRessourcesTab('eligibilite')"
-            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:30px;margin-bottom:8px;">✅</div>
-            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Éligibilité</div>
-            <div style="font-size:11px;color:var(--c-text-3);">Scoring détaillé par dispositif</div>
+          <div onclick="switchRessourcesTab('eligibilite',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
+            onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:32px;margin-bottom:10px;">✅</div>
+            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Éligibilité</div>
+            <div style="font-size:11px;color:var(--c-text-3);">Scoring détaillé par dispositif selon les paramètres actuels</div>
           </div>
-          <div id="res-card-organismes" onclick="switchRessourcesTab('organismes')"
-            style="padding:20px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:30px;margin-bottom:8px;">🏛</div>
-            <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Organismes</div>
-            <div style="font-size:11px;color:var(--c-text-3);">ADEME, Bpifrance, CEE…</div>
+          <div onclick="switchRessourcesTab('organismes',null)" style="padding:24px;background:var(--c-surface);border:2px solid var(--c-border);border-radius:14px;cursor:pointer;text-align:center;transition:box-shadow .15s;"
+            onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:32px;margin-bottom:10px;">🏛</div>
+            <div style="font-size:14px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Organismes</div>
+            <div style="font-size:11px;color:var(--c-text-3);">ADEME, Bpifrance, CEE — sources de financement disponibles</div>
           </div>
         </div>
-
-        <!-- ─── PANNEAU AIDES & SUBVENTIONS ─── -->
-        <div id="res-panel-aides" style="display:none;">
-          <div class="card">
-            <div class="section-label">Dispositifs activés</div>
-            <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
-              Activez / désactivez chaque aide selon l'éligibilité du projet de votre client. Les montants sont recalculés en temps réel.
-            </p>
-            <div class="aide-row" onclick="toggleAide('cee')">
-              <div class="toggle on" id="toggle-cee"></div>
-              <div class="aide-info">
-                <div class="aide-name">Prime CEE (P6 — 2026-2030)
-                  <span class="info-pill" data-tip="Le cours CEE fluctue chaque mois sur le marché.&#10;&#10;Cours de référence :&#10;• Valeur par défaut simulateur : 8,00 €/MWh cumac (prudent)&#10;• Marché EMMY — déc. 2025 : 8,78 €/MWh cumac&#10;&#10;→ Modifier le cours depuis admin.lihtea.com&#10;&#10;Source : registre EMMY / C2E Market (mensuel).">?</span>
-                </div>
-                <div class="aide-desc" id="cee-desc">Fournisseur énergie → bénéficiaire. Fiches IND-UT standardisées.</div>
-              </div>
-              <div class="aide-montant" id="amt-cee">0 €</div>
-            </div>
-            <div class="aide-row" onclick="toggleAide('ademe')">
-              <div class="toggle on" id="toggle-ademe"></div>
-              <div class="aide-info">
-                <div class="aide-name">Fonds Chaleur / DECARB FLASH ADEME
-                  <span class="info-pill" data-tip="Le taux ADEME affiché est un PLAFOND indicatif, pas un montant garanti.&#10;&#10;L'ADEME calcule l'aide projet par projet pour équilibrer son économie. Le taux réel dépend :&#10;• Du type et de la taille de l'installation&#10;• Du secteur et de la région&#10;• De la taille de l'entreprise (PME bénéficient d'un bonus +10 à +20%)&#10;&#10;Conditions d'éligibilité Fonds Chaleur :&#10;• Production minimale de 1 200 MWh/an (chaleur)&#10;• Temps de retour brut > 3 ans&#10;• Audit énergétique préalable requis&#10;&#10;→ Contacter la Direction Régionale ADEME pour valider l'aide réelle.">?</span>
-                </div>
-                <div class="aide-desc" id="ademe-desc">Jusqu'à X% selon équipement — plafond indicatif. PME : bonus +10%.</div>
-              </div>
-              <div class="aide-montant" id="amt-ademe">0 €</div>
-            </div>
-            <div class="aide-row" onclick="toggleAide('bpi')">
-              <div class="toggle on" id="toggle-bpi"></div>
-              <div class="aide-info">
-                <div class="aide-name">Prêt Vert Bpifrance</div>
-                <div class="aide-desc">Réduction du taux (-0,8%/an) → économie sur les intérêts. Jusqu'à 1 M€.</div>
-              </div>
-              <div class="aide-montant" id="amt-bpi">0 €</div>
-            </div>
-            <div class="aide-row" onclick="toggleAide('feder')">
-              <div class="toggle" id="toggle-feder"></div>
-              <div class="aide-info">
-                <div class="aide-name">FEDER régional (si éligible)</div>
-                <div class="aide-desc">50% des investissements. Selon région et appel à projets en cours.</div>
-              </div>
-              <div class="aide-montant" id="amt-feder">0 €</div>
-            </div>
-            <hr class="divider">
-            <div class="total-row">
-              <span class="total-label">Total aides mobilisées</span>
-              <span class="total-val color-green" id="total-aides">0 €</span>
-            </div>
-            <div class="total-row" style="padding-top:4px;">
-              <span style="font-size:13px;color:var(--c-text-2);">Capital à financer (net)</span>
-              <span style="font-size:18px;font-weight:700;color:var(--c-navy);font-family:var(--font-mono);" id="cout-net-mini">0 €</span>
-            </div>
-          </div>
-          <div class="pitch-only" id="pitch-card">
-            <div class="pitch-card">
-              <div class="pitch-headline">Synthèse de votre projet</div>
-              <div class="pitch-metrics">
-                <div class="pitch-metric"><div class="pitch-metric-label">Vous investissez</div><div class="pitch-metric-value white" id="pitch-invest">—</div></div>
-                <div class="pitch-metric"><div class="pitch-metric-label">Vous payez</div><div class="pitch-metric-value gold" id="pitch-loyer">—</div><div class="pitch-metric-sub">par mois</div></div>
-                <div class="pitch-metric"><div class="pitch-metric-label">Vous économisez</div><div class="pitch-metric-value teal" id="pitch-eco">—</div><div class="pitch-metric-sub">par mois en énergie</div></div>
-                <div class="pitch-metric"><div class="pitch-metric-label">Aides obtenues</div><div class="pitch-metric-value teal" id="pitch-aides">—</div><div class="pitch-metric-sub" id="pitch-pct">— de l'investissement</div></div>
-              </div>
-              <div class="pitch-verdict" id="pitch-verdict"></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="section-label">Waterfall — Décomposition du financement</div>
-            <div id="waterfall-chart"></div>
-          </div>
-        </div>
-
-        <!-- ─── PANNEAU ÉLIGIBILITÉ ─── -->
-        <div id="res-panel-eligibilite" style="display:none;">
-          <div class="card">
-            <div class="section-label">Scoring d'éligibilité par dispositif</div>
-            <p style="font-size:12px;color:var(--c-text-3);margin-bottom:14px;">
-              Évaluation automatique basée sur les paramètres saisis. Cliquez sur un dispositif pour voir le détail des critères.
-            </p>
-            <div class="scoring-grid" id="scoring-grid"></div>
-          </div>
-          <div class="scoring-summary" id="scoring-global-summary"></div>
-        </div>
-
-        <!-- ─── PANNEAU ORGANISMES ─── -->
-        <div id="res-panel-organismes" style="display:none;">
-          <div class="section-label" style="margin-bottom:6px;">Aides & subventions disponibles</div>
-          <p style="font-size:12px;color:var(--c-text-3);margin-bottom:16px;">Dispositifs français et européens pour le remplacement d'équipements industriels énergivores.</p>
-          <div id="tab-organismes" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-            <button class="tab-btn active" onclick="filterOrganismes('all', this)">Tous</button>
-            <button class="tab-btn" onclick="filterOrganismes('calculable', this)">⚡ Calculables</button>
-            <button class="tab-btn" onclick="filterOrganismes('informatif', this)">📋 Informatifs</button>
-            <button class="tab-btn" onclick="filterOrganismes('france', this)">🇫🇷 France</button>
-            <button class="tab-btn" onclick="filterOrganismes('europe', this)">🇪🇺 Europe</button>
-          </div>
-          <div id="organismes-list"></div>
-        </div>
-
       </div>
     </div>
 
@@ -5080,16 +5093,11 @@ async function lookupClientSiren() {
     showToast('SIREN invalide — 9 chiffres requis', 'warning');
     return;
   }
-  // Vérification auth avant enrichissement
-  if (!localStorage.getItem('gef_auth_token')) {
-    showToast('Connectez-vous pour enrichir la fiche client', 'warning');
-    return;
-  }
   const btn = document.getElementById('btn-siren-lookup');
   if (btn) { btn.textContent = '⏳ Recherche…'; btn.disabled = true; }
   try {
     const res = await fetch(CONNECTORS_API + '/siret?siret=' + siren, {
-      headers: getAuthHeaders()
+      headers: { 'apikey': SUPABASE_ANON }
     });
     const json = await res.json();
     console.log('[SIREN] Response:', res.status, JSON.stringify(json).slice(0, 200));
@@ -5104,32 +5112,14 @@ async function lookupClientSiren() {
       // Pré-remplir la taille
       const tailleSelect = document.getElementById('taille');
       if (tailleSelect && d.taille_calculee) tailleSelect.value = mapTailleInsee(d.taille_calculee);
-
-      // ── Créer immédiatement la fiche client dans l'onglet Clients ──
-      const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
+      // Afficher le badge
       if (badge) {
-        badge.textContent = '⏳ Création de la fiche client…';
+        const parts = [d.raison_sociale, d.code_naf ? 'NAF ' + d.code_naf : null, d.ville].filter(Boolean);
+        badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — prospect créé automatiquement à la sauvegarde';
         badge.style.display = 'block';
-        badge.style.color = 'var(--c-text-3)';
+        badge.style.color = 'var(--c-teal-bright)';
       }
-      const prospectId = await syncFindOrCreateProspect(
-        d.raison_sociale || siren, null, siren,
-        d.taille_calculee ? mapTailleInsee(d.taille_calculee) : 'pme'
-      );
-      if (badge) {
-        if (prospectId) {
-          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — fiche client créée';
-          badge.style.color = 'var(--c-teal-bright)';
-          showToast('Fiche client créée dans l\'onglet Clients et Pipeline ✓', 'success');
-          // Rafraîchir la liste clients et le pipeline si ouverts
-          if (pageCourante === 'clients') setTimeout(() => renderClientsPage(), 400);
-          if (pageCourante === 'pipeline') setTimeout(() => renderPipelinePage(), 400);
-        } else {
-          badge.textContent = '✓ ' + (parts.length ? parts.join(' — ') : 'Entreprise trouvée') + ' — erreur création fiche (voir console)';
-          badge.style.color = '#f59e0b';
-          showToast('Enrichissement OK mais création fiche échouée — vérifiez la connexion', 'warning');
-        }
-      }
+      showToast('Entreprise enrichie ✓', 'success');
     } else {
       const msg = json?.error || 'SIREN ' + siren + ' non trouvé (Pappers + INSEE)';
       if (badge) { badge.textContent = '⚠ ' + msg; badge.style.display = 'block'; badge.style.color = '#f59e0b'; }
@@ -5148,24 +5138,9 @@ async function lookupClientSiren() {
 // --- Find or create prospect from client info ---
 async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, clientTaille) {
   if (!clientName || clientName === 'Sans nom') return null;
-  const token = localStorage.getItem('gef_auth_token');
-  if (!token) {
-    console.warn('[Sync] No auth token — cannot create prospect');
-    return null;
-  }
-  // S'assurer que gef_internal_user_id est résolu avant d'insérer (évite violation FK user_id)
-  if (!localStorage.getItem('gef_internal_user_id')) {
-    try { await resolveInternalUserId(); } catch(e) { console.warn('[Sync] resolveInternalUserId failed:', e); }
-  }
-  // Utiliser UNIQUEMENT l'ID interne (users.id), jamais l'auth UUID
-  const internalUserId = localStorage.getItem('gef_internal_user_id') || null;
   try {
-    // Search existing prospect by SIREN or name
+    // Search existing prospect by name
     const searchRes = await fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() });
-    if (!searchRes.ok) {
-      console.warn('[Sync] Search prospects failed:', searchRes.status, await searchRes.text());
-      return null;
-    }
     const searchData = await searchRes.json();
     const prospects = searchData?.data || [];
     // Déduplication : SIREN en priorité, puis nom
@@ -5173,49 +5148,37 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
       (clientSiret && (p.siret === clientSiret || p.siren === clientSiret)) ||
       p.raison_sociale?.toLowerCase() === clientName.toLowerCase()
     );
-    if (existing) {
-      console.log('[Sync] Existing prospect found:', existing.id);
-      return existing.id;
-    }
+    if (existing) return existing.id;
 
     // Construire le payload avec données enrichies si disponibles
     const d = currentClientData || {};
-    const payload = {
-      tenant_id: currentTenantId,
-      user_id: internalUserId,   // FK valide : users.id ou null
-      raison_sociale: d.raison_sociale || clientName,
-      contact_email: clientEmail || null,
-      siret: clientSiret || null,
-      siren: clientSiret ? clientSiret.slice(0, 9) : null,
-      code_naf: d.code_naf || null,
-      libelle_naf: d.libelle_naf || null,
-      taille: d.taille_calculee ? mapTailleInsee(d.taille_calculee) : (clientTaille || 'pme'),
-      effectifs: d.effectifs || null,
-      adresse: d.adresse || null,
-      code_postal: d.code_postal || null,
-      ville: d.ville || null,
-      region: d.region || null,
-      source: 'entrant',
-      statut: 'nouveau',
-      score_lead: clientSiret ? 50 : 30,
-      montant_potentiel: 0,
-      date_premier_contact: new Date().toISOString().slice(0, 10)
-    };
-    console.log('[Sync] Creating prospect:', payload.raison_sociale, '/ tenant:', payload.tenant_id, '/ user:', payload.user_id);
     const createRes = await fetch(ADMIN_API + '/prospects', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        tenant_id: currentTenantId,
+        user_id: getCurrentUserId(),
+        raison_sociale: d.raison_sociale || clientName,
+        contact_email: clientEmail || null,
+        siret: clientSiret || null,
+        siren: clientSiret ? clientSiret.slice(0, 9) : null,
+        code_naf: d.code_naf || null,
+        libelle_naf: d.libelle_naf || null,
+        taille: d.taille_calculee ? mapTailleInsee(d.taille_calculee) : (clientTaille || 'pme'),
+        effectifs: d.effectifs || null,
+        adresse: d.adresse || null,
+        code_postal: d.code_postal || null,
+        ville: d.ville || null,
+        region: d.region || null,
+        source: 'entrant',
+        statut: 'nouveau',
+        score_lead: clientSiret ? 50 : 30,
+        montant_potentiel: 0,
+        date_premier_contact: new Date().toISOString().slice(0, 10)
+      })
     });
-    if (!createRes.ok) {
-      const errBody = await createRes.text();
-      console.warn('[Sync] Create prospect failed:', createRes.status, errBody);
-      return null;
-    }
     const created = await createRes.json();
-    const newId = created?.data?.id || created?.data?.[0]?.id || null;
-    console.log('[Sync] Prospect created:', newId);
-    return newId;
+    return created?.data?.id || created?.data?.[0]?.id || null;
   } catch(e) {
     console.warn('[Sync] Prospect sync error:', e);
     return null;
@@ -5224,11 +5187,8 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
 
 // --- Sync simulation to Supabase ---
 async function syncSimulationToSupabase(simData) {
-  if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip simulation sync'); return null; }
-  if (!localStorage.getItem('gef_internal_user_id')) {
-    try { await resolveInternalUserId(); } catch(e) {}
-  }
-  const userId = localStorage.getItem('gef_internal_user_id') || null;
+  const userId = getCurrentUserId();
+  if (!userId) { console.log('[Sync] No auth user, skip simulation sync'); return null; }
   try {
     const prospectId = await syncFindOrCreateProspect(
       simData.clientName, null, currentClientSiret, simData.params?.taille
@@ -5295,12 +5255,8 @@ async function syncSimulationToSupabase(simData) {
 
 // --- Sync proposition (PDF/Excel export) to Supabase ---
 async function syncPropositionToSupabase(propData) {
-  if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip proposition sync'); return null; }
-  // Résoudre l'ID interne si nécessaire (évite violation FK user_id)
-  if (!localStorage.getItem('gef_internal_user_id')) {
-    try { await resolveInternalUserId(); } catch(e) { console.warn('[Sync] resolveInternalUserId failed:', e); }
-  }
-  const userId = localStorage.getItem('gef_internal_user_id') || null;
+  const userId = getCurrentUserId();
+  if (!userId) { console.log('[Sync] No auth user, skip proposition sync'); return null; }
   try {
     const prospectId = await syncFindOrCreateProspect(
       propData.clientName, null, currentClientSiret,
@@ -5355,22 +5311,26 @@ async function syncPropositionToSupabase(propData) {
       );
     }
 
-    // Enregistrer la proposition comme document (visible dans onglet Documents du drawer)
+    // Create document entry in documents table
     if (prospectId) {
-      const docNom = 'Proposition_' + (propData.clientName || 'Client').replace(/\s+/g,'-') + '_' + new Date().toISOString().slice(0,10) + '.' + (propData.type || 'pdf');
+      const today = new Date().toISOString().slice(0,10);
+      const clientSlug = (propData.clientName || 'Client').replace(/[^a-zA-Z0-9À-ÿ]/g, '-').replace(/-+/g,'-').replace(/^-|-$/g,'').toUpperCase();
+      const docNom = 'Proposition_' + clientSlug + '_' + today + (propData.type === 'excel' ? '.xlsx' : '.pdf');
+      const mimeType = propData.type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf';
       fetch(ADMIN_API + '/documents', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          tenant_id: currentTenantId,
+          tenant_id: LIHTEA_TENANT_ID,
           prospect_id: prospectId,
           simulation_id: simId || null,
           nom: docNom,
           type_document: 'devis',
-          description: 'Proposition commerciale ' + (propData.type||'').toUpperCase() + ' — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
+          mime_type: mimeType,
           statut: 'envoye',
-          date_document: new Date().toISOString().slice(0,10),
-          mime_type: propData.type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf'
+          description: 'Proposition ' + (propData.type || '').toUpperCase() + ' générée — Investissement : ' + Math.round(propData.investissement || 0).toLocaleString('fr-FR') + ' € · Aides : ' + Math.round(propData.totalAides || 0).toLocaleString('fr-FR') + ' €',
+          date_document: new Date().toISOString(),
+          created_by: userId || null,
         })
       }).catch(e => console.warn('[Sync] Document creation error:', e));
     }
@@ -5398,8 +5358,8 @@ async function syncPropositionToSupabase(propData) {
 
 // --- Log activity to Supabase ---
 async function syncLogActivity(type, titre, simulationId, prospectId) {
-  if (!localStorage.getItem('gef_auth_token')) return;
-  const userId = localStorage.getItem('gef_internal_user_id') || null;
+  const userId = getCurrentUserId();
+  if (!userId) return;
   try {
     await fetch(ADMIN_API + '/activites', {
       method: 'POST',
@@ -5714,14 +5674,20 @@ function switchPage(pageName, navItem) {
   // Call render functions based on page
   if (pageName === 'resultats') {
     recalculer();
+  } else if (pageName === 'eligibilite') {
+    renderScoring();
   } else if (pageName === 'dossier') {
     renderTimeline();
   } else if (pageName === 'saved') {
     renderSavedSimulations();
   } else if (pageName === 'dashboard') {
     renderGlobalDashboard();
+  } else if (pageName === 'organismes') {
+    renderOrganismesFront();
   } else if (pageName === 'propositions') {
     renderPropositions();
+  } else if (pageName === 'aides') {
+    recalculer();
   } else if (pageName === 'scenarios') {
     renderScenarios();
   } else if (pageName === 'clients') {
@@ -5730,12 +5696,6 @@ function switchPage(pageName, navItem) {
     renderPipelinePage();
   } else if (pageName === 'ressources') {
     renderRessourcesPage();
-  } else if (pageName === 'eligibilite' || pageName === 'aides' || pageName === 'organismes') {
-    // Ces sous-pages sont maintenant intégrées dans Ressources
-    const tabMap = { eligibilite:'eligibilite', aides:'aides', organismes:'organismes' };
-    switchPage('ressources', document.querySelector('[data-page="ressources"]'));
-    setTimeout(() => switchRessourcesTab(tabMap[pageName]), 50);
-    return;
   }
 
   // Update mobile navigation (closes sidebar and updates active state)
@@ -7031,8 +6991,7 @@ async function renderSavedSimulations() {
         const aides = s.montant_aides_total || s.resultats?.total_aides || 0;
         const pct = inv > 0 ? Math.round(aides/inv*100) : 0;
         const id = JSON.stringify(s.id);
-        const safeKey = s.id.replace(/-/g, '');
-        return `<div class="saved-sim-card" onclick="loadSimulationFromAPI(window.__cloudSim_${safeKey})">
+        return `<div class="saved-sim-card" onclick="loadSimulationFromAPI(window.__cloudSim_${s.id})">
           <div class="saved-sim-info">
             <div class="saved-sim-name">${s.client_entreprise||s.client_nom||'Sans nom'}</div>
             <div class="saved-sim-meta">
@@ -7045,12 +7004,12 @@ async function renderSavedSimulations() {
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">${statusBadge(s.statut||'brouillon')}</div>
           <div class="saved-sim-actions">
-            <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulationFromAPI(window.__cloudSim_${safeKey})">Charger</button>
+            <button class="saved-sim-btn" onclick="event.stopPropagation();loadSimulationFromAPI(window.__cloudSim_${s.id})">Charger</button>
           </div>
         </div>`;
       }).join('');
-      // Expose cloud sims globally — clé sans tirets (UUID avec tirets = soustraction JS)
-      cloudSims.forEach(s => { window['__cloudSim_' + s.id.replace(/-/g, '')] = s; });
+      // Expose cloud sims globally for click access
+      cloudSims.forEach(s => { window['__cloudSim_' + s.id] = s; });
     }
     html += '</div>';
   }
@@ -7092,6 +7051,133 @@ async function renderSavedSimulations() {
 
 // Init saved badge on load
 setTimeout(updateSavedBadge, 100);
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGE CLIENTS — Portefeuille commercial
+// ═══════════════════════════════════════════════════════════════════
+const STATUT_COLORS = {
+  nouveau:'#3b82f6', qualifie:'#0d9488', en_discussion:'#ea580c',
+  proposition:'#7c3aed', negociation:'#d97706', gagne:'#059669',
+  perdu:'#dc2626', inactif:'#6b7280'
+};
+const STATUT_LABELS = {
+  nouveau:'Nouveau', qualifie:'Qualifié', en_discussion:'En discussion',
+  proposition:'Proposition', negociation:'Négociation', gagne:'Gagné',
+  perdu:'Perdu', inactif:'Inactif'
+};
+
+async function renderClientsPage() {
+  const list = document.getElementById('clients-list');
+  const stats = document.getElementById('clients-stats');
+  const filterStatut = document.getElementById('clients-filter-statut')?.value || '';
+  if (!list) return;
+
+  const isLoggedIn = !!localStorage.getItem('gef_auth_token');
+  if (!isLoggedIn) {
+    list.innerHTML = `<div style="padding:40px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">🔒</div>
+      <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:8px;">Connexion requise</div>
+      <div style="font-size:12px;color:var(--c-text-3);">Connectez-vous pour accéder à votre portefeuille clients.</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--c-text-3);font-size:13px;">
+    <span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;"></span>
+    Chargement…</div>`;
+
+  try {
+    const [prospectsRes, simsRes] = await Promise.all([
+      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() })
+    ]);
+    const prospectsData = await prospectsRes.json();
+    const simsData = await simsRes.json();
+
+    let prospects = prospectsData?.data || [];
+    const sims = simsData?.data || [];
+
+    // Filtrer par statut si sélectionné
+    if (filterStatut) prospects = prospects.filter(p => p.statut === filterStatut);
+
+    // Enrichir avec comptes de simulations et détection alerte 15j
+    const now = Date.now();
+    const enriched = prospects.map(p => {
+      const pSims = sims.filter(s => s.prospect_id === p.id);
+      const lastSim = pSims.sort((a,b) => (b.updated_at||'').localeCompare(a.updated_at||''))[0];
+      const lastContact = new Date(p.date_dernier_contact || p.updated_at || p.created_at).getTime();
+      const daysInactive = Math.floor((now - lastContact) / 86400000);
+      const hasAlert = daysInactive > 15 && !['gagne','perdu','inactif'].includes(p.statut);
+      const totalInvest = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
+      return { ...p, nb_sims: pSims.length, lastSim, daysInactive, hasAlert, totalInvest };
+    });
+
+    // Mettre à jour le badge alerte dans la sidebar
+    const alertCount = enriched.filter(p => p.hasAlert).length;
+    const badge = document.getElementById('badge-clients-alerte');
+    if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
+
+    // Stats rapides
+    if (stats) {
+      const all = prospectsData?.data || [];
+      const fek = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M€' : n >= 1000 ? Math.round(n/1000)+'k€' : n+'€';
+      stats.innerHTML = [
+        { icon:'👥', val: all.length, lbl:'Total clients' },
+        { icon:'🔥', val: all.filter(p=>p.statut==='en_discussion').length, lbl:'En discussion' },
+        { icon:'✅', val: all.filter(p=>p.statut==='gagne').length, lbl:'Gagnés' },
+        { icon:'⚠️', val: all.filter(p=>{ const d=Math.floor((now-new Date(p.updated_at||p.created_at).getTime())/86400000); return d>15&&!['gagne','perdu','inactif'].includes(p.statut); }).length, lbl:'Alertes relance' },
+      ].map(({icon,val,lbl}) => `<div style="padding:12px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:10px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:4px;">${icon}</div>
+        <div style="font-size:20px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono,'monospace')">${val}</div>
+        <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.04em;">${lbl}</div>
+      </div>`).join('');
+    }
+
+    if (enriched.length === 0) {
+      list.innerHTML = `<div style="padding:40px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">👥</div>
+        <div style="font-size:14px;font-weight:600;color:var(--c-navy);margin-bottom:6px;">${filterStatut ? 'Aucun client avec ce statut' : 'Aucun client encore'}</div>
+        <div style="font-size:12px;color:var(--c-text-3);">Les clients sont créés automatiquement depuis le simulateur.</div>
+      </div>`;
+      return;
+    }
+
+    const fmtD = n => n < 1 ? 'Auj.' : n < 30 ? n+'j' : Math.floor(n/30)+'mois';
+    const fek = n => n >= 1e6 ? (n/1e6).toFixed(1).replace('.',',')+' M€' : n >= 1000 ? Math.round(n/1000)+' k€' : n+'€';
+
+    list.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">` +
+      enriched.map(p => {
+        const color = STATUT_COLORS[p.statut] || '#6b7280';
+        const label = STATUT_LABELS[p.statut] || p.statut;
+        const alertBadge = p.hasAlert
+          ? `<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid #fcd34d;">⚠ Relancer (${p.daysInactive}j)</span>`
+          : '';
+        return `<div style="padding:14px 16px;background:var(--c-surface);border:1px solid ${p.hasAlert?'#fcd34d':color+'30'};border-left:3px solid ${color};border-radius:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:box-shadow .15s;"
+          onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'"
+          onclick="openClientDrawer('${p.id}')">
+          <div style="width:36px;height:36px;border-radius:10px;background:${color}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${color};flex-shrink:0;">${(p.raison_sociale||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.raison_sociale||'Sans nom'}</div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <span style="background:${color}18;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">${label}</span>
+              ${p.ville ? `<span style="font-size:11px;color:var(--c-text-3);">📍 ${p.ville}</span>` : ''}
+              ${p.code_naf ? `<span style="font-size:11px;color:var(--c-text-3);">NAF ${p.code_naf}</span>` : ''}
+              ${alertBadge}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:600;color:var(--c-navy);">${p.nb_sims} sim${p.nb_sims>1?'s':''}</div>
+            ${p.totalInvest > 0 ? `<div style="font-size:11px;color:var(--c-teal);font-weight:600;">${fek(p.totalInvest)}</div>` : ''}
+            <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">il y a ${fmtD(p.daysInactive)}</div>
+          </div>
+        </div>`;
+      }).join('') + `</div>`;
+
+  } catch(e) {
+    console.warn('[Clients] Error:', e);
+    list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-text-3);">Impossible de charger le portefeuille — ${e.message}</div>`;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // CONTEXT BAND — Bandeau de simulation active sur pages full-width
@@ -7257,12 +7343,13 @@ let _clientsSort = 'score_desc';
 
 async function renderClientsPage() {
   const container = document.getElementById('clients-list');
+  const statsEl = document.getElementById('clients-stats');
   if (!container) return;
   if (!localStorage.getItem('gef_auth_token')) {
-    container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise pour accéder au portefeuille clients.</div>';
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise</div>';
     return;
   }
-  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:14px;height:14px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>';
+  container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
   try {
     const [prosp, sims] = await Promise.all([
       fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }).then(r => r.json()),
@@ -7271,14 +7358,13 @@ async function renderClientsPage() {
     const allSims = sims?.data || [];
     _clientsAll = (prosp?.data || []).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
-      const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
-      const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
-      const daysInact = Math.floor((Date.now() - new Date(p.updated_at||p.created_at).getTime()) / 86400000);
+      const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total)||0), 0);
+      const lastContact = new Date(p.updated_at || p.created_at).getTime();
+      const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
       const score = calcScoreICP({ ...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact });
-      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score,
-               hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score, hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
     });
-    // Badge alerte sidebar
     const alertCount = _clientsAll.filter(c => c.hasAlert).length;
     const badge = document.getElementById('badge-clients-alerte');
     if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
@@ -7288,22 +7374,13 @@ async function renderClientsPage() {
   }
 }
 
-const STATUT_STAGES = {
-  nouveau:        { label: 'Nouveau',        bg: 'rgba(59,130,246,0.12)',  color: '#2563eb' },
-  qualifie:       { label: 'Qualifié',        bg: 'rgba(139,92,246,0.12)', color: '#7c3aed' },
-  en_discussion:  { label: 'En discussion',   bg: 'rgba(14,165,233,0.12)', color: '#0284c7' },
-  proposition:    { label: 'Proposition',     bg: 'rgba(245,158,11,0.12)', color: '#d97706' },
-  negociation:    { label: 'Négociation',     bg: 'rgba(234,88,12,0.12)',  color: '#ea580c' },
-  dossier_depose: { label: 'Dossier déposé',  bg: 'rgba(13,148,136,0.12)', color: '#0d9488' },
-  gagne:          { label: 'Gagné ✓',         bg: 'rgba(5,150,105,0.12)',  color: '#059669' },
-  perdu:          { label: 'Perdu',           bg: 'rgba(220,38,38,0.1)',   color: '#dc2626' },
-  inactif:        { label: 'Inactif',         bg: 'rgba(107,114,128,0.1)', color: '#6b7280' },
-};
-
 function _renderClientsTable() {
   const container = document.getElementById('clients-list');
-  const countEl   = document.getElementById('clients-count');
-  const fd  = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+  const statsEl = document.getElementById('clients-stats');
+  const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':n>0?Math.round(n)+'€':'—';
+  const fd = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+  const STATUT_COLORS = {nouveau:'#3b82f6',qualifie:'#8b5cf6',en_discussion:'#0ea5e9',proposition:'#f59e0b',negociation:'#ea580c',dossier_depose:'#0d9488',gagne:'#059669',perdu:'#dc2626',inactif:'#6b7280'};
+  const STATUT_LABELS = {nouveau:'Nouveau',qualifie:'Qualifié',en_discussion:'En discussion',proposition:'Proposition',negociation:'Négociation',dossier_depose:'Dossier déposé',gagne:'Gagné',perdu:'Perdu',inactif:'Inactif'};
 
   let filtered = _clientsAll.filter(c => {
     if (_clientsFilterStatut && c.statut !== _clientsFilterStatut) return false;
@@ -7312,49 +7389,50 @@ function _renderClientsTable() {
     return true;
   });
 
-  if (_clientsSort === 'score_desc')  filtered.sort((a,b) => b.score - a.score);
+  if (_clientsSort === 'score_desc') filtered.sort((a,b) => b.score - a.score);
   else if (_clientsSort === 'invest_desc') filtered.sort((a,b) => b.totalInvest - a.totalInvest);
-  else if (_clientsSort === 'date_desc')   filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
-  else if (_clientsSort === 'alert')  filtered.sort((a,b) => b.hasAlert - a.hasAlert);
+  else if (_clientsSort === 'date_desc') filtered.sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
+  else if (_clientsSort === 'alert') filtered.sort((a,b) => b.hasAlert - a.hasAlert);
 
-  if (countEl) countEl.textContent = filtered.length + ' prospect' + (filtered.length>1?'s':'');
+  // Stats rapides
+  if (statsEl) {
+    const all = _clientsAll;
+    statsEl.innerHTML = [
+      { icon:'👥', val: all.length, lbl:'Total' },
+      { icon:'🔥', val: all.filter(c=>c.statut==='en_discussion').length, lbl:'En discussion' },
+      { icon:'📤', val: all.filter(c=>c.statut==='dossier_depose').length, lbl:'Dossiers' },
+      { icon:'✅', val: all.filter(c=>c.statut==='gagne').length, lbl:'Gagnés' },
+      { icon:'⚠️', val: all.filter(c=>c.hasAlert).length, lbl:'Alertes' },
+    ].map(({icon,val,lbl}) => `<div style="padding:10px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;text-align:center;min-width:80px;">
+      <div style="font-size:16px;margin-bottom:2px;">${icon}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--c-navy);">${val}</div>
+      <div style="font-size:9px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</div>
+    </div>`).join('');
+  }
 
   if (filtered.length === 0) {
-    container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);font-size:13px;">Aucun client ne correspond aux filtres.</div>';
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Aucun client ne correspond aux filtres.</div>';
     return;
   }
 
-  // Columns: Score | Entreprise | Contact | Secteur | Ville | Statut | Dernier contact | Action
-  container.innerHTML = `<table class="prospect-table">
+  container.innerHTML = `<table class="clients-table">
     <thead><tr>
-      <th>Score</th>
-      <th>Entreprise</th>
-      <th>Contact</th>
-      <th>Secteur</th>
-      <th>Ville</th>
-      <th>Statut</th>
-      <th>Dernier contact</th>
-      <th>Action</th>
+      <th>Score</th><th>Entreprise</th><th>Contact</th><th>Secteur / Taille</th><th>Potentiel Aides</th><th>Simulations</th><th>Statut</th><th>Dernier contact</th><th>Action</th>
     </tr></thead>
     <tbody>
     ${filtered.map(c => {
-      const stage   = STATUT_STAGES[c.statut] || { label: c.statut||'—', bg:'rgba(107,114,128,0.1)', color:'#6b7280' };
+      const sc = STATUT_COLORS[c.statut]||'#6b7280';
       const overdue = c.hasAlert;
-      const contact = [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') || '—';
-      const secteur = c.libelle_naf || c.code_naf || '—';
-      const ville   = c.ville || '—';
       return `<tr onclick="openClientDrawer('${c.id}')">
         <td><span class="score-badge ${scoreClass(c.score)}">${c.score}</span></td>
-        <td style="font-weight:600;color:var(--c-navy);">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</td>
-        <td style="font-size:12px;">${contact}</td>
-        <td style="font-size:12px;color:var(--c-text-3);">${secteur}</td>
-        <td style="font-size:12px;color:var(--c-text-3);">${ville}</td>
-        <td><span class="stage-badge" style="background:${stage.bg};color:${stage.color};">${stage.label}</span></td>
+        <td style="font-weight:700;color:var(--c-navy);">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</td>
+        <td style="color:var(--c-text-2);font-size:12px;">${c.contact_nom?c.contact_prenom+' '+c.contact_nom:'—'}</td>
+        <td style="font-size:12px;color:var(--c-text-3);">${c.code_naf||'—'}<br><span style="font-size:10px;background:var(--c-bg);padding:1px 6px;border-radius:4px;">${(c.taille||'—').toUpperCase()}</span></td>
+        <td style="font-weight:600;color:var(--c-teal);font-family:monospace;">${fek(c.totalAides)}</td>
+        <td style="text-align:center;font-size:13px;">${c.nb_sims}</td>
+        <td><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:${sc}18;color:${sc};">${STATUT_LABELS[c.statut]||c.statut}</span></td>
         <td style="font-size:12px;color:var(--c-text-3);">${fd(c.updated_at||c.created_at)}</td>
-        <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')"
-            style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;">
-          ⚡ Simuler
-        </td>
+        <td onclick="event.stopPropagation();startSimForClient('${(c.raison_sociale||'').replace(/'/g,"\\'")}','${c.siren||''}')" style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;white-space:nowrap;">⚙ Simuler</td>
       </tr>`;
     }).join('')}
     </tbody>
@@ -7365,7 +7443,7 @@ function _clientsApplyFilters() {
   _clientsFilterStatut = document.getElementById('cf-statut')?.value || '';
   _clientsFilterTaille = document.getElementById('cf-taille')?.value || '';
   _clientsFilterSource = document.getElementById('cf-source')?.value || '';
-  _clientsSort         = document.getElementById('cf-sort')?.value   || 'score_desc';
+  _clientsSort = document.getElementById('cf-sort')?.value || 'score_desc';
   _renderClientsTable();
 }
 
@@ -7378,27 +7456,11 @@ async function openClientDrawer(prospectId) {
   _drawerClientId = prospectId;
   const overlay = document.getElementById('client-drawer-overlay');
   const drawer  = document.getElementById('client-drawer');
+  const body    = document.getElementById('drawer-body');
   if (!overlay || !drawer) return;
   overlay.classList.add('open');
   drawer.classList.add('open');
-
-  // ── Afficher le spinner DANS le premier onglet sans détruire les autres divs
-  const tabInfos = document.getElementById('drawer-tab-infos');
-  const tabSims  = document.getElementById('drawer-tab-simulations');
-  const tabHist  = document.getElementById('drawer-tab-historique');
-  const tabDocs  = document.getElementById('drawer-tab-documents');
-  if (tabInfos) tabInfos.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Chargement…</div>';
-  if (tabSims)  tabSims.innerHTML  = '';
-  if (tabHist)  tabHist.innerHTML  = '';
-  if (tabDocs)  tabDocs.innerHTML  = '';
-  // Réinitialiser sur le premier onglet
-  document.querySelectorAll('.drawer-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
-  document.querySelectorAll('.drawer-tab-content').forEach((c,i) => c.classList.toggle('active', i===0));
-  // Reset header
-  document.getElementById('drawer-nom').textContent = '…';
-  document.getElementById('drawer-siren').textContent = '';
-  document.getElementById('drawer-ville').textContent = '';
-
+  body.innerHTML = `<div style="padding:40px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:16px;height:16px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>`;
   try {
     const res  = await fetch(ADMIN_API + '/prospects/' + prospectId + '/detail', { headers: getAuthHeaders() });
     const data = await res.json();
@@ -7407,7 +7469,7 @@ async function openClientDrawer(prospectId) {
     _drawerClientData = p;
     renderDrawerContent(p);
   } catch(e) {
-    if (tabInfos) tabInfos.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
+    body.innerHTML = `<div style="padding:32px;text-align:center;color:var(--c-red);">Erreur : ${e.message}</div>`;
   }
 }
 
@@ -7451,6 +7513,9 @@ function renderDrawerContent(p) {
   const dtDoc = document.getElementById('dt-doc-count');
   if (dtSim) dtSim.textContent = `(${p.simulations?.length||0})`;
   if (dtDoc) dtDoc.textContent = `(${p.documents?.length||0})`;
+
+  // Reset onglet actif au premier
+  document.querySelectorAll('.drawer-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
 
   // ── ONGLET 1 : Infos
   const tabInfos = document.getElementById('drawer-tab-infos');
@@ -7521,16 +7586,16 @@ function renderDrawerContent(p) {
     </div>`;
   }
 
-  // ── ONGLET 3 : Historique (source : activites de l'API)
+  // ── ONGLET 3 : Historique
   const tabHist = document.getElementById('drawer-tab-historique');
   if (tabHist) {
-    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤', proposition:'📋', connexion:'🔑', update:'✏️' };
-    const acts = p.activites || [];
+    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤', proposition:'📋', note_interne:'✎' };
+    const acts = p.activites || p.history || [];
     tabHist.innerHTML = `<div style="padding:16px 20px;">
       ${!acts.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">Aucun événement enregistré</div>`
-      :acts.slice().reverse().map(h=>`<div class="timeline-entry">
+      :acts.map(h=>`<div class="timeline-entry">
         <div class="te-icon">${ICONS[h.type]||'•'}</div>
-        <div style="flex:1;"><div class="te-msg">${h.titre||h.description||'—'}</div><div class="te-date">${fd(h.date_realisee||h.created_at)}</div></div>
+        <div style="flex:1;"><div class="te-msg">${h.titre||h.msg||h.action||'—'}</div><div class="te-date">${fd(h.date_realisee||h.date_planifiee||h.date||h.created_at)}</div></div>
       </div>`).join('')}
     </div>`;
   }
@@ -7539,30 +7604,31 @@ function renderDrawerContent(p) {
   const tabDocs = document.getElementById('drawer-tab-documents');
   if (tabDocs) {
     const iconFor = n => n?.endsWith('.pdf')?'📕':n?.endsWith('.xlsx')||n?.endsWith('.xls')?'📊':'📄';
+    const STATUT_DOC = { brouillon:'Brouillon', valide:'Validé', envoye:'Envoyé', signe:'Signé', archive:'Archivé' };
+    const STATUT_DOC_COLOR = { brouillon:'#6b7280', valide:'#059669', envoye:'#2563eb', signe:'#7c3aed', archive:'#d97706' };
     tabDocs.innerHTML = `<div style="padding:16px 20px;">
       ${!p.documents?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
         <div style="font-size:28px;margin-bottom:8px;">📄</div><div>Aucun document</div>
+        <div style="font-size:12px;margin-top:4px;">Générez un PDF ou Excel depuis le Simulateur</div>
       </div>`
-      :p.documents.map(doc=>`
-        <div class="doc-entry" id="doc-row-${doc.id}">
-          <div class="doc-icon-box">${iconFor(doc.nom)}</div>
+      :p.documents.map(doc=>{
+        const simId = doc.simulation_id ? doc.simulation_id.replace(/-/g,'') : null;
+        const isExcel = doc.mime_type?.includes('spreadsheet') || doc.nom?.endsWith('.xlsx');
+        const sc = STATUT_DOC_COLOR[doc.statut] || '#6b7280';
+        return `<div class="doc-entry" style="align-items:flex-start;">
+          <div class="doc-icon-box" style="font-size:20px;">${iconFor(doc.nom)}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.nom}</div>
-            <div style="font-size:11px;color:var(--c-text-3);">${fd(doc.created_at)} · ${doc.type_document||'document'} · <span style="text-transform:capitalize;">${doc.statut||'—'}</span></div>
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.nom||'—'}</div>
+            <div style="font-size:11px;color:var(--c-text-3);margin-top:1px;">${fd(doc.date_document||doc.created_at)} · ${doc.type_document||'document'}</div>
+            ${doc.description?`<div style="font-size:11px;color:var(--c-text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.description}</div>`:''}
+            ${simId?`<button onclick="loadSimFromDrawer('${simId}')" style="margin-top:5px;padding:3px 9px;background:var(--c-navy);color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">↩ Charger la simulation</button>`:''}
           </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button data-sim="${doc.simulation_id||''}" data-mime="${doc.mime_type||''}" data-nom="${doc.nom||''}"
-              onclick="previewDocInfo(this.dataset.sim,this.dataset.mime,this.dataset.nom)"
-              title="Aperçu PDF"
-              style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
-              onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">👁</button>
-            <button onclick="downloadDoc('${doc.simulation_id||''}','${doc.nom}','${doc.mime_type||''}')"
-              title="Regénérer / Télécharger"
-              style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
-              onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">⬇</button>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+            <span style="font-size:10px;font-weight:700;color:${sc};background:${sc}18;padding:2px 7px;border-radius:6px;">${STATUT_DOC[doc.statut]||doc.statut||'—'}</span>
+            ${simId?`<button onclick="regenDocFromSim('${simId}','${isExcel?'excel':'pdf'}')" title="Regénérer le fichier" style="padding:3px 7px;background:transparent;border:1px solid var(--c-border);border-radius:5px;font-size:11px;cursor:pointer;color:var(--c-text-2);">⬇ Télécharger</button>`:''}
           </div>
-        </div>
-        `).join('')}
+        </div>`;
+      }).join('')}
       <div style="margin-top:12px;padding:10px;border:2px dashed var(--c-border);border-radius:8px;text-align:center;font-size:12px;color:var(--c-text-3);">📎 Upload disponible depuis le Dossier</div>
     </div>`;
   }
@@ -7604,140 +7670,66 @@ async function saveDrawerNotes() {
   showToast('Notes sauvegardées ✓', 'success');
 }
 
-// Charger une simulation depuis le drawer
-function loadSimFromDrawer(simId) {
+// Charger une simulation depuis le drawer (simId peut être sans tirets)
+async function loadSimFromDrawer(simIdNoHyphens) {
+  if (!simIdNoHyphens) return;
+  // Reconstituer l'UUID avec tirets si nécessaire (format: 8-4-4-4-12)
+  let simId = simIdNoHyphens;
+  if (simIdNoHyphens.length === 32 && !simIdNoHyphens.includes('-')) {
+    simId = simIdNoHyphens.slice(0,8)+'-'+simIdNoHyphens.slice(8,12)+'-'+simIdNoHyphens.slice(12,16)+'-'+simIdNoHyphens.slice(16,20)+'-'+simIdNoHyphens.slice(20);
+  }
   closeClientDrawer();
-  showToast('Simulation chargée depuis la fiche client', 'success');
-  switchPage('saved', document.querySelector('[data-page="saved"]'));
-}
-
-// ─── Aperçu PDF dans modal ───
-let _pdfPreviewBlobUrl = null;
-let _pdfPreviewFilename = '';
-
-async function previewDocInfo(simId, mimeType, nom) {
-  if (!simId) { showToast('Aucune simulation liée à ce document', 'warning'); return; }
-
-  // Ouvrir le modal avec loader
-  const modal = document.getElementById('pdf-preview-modal');
-  const frame = document.getElementById('pdf-preview-frame');
-  const loader = document.getElementById('pdf-preview-loader');
-  const title  = document.getElementById('pdf-preview-title');
-  const sub    = document.getElementById('pdf-preview-subtitle');
-  if (!modal) return;
-  modal.style.display = 'flex';
-  loader.style.display = 'flex';
-  frame.style.opacity = '0';
-  frame.src = 'about:blank';
-  title.textContent = nom || 'Aperçu de la proposition';
-  sub.textContent = 'Chargement de la simulation…';
-
   try {
-    // 1. Charger la simulation
     const res = await fetch(ADMIN_API + '/simulations/' + simId, { headers: getAuthHeaders() });
     const data = await res.json();
-    const sim  = data?.data;
+    const sim = data?.data;
     if (!sim) throw new Error('Simulation introuvable');
-
-    sub.textContent = 'Génération du PDF…';
-
-    // 2. Restaurer les paramètres dans les champs du simulateur
+    // Restaurer les paramètres dans le simulateur
     const p = sim.parametres || {};
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
-    setVal('inv',   p.investissement);
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+    setVal('inv', p.investissement);
     setVal('conso', p.consommation);
-    setVal('gain',  p.gain_energetique);
+    setVal('gain', p.gain_energetique);
     setVal('duree', p.duree_ans);
-    setVal('taux',  p.taux);
-    setVal('prix',  p.prix_energie);
-    setVal('kwh',   p.kwh_cumac);
+    setVal('taux', p.taux);
+    setVal('prix', p.prix_energie);
+    setVal('kwh', p.kwh_cumac);
     setVal('cours', p.cours_cee);
-    if (sim.client_taille) { const el = document.getElementById('taille'); if (el) el.value = sim.client_taille; }
-    if (sim.client_entreprise || sim.client_nom) {
-      const el = document.getElementById('nom-client');
-      if (el) el.value = sim.client_entreprise || sim.client_nom || '';
+    if (p.equipement_label) {
+      const equipSel = document.getElementById('equip-type');
+      if (equipSel) { for (const opt of equipSel.options) { if (opt.text === p.equipement_label) { equipSel.value = opt.value; break; } } }
     }
+    if (sim.client_nom) { const nomEl = document.getElementById('nom-client'); if (nomEl) nomEl.value = sim.client_nom; }
     recalculer();
-    await new Promise(r => setTimeout(r, 80)); // laisser recalculer() se stabiliser
-
-    // 3. Générer le PDF en mode aperçu (blob URL, pas de téléchargement)
-    const blobUrl = await exporterPDF(true);
-    if (!blobUrl) throw new Error('Échec de la génération PDF');
-
-    // 4. Stocker pour le téléchargement éventuel
-    _pdfPreviewBlobUrl = blobUrl;
-    _pdfPreviewFilename = nom || ('Proposition_' + (sim.client_entreprise || 'Client') + '.pdf');
-    sub.textContent = sim.client_entreprise || sim.client_nom || '';
-
-    // 5. Afficher dans l'iframe
-    frame.src = blobUrl;
-
+    switchPage('resultats', document.querySelector('[data-page="resultats"]'));
+    showToast('Simulation rechargée ✓', 'success');
   } catch(e) {
-    loader.style.display = 'none';
-    frame.style.opacity = '1';
-    frame.srcdoc = `<div style="font-family:sans-serif;padding:40px;color:#dc2626;text-align:center;"><b>Erreur : </b>${e.message}</div>`;
-    showToast('Erreur aperçu : ' + e.message, 'error');
+    showToast('Erreur chargement simulation : ' + e.message, 'error');
   }
 }
 
-function closePdfPreviewModal() {
-  const modal = document.getElementById('pdf-preview-modal');
-  if (modal) modal.style.display = 'none';
-  const frame = document.getElementById('pdf-preview-frame');
-  if (frame) frame.src = 'about:blank';
-  if (_pdfPreviewBlobUrl) { URL.revokeObjectURL(_pdfPreviewBlobUrl); _pdfPreviewBlobUrl = null; }
-}
-
-function pdfPreviewDownload() {
-  if (!_pdfPreviewBlobUrl) return;
-  const a = document.createElement('a');
-  a.href = _pdfPreviewBlobUrl;
-  a.download = _pdfPreviewFilename;
-  a.click();
-}
-
-// ─── Télécharger/regénérer un document ───
-async function downloadDoc(simIdOrEl, nom, mimeType) {
-  // Accepte soit un élément DOM (data-sim), soit des valeurs directes
-  let simId = simIdOrEl, docNom = nom, docMime = mimeType;
-  if (simIdOrEl && typeof simIdOrEl === 'object' && simIdOrEl.dataset) {
-    simId = simIdOrEl.dataset.sim; docNom = simIdOrEl.dataset.nom; docMime = simIdOrEl.dataset.mime;
+// Regénérer le fichier PDF ou Excel depuis une simulation liée
+async function regenDocFromSim(simIdNoHyphens, type) {
+  if (!simIdNoHyphens) return;
+  let simId = simIdNoHyphens;
+  if (simIdNoHyphens.length === 32 && !simIdNoHyphens.includes('-')) {
+    simId = simIdNoHyphens.slice(0,8)+'-'+simIdNoHyphens.slice(8,12)+'-'+simIdNoHyphens.slice(12,16)+'-'+simIdNoHyphens.slice(16,20)+'-'+simIdNoHyphens.slice(20);
   }
-  if (!simId) {
-    showToast('Aucune simulation liée — regénérez depuis le simulateur', 'warning');
-    return;
-  }
-  showToast('⏳ Chargement de la simulation…', 'info');
   try {
-    const res  = await fetch(ADMIN_API + '/simulations/' + simId, { headers: getAuthHeaders() });
+    const res = await fetch(ADMIN_API + '/simulations/' + simId, { headers: getAuthHeaders() });
     const data = await res.json();
-    const sim  = data?.data;
+    const sim = data?.data;
     if (!sim) throw new Error('Simulation introuvable');
-
     const p = sim.parametres || {};
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
-    setVal('inv',   p.investissement);
-    setVal('conso', p.consommation);
-    setVal('gain',  p.gain_energetique);
-    setVal('duree', p.duree_ans);
-    setVal('taux',  p.taux);
-    setVal('prix',  p.prix_energie);
-    setVal('kwh',   p.kwh_cumac);
-    setVal('cours', p.cours_cee);
-    if (sim.client_nom) {
-      const nomEl = document.getElementById('nom-client');
-      if (nomEl) { nomEl.value = sim.client_nom; }
-    }
-    if (sim.client_siret) currentClientSiret = sim.client_siret;
-
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+    setVal('inv', p.investissement); setVal('conso', p.consommation); setVal('gain', p.gain_energetique);
+    setVal('duree', p.duree_ans); setVal('taux', p.taux); setVal('prix', p.prix_energie);
+    setVal('kwh', p.kwh_cumac); setVal('cours', p.cours_cee);
+    if (sim.client_nom) { const nomEl = document.getElementById('nom-client'); if (nomEl) nomEl.value = sim.client_nom; }
     recalculer();
     closeClientDrawer();
-    switchPage('resultats', document.querySelector('[data-page="resultats"]'));
-
-    const isExcel = docMime?.includes('spreadsheet') || docNom?.endsWith('.xlsx');
-    showToast('Simulation restaurée — cliquez sur ' + (isExcel ? 'Excel' : 'PDF') + ' pour télécharger', 'success');
-    // Auto-déclencher l'export après un court délai (laisser recalculer() finir)
-    setTimeout(() => { isExcel ? exporterExcel() : exporterPDF(); }, 600);
+    await new Promise(r => setTimeout(r, 200));
+    if (type === 'excel') { await exporterExcel(); } else { await exporterPDF(); }
   } catch(e) {
     showToast('Erreur : ' + e.message, 'error');
   }
@@ -7758,49 +7750,38 @@ function startSimForClient(raison, siren) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// PAGE RESSOURCES — 3 onglets icônes + contenu inline (pas de navigation)
+// PAGE RESSOURCES — Hub de navigation vers Aides / Éligibilité / Organismes
 // ═══════════════════════════════════════════════════════════════════
-
-let _ressourcesCurrentTab = null;
+// Approche sans clonage : les onglets naviguent vers les vraies pages
+// pour éviter les IDs dupliqués (toggles, montants, etc.)
 
 function renderRessourcesPage() {
-  // Si aucun onglet actif, ouvrir Aides par défaut
-  if (!_ressourcesCurrentTab) switchRessourcesTab('aides');
+  // Afficher le hub de sélection
+  const hub = document.getElementById('ressources-hub');
+  if (hub) hub.style.display = 'grid';
 }
 
-function switchRessourcesTab(tab) {
-  _ressourcesCurrentTab = tab;
+function switchRessourcesTab(tab, btn) {
+  // Naviguer directement vers la vraie page — pas de clonage
+  const pageMap = { aides: 'aides', eligibilite: 'eligibilite', organismes: 'organismes' };
+  const targetPage = pageMap[tab];
+  if (!targetPage) return;
 
-  // ─── 1. Masquer tous les panneaux
-  ['aides','eligibilite','organismes'].forEach(t => {
-    const panel = document.getElementById('res-panel-' + t);
-    if (panel) panel.style.display = 'none';
-    const card  = document.getElementById('res-card-' + t);
-    if (card) {
-      card.style.border = '2px solid var(--c-border)';
-      card.style.background = 'var(--c-surface)';
-    }
-  });
+  // Naviguer (garde le sidebar item "Ressources" actif)
+  const navItem = document.querySelector('[data-page="ressources"]');
+  switchPage(targetPage, navItem);
 
-  // ─── 2. Afficher le panneau sélectionné
-  const panel = document.getElementById('res-panel-' + tab);
-  if (panel) panel.style.display = 'block';
-
-  // ─── 3. Mettre la carte active en surbrillance teal
-  const card = document.getElementById('res-card-' + tab);
-  if (card) {
-    card.style.border = '2px solid var(--c-teal)';
-    card.style.background = 'var(--c-teal-bg,#f0fdfa)';
-  }
-
-  // ─── 4. Appeler la fonction de rendu correspondante
-  if (tab === 'aides') {
-    recalculer();
-  } else if (tab === 'eligibilite') {
-    renderScoring();
-  } else if (tab === 'organismes') {
-    renderOrganismesFront();
-  }
+  // Forcer le highlight "Ressources" dans le sidebar (switchPage aura mis aides actif)
+  setTimeout(() => {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    if (navItem) navItem.classList.add('active');
+    // Mettre à jour le sous-titre header
+    const subEl = document.getElementById('header-page-sub');
+    const sepEl = document.getElementById('header-page-sep');
+    const subLabel = {aides:'Aides & Subventions', eligibilite:'Éligibilité', organismes:'Organismes'}[tab];
+    if (subEl) subEl.textContent = subLabel;
+    if (sepEl) sepEl.style.display = '';
+  }, 0);
 }
 
 // Initialiser le badge clients au chargement (si connecté)
@@ -8165,9 +8146,10 @@ function lireParametres() {
 }
 
 // ─── PDF EXPORT REFONDU ───
-async function exporterPDF(previewOnly = false) {
+async function exporterPDF() {
   const btn = document.querySelector('.export-btn-pdf');
-  if (!previewOnly && btn) { btn.disabled = true; btn.textContent = 'Generation...'; }
+  btn.disabled = true;
+  btn.textContent = 'Generation...';
   await new Promise(r => setTimeout(r, 50));
 
   try {
@@ -8781,11 +8763,6 @@ async function exporterPDF(previewOnly = false) {
     // Sauvegarde
     const nomFichier = 'Lihtea_' + d.nomClient.replace(/\s+/g, '-') + '_' + d.date.replace(/\//g, '-') + '.pdf';
 
-    // Mode aperçu : retourner la blob URL sans sauvegarder
-    if (previewOnly) {
-      return doc.output('bloburl');
-    }
-
     // Sauvegarder la proposition dans l'historique AVANT le téléchargement
     sauvegarderProposition(d.nomClient || 'Sans nom', d.inv, d.totalAides, d.coutNet, 'pdf');
 
@@ -8794,12 +8771,9 @@ async function exporterPDF(previewOnly = false) {
   } catch (err) {
     console.error('Erreur PDF :', err);
     showToast('Erreur lors de la génération du PDF', 'error');
-    if (previewOnly) return null;
   } finally {
-    if (!previewOnly && btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Synthese PDF';
-    }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Synthese PDF';
   }
 }
 
@@ -11553,33 +11527,5 @@ document.addEventListener('DOMContentLoaded', async function() {
 var pageCourante = 'dashboard';
 
 </script>
-<!-- ═══ MODAL APERÇU PDF ═══ -->
-<div id="pdf-preview-modal" style="display:none;position:fixed;inset:0;z-index:99999;flex-direction:column;background:rgba(10,20,40,0.92);">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#0f2b46;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:18px;">📋</span>
-      <div>
-        <div id="pdf-preview-title" style="color:#fff;font-weight:700;font-size:14px;letter-spacing:-0.01em;">Aperçu de la proposition</div>
-        <div id="pdf-preview-subtitle" style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:1px;"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="pdf-preview-download-btn" onclick="pdfPreviewDownload()"
-        style="padding:7px 16px;background:var(--c-teal);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
-        ⬇ Télécharger
-      </button>
-      <button onclick="closePdfPreviewModal()"
-        style="width:32px;height:32px;background:rgba(255,255,255,0.1);border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-    </div>
-  </div>
-  <div style="flex:1;overflow:hidden;position:relative;">
-    <div id="pdf-preview-loader" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:14px;flex-direction:column;gap:12px;">
-      <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--c-teal);border-radius:50%;animation:spin .7s linear infinite;"></div>
-      Génération de l'aperçu…
-    </div>
-    <iframe id="pdf-preview-frame" style="width:100%;height:100%;border:none;opacity:0;transition:opacity .3s;" onload="document.getElementById('pdf-preview-loader').style.display='none';this.style.opacity='1';" src="about:blank"></iframe>
-  </div>
-</div>
-
 </body>
 </html>
