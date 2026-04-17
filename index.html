@@ -3915,6 +3915,7 @@
             <span style="width:7px;height:7px;border-radius:4px;background:#dc2626;display:inline-block;flex-shrink:0;"></span>
             <span id="dash-alerte-txt">0 en retard</span>
           </span>
+          <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" style="padding:8px 14px;background:white;color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">⚡ Simulation</button>
           <button onclick="switchPage('clients',document.querySelector('[data-page=&quot;clients&quot;]'));setTimeout(openNewClientModal,350);" style="padding:8px 16px;background:var(--c-teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">+ Nouveau client</button>
         </div>
       </div>
@@ -8708,6 +8709,9 @@ async function exporterPDF(previewOnly = false) {
 
   try {
     const d = lireParametres();
+    // Scores d'éligibilité (score >= 70 = Éligible, seules ces aides apparaissent dans le PDF)
+    const elig = evaluerEligibilite();
+    const isEligible = key => (elig[key]?.score ?? 0) >= 70;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -8864,10 +8868,10 @@ async function exporterPDF(previewOnly = false) {
     Y += 6;
 
     const aidesDonnees = [
-      aidesActives.cee  && d.primeCEE   > 0 ? ['Prime CEE (P6 2026-2030)', fe(d.primeCEE)] : null,
-      aidesActives.ademe && d.primeADEME > 0 ? ['Fonds Chaleur / DECARB FLASH ADEME', fe(d.primeADEME)] : null,
-      aidesActives.bpi  && d.gainBPI    > 0 ? ['Pret Vert Bpifrance (reduction de taux)', fe(d.gainBPI)] : null,
-      aidesActives.feder && d.primeFEDER > 0 ? ['FEDER regional', fe(d.primeFEDER)] : null,
+      aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0 ? ['Prime CEE (P6 2026-2030)', fe(d.primeCEE)] : null,
+      aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0 ? ['Fonds Chaleur / DECARB FLASH ADEME', fe(d.primeADEME)] : null,
+      aidesActives.bpi   && isEligible('bpi')   && d.gainBPI    > 0 ? ['Pret Vert Bpifrance (reduction de taux)', fe(d.gainBPI)] : null,
+      aidesActives.feder && isEligible('feder') && d.primeFEDER > 0 ? ['FEDER regional', fe(d.primeFEDER)] : null,
     ].filter(Boolean);
     if (aidesDonnees.length === 0) {
       rect(MARG, Y, CONTENU, 8, PDF_COLORS.grisClair);
@@ -8896,9 +8900,9 @@ async function exporterPDF(previewOnly = false) {
 
     const lignesFin = [
       ['Investissement total HT', fe(d.inv), PDF_COLORS.gris],
-      ...(aidesActives.cee   && d.primeCEE   > 0 ? [['- Prime CEE', '- ' + fe(d.primeCEE), PDF_COLORS.teal]] : []),
-      ...(aidesActives.ademe && d.primeADEME > 0 ? [['- Subvention ADEME', '- ' + fe(d.primeADEME), PDF_COLORS.teal]] : []),
-      ...(aidesActives.feder && d.primeFEDER > 0 ? [['- FEDER regional', '- ' + fe(d.primeFEDER), PDF_COLORS.teal]] : []),
+      ...(aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0 ? [['- Prime CEE', '- ' + fe(d.primeCEE), PDF_COLORS.teal]] : []),
+      ...(aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0 ? [['- Subvention ADEME', '- ' + fe(d.primeADEME), PDF_COLORS.teal]] : []),
+      ...(aidesActives.feder && isEligible('feder') && d.primeFEDER > 0 ? [['- FEDER regional', '- ' + fe(d.primeFEDER), PDF_COLORS.teal]] : []),
       ['= Capital net a financer', fe(d.coutNet), PDF_COLORS.navy],
       ['Duree / Taux brut / Taux net', d.duree + ' ans  |  ' + d.taux.toFixed(1) + '%  |  ' + d.tauxNet.toFixed(1) + '%', PDF_COLORS.grisfonce],
       ['Loyer mensuel brut', fe(Math.round(d.mensBrute)) + ' /mois', PDF_COLORS.gris],
@@ -9051,9 +9055,9 @@ async function exporterPDF(previewOnly = false) {
       { label: 'Investissement HT', val: d.inv, pct: 100, color: PDF_COLORS.gris, type: 'base' },
     ];
     let wfRunning = d.inv;
-    if (d.primeCEE > 0) { wfRunning -= d.primeCEE; wfSteps.push({ label: '- Prime CEE', val: d.primeCEE, pct: d.primeCEE/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
-    if (d.primeADEME > 0) { wfRunning -= d.primeADEME; wfSteps.push({ label: '- Subvention ADEME', val: d.primeADEME, pct: d.primeADEME/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
-    if (d.primeFEDER > 0) { wfRunning -= d.primeFEDER; wfSteps.push({ label: '- FEDER regional', val: d.primeFEDER, pct: d.primeFEDER/d.inv*100, color: [124,58,237], type: 'sub', left: Math.max(0,wfRunning/d.inv*100) }); }
+    if (aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0) { wfRunning -= d.primeCEE;   wfSteps.push({ label: '- Prime CEE', val: d.primeCEE, pct: d.primeCEE/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
+    if (aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0) { wfRunning -= d.primeADEME; wfSteps.push({ label: '- Subvention ADEME', val: d.primeADEME, pct: d.primeADEME/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
+    if (aidesActives.feder && isEligible('feder') && d.primeFEDER > 0) { wfRunning -= d.primeFEDER; wfSteps.push({ label: '- FEDER regional', val: d.primeFEDER, pct: d.primeFEDER/d.inv*100, color: [124,58,237], type: 'sub', left: Math.max(0,wfRunning/d.inv*100) }); }
     wfSteps.push({ label: '= Capital net', val: d.coutNet, pct: d.coutNet/d.inv*100, color: PDF_COLORS.navy, type: 'total' });
 
     const barMaxW = CONTENU - 50;
