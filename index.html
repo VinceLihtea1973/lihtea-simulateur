@@ -9949,12 +9949,12 @@ function dashFmtK(n) {
   return Math.round(n) + ' €';
 }
 function dashKpiCard(icon, value, label, sub, color) {
-  return '<div style="padding:20px;border-radius:12px;background:white;border:1px solid var(--c-border);cursor:default;">' +
-    '<div style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">' +
-      '<span style="font-size:16px;">' + icon + '</span>' + label +
+  return '<div style="padding:16px 20px;border-radius:12px;background:white;border:1px solid var(--c-border);cursor:default;">' +
+    '<div style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:5px;">' +
+      '<span style="font-size:14px;">' + icon + '</span>' + label +
     '</div>' +
-    '<div style="font-size:26px;font-weight:800;color:' + (color||'var(--c-navy)') + ';line-height:1;margin-bottom:4px;font-family:var(--font-mono);">' + (value||'—') + '</div>' +
-    '<div style="font-size:12px;color:var(--c-text-3);">' + (sub||'') + '</div>' +
+    '<div style="font-size:22px;font-weight:800;color:' + (color||'var(--c-navy)') + ';line-height:1.1;margin-bottom:5px;">' + (value||'—') + '</div>' +
+    '<div style="font-size:11px;color:var(--c-text-3);">' + (sub||'') + '</div>' +
   '</div>';
 }
 function dashDonut(data, svgId, legendId) {
@@ -9991,19 +9991,18 @@ function dashBarChart(containerId, data) {
   if (!el) return;
   if (!data || data.length === 0) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Aucune donnée</div>'; return; }
   const maxV = Math.max(...data.map(d => d.v), 1);
-  const barW = Math.floor(100 / data.length) - 2;
-  const svgH = 120;
-  const barMaxH = 80;
-  let rects = '', labels = '', values = '';
-  data.forEach((d, i) => {
-    const bh = Math.max(4, Math.round(d.v / maxV * barMaxH));
-    const x = i * (100 / data.length) + 1;
-    const y = svgH - 28 - bh;
-    rects += '<rect x="' + x + '%" y="' + y + '" width="' + barW + '%" height="' + bh + '" rx="3" fill="' + d.c + '" opacity="0.85"/>';
-    labels += '<text x="' + (x + barW/2) + '%" y="' + (svgH-8) + '" text-anchor="middle" font-size="9" fill="var(--c-text-3)">' + d.label + '</text>';
-    if (d.v > 0) values += '<text x="' + (x + barW/2) + '%" y="' + (y-4) + '" text-anchor="middle" font-size="9" font-weight="600" fill="' + d.c + '">' + d.v + '</text>';
-  });
-  el.innerHTML = '<svg width="100%" height="' + svgH + '" viewBox="0 0 100 ' + svgH + '" preserveAspectRatio="none" style="overflow:visible;">' + rects + labels + values + '</svg>';
+  el.innerHTML = data.map(d => {
+    const pct = Math.round(d.v / maxV * 100);
+    return '<div style="margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+        '<span style="font-size:12px;color:var(--c-text-2);">' + d.label + '</span>' +
+        '<span style="font-size:12px;font-weight:700;color:' + d.c + ';font-family:var(--font-mono);">' + d.v + '</span>' +
+      '</div>' +
+      '<div style="height:8px;background:var(--c-bg);border-radius:4px;overflow:hidden;">' +
+        '<div style="height:8px;border-radius:4px;background:' + d.c + ';width:' + pct + '%;transition:width .4s;"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 async function renderGlobalDashboard() {
