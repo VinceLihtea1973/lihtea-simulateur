@@ -3979,7 +3979,7 @@
         </div>
         <!-- ── SIREN / Enrichissement optionnel ── -->
         <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
-          <input type="text" id="client-siren" maxlength="9" placeholder="SIREN (optionnel — 9 chiffres)"
+          <input type="text" id="client-siren" maxlength="14" placeholder="SIREN (optionnel — 9 chiffres)"
             oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)"
             style="flex:1;padding:6px 10px;font-size:12px;font-family:var(--font-body);
               border:1px solid rgba(255,255,255,0.15);border-radius:6px;
@@ -12221,6 +12221,10 @@ function resetSimulateur() {
     if (el) { el.value = val; el.dispatchEvent(new Event('input')); }
   });
 
+  // Reset the inv text input explicitly (slider oninput may not fire reliably on programmatic dispatch)
+  const invNumber = document.getElementById('inv-number');
+  if (invNumber) invNumber.value = (250000).toLocaleString('fr-FR');
+
   // Reset taille to PME (default)
   const tailleEl = document.getElementById('taille');
   if (tailleEl) tailleEl.value = 'pme';
@@ -12633,7 +12637,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- SIREN input -->
       <label class="modal-input-label">Numéro SIREN (9 chiffres)</label>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input id="nc-siren" type="text" inputmode="numeric" maxlength="9" placeholder="Ex : 123 456 789"
+        <input id="nc-siren" type="text" inputmode="numeric" maxlength="14" placeholder="Ex : 123 456 789"
           class="modal-input" style="flex:1;margin-bottom:0;letter-spacing:.05em;"
           oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)"
           onkeydown="if(event.key==='Enter')ncSirenLookup()">
