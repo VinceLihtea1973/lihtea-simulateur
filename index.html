@@ -4899,6 +4899,10 @@
         <span class="export-label" id="export-client-label">Synthèse client</span>
       </div>
       <div class="export-bar-right">
+        <button class="export-btn" id="btn-enregistrer-etude" onclick="enregistrerEtude()" style="background:var(--c-teal);color:#fff;border-color:var(--c-teal);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Enregistrer l'étude
+        </button>
         <button class="export-btn export-btn-pdf" onclick="ouvrirPopupProposition()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Générer la proposition
@@ -5163,6 +5167,10 @@ let currentTenantConfig = null; // full brand_config object
 // ── Client courant — enrichissement SIREN ──────────────────────────────
 let currentClientSiret = null; // SIREN validé lors du lookup
 let _lastTotalAides = 0; // Montant total des aides du dernier recalcul (valeur numérique brute)
+let _autoSaveTimer = null;          // Debounce timer pour l'auto-save brouillon
+let _currentBrouillonId = null;     // ID du brouillon Supabase en cours
+let _currentProspectId = null;      // ID du prospect courant (mis à jour par syncFindOrCreate)
+let _currentProspectStatut = 'nouveau'; // Statut prospect courant (pour transitions pipeline)
 let currentClientData  = {};   // données complètes retournées par l'API SIRET
 
 // Legacy alias kept for backward-compat during migration
@@ -5651,6 +5659,8 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     );
     if (existing) {
       console.log('[Sync] Existing prospect found:', existing.id);
+      _currentProspectId = existing.id;
+      _currentProspectStatut = existing.statut || 'nouveau';
       return existing.id;
     }
 
@@ -5691,6 +5701,8 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     const created = await createRes.json();
     const newId = created?.data?.id || created?.data?.[0]?.id || null;
     console.log('[Sync] Prospect created:', newId);
+    _currentProspectId = newId;
+    _currentProspectStatut = 'nouveau';
     return newId;
   } catch(e) {
     console.warn('[Sync] Prospect sync error:', e);
@@ -5699,8 +5711,9 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
 }
 
 // --- Sync simulation to Supabase ---
-async function syncSimulationToSupabase(simData) {
-  if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip simulation sync'); return null; }
+async function syncSimulationToSupabase(simData, options = {}) {
+  const { statut = 'brouillon', isReference = false, silent = false } = options;
+  if (!localStorage.getItem('gef_auth_token')) { if (!silent) console.log('[Sync] No auth token, skip simulation sync'); return null; }
   if (!localStorage.getItem('gef_internal_user_id')) {
     try { await resolveInternalUserId(); } catch(e) {}
   }
@@ -5723,16 +5736,17 @@ async function syncSimulationToSupabase(simData) {
       parametres: {
         investissement: simData.params?.inv,
         consommation: simData.params?.conso,
-        consommation_kwh: simData.params?.conso,    // alias pour dashboard ecoKwh
+        consommation_kwh: simData.params?.conso,
         gain_energetique: simData.params?.gain,
-        gain_pct: simData.params?.gain,             // alias pour dashboard ecoKwh
+        gain_pct: simData.params?.gain,
         duree_ans: simData.params?.duree,
         taux: simData.params?.taux,
         prix_energie: simData.params?.prix,
         kwh_cumac: simData.params?.kwh,
         cours_cee: simData.params?.cours,
         equipement_label: equipLabel,
-        equipement_index: simData.params?.equipIdx
+        equipement_index: simData.params?.equipIdx,
+        taille: simData.params?.taille || 'pme'
       },
       resultats: {
         total_aides: simData.results?.totalAides,
@@ -5743,10 +5757,12 @@ async function syncSimulationToSupabase(simData) {
         pct_couvert: simData.results?.pctCouvert
       },
       aides_selectionnees: simData.aides || {},
-      statut: 'brouillon',
+      statut: statut,
+      is_reference_etude: isReference,
       montant_aides_total: simData.results?.totalAides || 0,
       montant_loyer_mensuel: simData.results?.mensNette || 0,
       gain_net_annuel: simData.results?.ecoAn || 0,
+      roi_mois: simData.results?.roiNet ? Math.round(simData.results.roiNet) : null,
       notes: simData.name || ''
     };
 
@@ -5758,15 +5774,21 @@ async function syncSimulationToSupabase(simData) {
     const result = await res.json();
     const simId = result?.data?.id || result?.data?.[0]?.id || null;
 
-    // Log activity
-    if (simId) {
-      syncLogActivity('note', 'Simulation créée : ' + (simData.name || simData.clientName), simId, prospectId);
+    // Transition pipeline : nouveau → qualifie quand une étude est enregistrée
+    if (simId && prospectId && statut === 'etudie' && _currentProspectStatut === 'nouveau') {
+      await updateProspectStatut(prospectId, 'qualifie');
     }
 
-    console.log('[Sync] Simulation synced:', simId);
+    // Log activity (sauf auto-save silencieux)
+    if (simId && !silent) {
+      const actLabel = statut === 'etudie' ? 'Étude enregistrée : ' : 'Simulation créée : ';
+      syncLogActivity('note', actLabel + (simData.name || simData.clientName), simId, prospectId);
+    }
+
+    if (!silent) console.log('[Sync] Simulation synced:', simId, '/ statut:', statut);
     return simId;
   } catch(e) {
-    console.warn('[Sync] Simulation sync error:', e);
+    if (!silent) console.warn('[Sync] Simulation sync error:', e);
     return null;
   }
 }
@@ -5814,6 +5836,7 @@ async function syncPropositionToSupabase(propData) {
       },
       aides_selectionnees: propData.aidesState || {},
       statut: 'envoyee',
+      is_reference_etude: true,
       montant_aides_total: propData.totalAides || 0,
       notes: 'Proposition ' + propData.type?.toUpperCase() + ' générée le ' + new Date().toLocaleDateString('fr-FR')
     };
@@ -5877,6 +5900,22 @@ async function syncPropositionToSupabase(propData) {
 }
 
 // --- Log activity to Supabase ---
+// --- Mettre à jour le statut d'un prospect ---
+async function updateProspectStatut(prospectId, newStatut) {
+  if (!prospectId) return;
+  try {
+    await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ statut: newStatut, date_dernier_contact: new Date().toISOString() })
+    });
+    _currentProspectStatut = newStatut;
+    console.log('[Sync] Prospect statut →', newStatut);
+  } catch(e) {
+    console.warn('[Sync] Prospect statut update error:', e);
+  }
+}
+
 async function syncLogActivity(type, titre, simulationId, prospectId) {
   if (!localStorage.getItem('gef_auth_token')) return;
   const userId = localStorage.getItem('gef_internal_user_id') || null;
@@ -5903,6 +5942,77 @@ async function syncLogActivity(type, titre, simulationId, prospectId) {
 }
 
 const aidesActives = { cee: true, ademe: true, bpi: true, feder: false };
+
+// --- Auto-save brouillon silencieux (debounce 3s après chaque recalcul) ---
+function autoSaveBrouillon() {
+  if (!localStorage.getItem('gef_auth_token')) return;
+  const clientName = document.getElementById('nom-client')?.value?.trim();
+  if (!clientName) return; // pas de client → pas d'auto-save
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(async () => {
+    try {
+      const d = lireParametres();
+      const simData = {
+        clientName: d.nomClient,
+        params: {
+          inv: d.inv, conso: d.conso, gain: d.gain, duree: d.duree, taux: d.taux,
+          prix: d.prix, kwh: d.kwh, cours: d.cours, taille: d.taille,
+          equipIdx: document.getElementById('equip-type')?.selectedIndex
+        },
+        results: {
+          totalAides: d.totalAides, coutNet: d.coutNet, mensNette: d.mensNette,
+          ecoAn: d.ecoAn, roiNet: d.roi, pctCouvert: d.pctCouvert
+        },
+        aides: { ...aidesActives },
+        name: 'Brouillon auto'
+      };
+      const simId = await syncSimulationToSupabase(simData, { statut: 'brouillon', silent: true });
+      if (simId) _currentBrouillonId = simId;
+    } catch(e) { /* silencieux */ }
+  }, 3000);
+}
+
+// --- Enregistrer l'étude (action explicite du commercial) ---
+async function enregistrerEtude() {
+  if (!localStorage.getItem('gef_auth_token')) {
+    showToast('Connectez-vous pour enregistrer une étude', 'warning'); return;
+  }
+  const clientName = document.getElementById('nom-client')?.value?.trim();
+  if (!clientName) {
+    showToast('Renseignez le nom du client avant d\'enregistrer', 'warning'); return;
+  }
+  const btn = document.getElementById('btn-enregistrer-etude');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+  try {
+    const d = lireParametres();
+    const simData = {
+      clientName: d.nomClient,
+      params: {
+        inv: d.inv, conso: d.conso, gain: d.gain, duree: d.duree, taux: d.taux,
+        prix: d.prix, kwh: d.kwh, cours: d.cours, taille: d.taille,
+        equipIdx: document.getElementById('equip-type')?.selectedIndex
+      },
+      results: {
+        totalAides: d.totalAides, coutNet: d.coutNet, mensNette: d.mensNette,
+        ecoAn: d.ecoAn, roiNet: d.roi, pctCouvert: d.pctCouvert
+      },
+      aides: { ...aidesActives },
+      name: 'Étude — ' + d.nomClient
+    };
+    const simId = await syncSimulationToSupabase(simData, { statut: 'etudie', isReference: true, silent: false });
+    if (simId) {
+      _currentBrouillonId = simId;
+      showToast('✓ Étude enregistrée — marquée comme référence', 'success');
+    } else {
+      showToast('Erreur lors de l\'enregistrement', 'error');
+    }
+  } catch(e) {
+    console.warn('[enregistrerEtude]', e);
+    showToast('Erreur lors de l\'enregistrement', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enregistrer l\'étude'; }
+  }
+}
 let ongletCourant = 'dashboard';
 let unitMode = 'mwh'; // 'mwh' | 'kwh'
 
@@ -6682,6 +6792,9 @@ function recalculer() {
       </div>
     </div>
   `;
+
+  // Auto-save brouillon silencieux (déclenché 3s après le recalcul, seulement si client renseigné)
+  autoSaveBrouillon();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -8056,9 +8169,46 @@ function renderDrawerContent(p) {
   // ── ONGLET 2 : Simulations
   const tabSims = document.getElementById('drawer-tab-simulations');
   if (tabSims) {
-    const SC2 = {brouillon:'#6b7280',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'};
-    const SL2 = {brouillon:'Brouillon',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'};
+    const SC2 = {brouillon:'#6b7280',etudie:'#0d9488',envoyee:'#2563eb',en_cours:'#ea580c',financee:'#059669',abandonnee:'#dc2626'};
+    const SL2 = {brouillon:'Brouillon',etudie:'Étude',envoyee:'Envoyée',en_cours:'En cours',financee:'Financée',abandonnee:'Abandonnée'};
+
+    // Dernière étude de référence pour ce prospect
+    const refEtude = p.simulations?.find(s => s.is_reference_etude) || p.simulations?.find(s => s.statut === 'etudie');
+    const refEtudeBlock = refEtude ? (() => {
+      const re = refEtude;
+      const reInv = Number(re.parametres?.investissement)||0;
+      const reAides = re.montant_aides_total||0;
+      const reMens = re.montant_loyer_mensuel||0;
+      const reEco = re.gain_net_annuel||0;
+      const reRoi = re.roi_mois ? (re.roi_mois < 12 ? re.roi_mois+'m' : Math.round(re.roi_mois/12)+'an') : '—';
+      const reDate = re.updated_at ? new Date(re.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const reParams = re.parametres || {};
+      const reSirenStr = p.siren ? `,'${p.siren}'` : ",''"
+      const reParamsStr = JSON.stringify(reParams).replace(/'/g,"\\'");
+      return `<div style="margin-bottom:14px;padding:14px 16px;background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);border-radius:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-teal);">📌 Dernière étude de référence</div>
+          <div style="font-size:10px;color:var(--c-text-3);">${reDate}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          ${[
+            {l:'Investissement net',v:fek(reInv-reAides)},
+            {l:'Aides totales',v:fek(reAides)},
+            {l:'Loyer mensuel net',v:fek(reMens)+'/mois'},
+            {l:'Économies/an',v:fek(reEco)+'/an'},
+          ].map(k=>`<div style="padding:8px 10px;background:#fff;border:1px solid var(--c-teal-border,#99f6e4);border-radius:7px;">
+            <div style="font-size:9px;color:var(--c-teal);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:2px;">${k.l}</div>
+            <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
+          </div>`).join('')}
+        </div>
+        <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}',${reParamsStr})" style="width:100%;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+          ↩ Reprendre cette simulation
+        </button>
+      </div>`;
+    })() : '';
+
     tabSims.innerHTML = `<div style="padding:16px 20px;">
+      ${refEtudeBlock}
       ${!p.simulations?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
         <div style="font-size:28px;margin-bottom:8px;">▣</div><div>Aucune simulation liée</div>
         <div style="font-size:12px;margin-top:4px;">Utilisez le Simulateur pour créer une simulation</div>
@@ -8066,10 +8216,11 @@ function renderDrawerContent(p) {
       :p.simulations.map(s=>{
         const inv=Number(s.parametres?.investissement)||0;
         const c2=SC2[s.statut]||'#6b7280';
+        const isRef = s.is_reference_etude ? ' 📌' : '';
         return `<div class="client-drawer-sim-row" onclick="loadSimFromDrawer('${s.id}')">
           <div style="width:8px;height:8px;border-radius:4px;background:${c2};flex-shrink:0;margin-top:3px;"></div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' · investissement':'Simulation'}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' · investissement':'Simulation'}${isRef}</div>
             <div style="font-size:11px;color:var(--c-text-3);">${fd(s.created_at)} · ${s.montant_aides_total>0?fek(s.montant_aides_total)+' d\'aides':'sans aide calculée'}</div>
           </div>
           <span style="font-size:10px;font-weight:700;color:${c2};background:${c2}18;padding:2px 7px;border-radius:6px;flex-shrink:0;">${SL2[s.statut]||s.statut}</span>
@@ -8302,16 +8453,45 @@ async function downloadDoc(simIdOrEl, nom, mimeType) {
 }
 
 // Lance une simulation pré-remplie avec le client
-function startSimForClient(raison, siren) {
+function startSimForClient(raison, siren, params) {
   closeClientDrawer();
   const nomInput = document.getElementById('nom-client');
-  if (nomInput && raison) { nomInput.value = raison; recalculer(); }
+  if (nomInput && raison) { nomInput.value = raison; }
   if (siren && siren.length === 9) {
     const sirenInput = document.getElementById('client-siren');
     if (sirenInput) sirenInput.value = siren;
     resetClientEnrichment(false);
     currentClientSiret = siren;
   }
+
+  // Pré-remplir les sliders depuis les paramètres de la dernière étude
+  if (params && typeof params === 'object') {
+    const setSlider = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val != null && !isNaN(val)) {
+        el.value = val;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    };
+    const setNum = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val != null && !isNaN(val)) el.value = Number(val).toLocaleString('fr-FR');
+    };
+    if (params.investissement != null) { setSlider('inv', params.investissement); setNum('inv-number', params.investissement); }
+    if (params.consommation != null) setSlider('conso', params.consommation);
+    if (params.gain_energetique != null) setSlider('gain', params.gain_energetique);
+    if (params.duree_ans != null) setSlider('duree', params.duree_ans);
+    if (params.prix_energie != null) setSlider('prix', params.prix_energie);
+    if (params.kwh_cumac != null) setSlider('kwh', params.kwh_cumac);
+    if (params.cours_cee != null) setSlider('cours', params.cours_cee);
+    if (params.taille) { const el = document.getElementById('taille'); if(el) el.value = params.taille; }
+    if (params.equipement_index != null) {
+      const eq = document.getElementById('equip-type');
+      if (eq && params.equipement_index < eq.options.length) eq.selectedIndex = params.equipement_index;
+    }
+  }
+
+  recalculer();
   switchPage('resultats', document.querySelector('[data-page="resultats"]'));
 }
 
