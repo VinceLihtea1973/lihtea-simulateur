@@ -5169,6 +5169,7 @@ let currentClientSiret = null; // SIREN validé lors du lookup
 let _lastTotalAides = 0; // Montant total des aides du dernier recalcul (valeur numérique brute)
 let _brouillonTimer = null;          // Debounce timer pour l'auto-save brouillon (Supabase)
 let _currentBrouillonId = null;     // ID du brouillon Supabase en cours
+let _userHasEdited = false;         // true uniquement si l'utilisateur a interagi manuellement (isTrusted)
 let _currentProspectId = null;      // ID du prospect courant (mis à jour par syncFindOrCreate)
 let _currentProspectStatut = 'nouveau'; // Statut prospect courant (pour transitions pipeline)
 let currentClientData  = {};   // données complètes retournées par l'API SIRET
@@ -5952,6 +5953,7 @@ const aidesActives = { cee: true, ademe: true, bpi: true, feder: false };
 
 // --- Auto-save brouillon silencieux (debounce 3s après chaque recalcul) ---
 function autoSaveBrouillon() {
+  if (!_userHasEdited) return;          // seulement si l'utilisateur a vraiment interagi (pas les appels programmatiques)
   if (!localStorage.getItem('gef_auth_token')) return;
   const clientName = document.getElementById('nom-client')?.value?.trim();
   if (!clientName) return; // pas de client → pas d'auto-save
@@ -8074,7 +8076,15 @@ function renderDrawerContent(p) {
   const fek  = n => n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M€':n>=1000?Math.round(n/1000)+' k€':Math.round(n||0)+'€';
   const fd   = d => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
   const c    = p._computed || {};
-  const score = calcScoreICP({ ...p, nb_sims: p.simulations?.length||0, totalInvest: c.total_investissement||0, daysInactive: Math.floor((Date.now()-new Date(p.updated_at||p.created_at).getTime())/86400000) });
+  // KPI de référence : on prend la simulation de référence (is_reference_etude > statut etudie > non-brouillon)
+  // pour éviter de sommer tous les brouillons auto-sauvegardés
+  const _kpiSim = p.simulations?.find(s => s.is_reference_etude)
+    || p.simulations?.find(s => s.statut === 'etudie')
+    || p.simulations?.find(s => s.statut !== 'brouillon');
+  const _kpiInv   = _kpiSim ? (Number(_kpiSim.parametres?.investissement)||0) : 0;
+  const _kpiAides = _kpiSim ? (_kpiSim.montant_aides_total||0) : 0;
+  const _kpiRoi   = _kpiSim ? (_kpiSim.roi_mois||0) : 0;
+  const score = calcScoreICP({ ...p, nb_sims: p.simulations?.length||0, totalInvest: _kpiInv||0, daysInactive: Math.floor((Date.now()-new Date(p.updated_at||p.created_at).getTime())/86400000) });
 
   // ── Header
   document.getElementById('drawer-nom').textContent = p.raison_sociale || '—';
@@ -8138,9 +8148,9 @@ function renderDrawerContent(p) {
     <div style="padding:16px 20px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0;">
         ${[
-          {i:'💰', v:c.total_investissement>0?fek(c.total_investissement):'—', l:'Investissement'},
-          {i:'🎯', v:c.total_aides>0?fek(c.total_aides):'—', l:'Aides totales'},
-          {i:'📈', v:c.roi_moyen>0?c.roi_moyen+'m':'—', l:'ROI moyen'},
+          {i:'💰', v:_kpiInv>0?fek(_kpiInv):'—', l:'Investissement'},
+          {i:'🎯', v:_kpiAides>0?fek(_kpiAides):'—', l:'Aides totales'},
+          {i:'📈', v:_kpiRoi>0?Math.round(_kpiRoi)+'m':'—', l:'ROI'},
         ].map(k=>`<div style="padding:10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;text-align:center;">
           <div style="font-size:16px;margin-bottom:3px;">${k.i}</div>
           <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
@@ -8191,8 +8201,12 @@ function renderDrawerContent(p) {
       const reRoi = re.roi_mois ? (re.roi_mois < 12 ? re.roi_mois+'m' : Math.round(re.roi_mois/12)+'an') : '—';
       const reDate = re.updated_at ? new Date(re.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
       const reParams = re.parametres || {};
-      const reSirenStr = p.siren ? `,'${p.siren}'` : ",''"
-      const reParamsStr = JSON.stringify(reParams).replace(/'/g,"\\'");
+      // Stocker les params dans un global pour éviter l'injection JSON dans onclick (double-quotes cassent l'attribut HTML)
+      window._drawerSimParams = window._drawerSimParams || {};
+      const reParamsKey = 'sim_' + (re.id || Date.now());
+      window._drawerSimParams[reParamsKey] = reParams;
+      const raisonEsc = (p.raison_sociale||'').replace(/'/g,"\\'");
+      const sirenEsc  = (p.siren||'');
       return `<div style="margin-bottom:14px;padding:14px 16px;background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);border-radius:10px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-teal);">📌 Dernière étude de référence</div>
@@ -8209,7 +8223,7 @@ function renderDrawerContent(p) {
             <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
           </div>`).join('')}
         </div>
-        <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}',${reParamsStr})" style="width:100%;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <button onclick="startSimForClient('${raisonEsc}','${sirenEsc}',window._drawerSimParams['${reParamsKey}'])" style="width:100%;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
           ↩ Reprendre cette simulation
         </button>
       </div>`;
@@ -8463,8 +8477,10 @@ async function downloadDoc(simIdOrEl, nom, mimeType) {
 // Lance une simulation pré-remplie avec le client
 function startSimForClient(raison, siren, params) {
   closeClientDrawer();
-  // Nouveau client = nouveau contexte de brouillon
+  // Nouveau client = nouveau contexte de brouillon ; l'auto-save ne se déclenchera
+  // qu'après une vraie interaction utilisateur (pas les dispatches programmatiques des sliders)
   _currentBrouillonId = null;
+  _userHasEdited = false;
   const nomInput = document.getElementById('nom-client');
   if (nomInput && raison) { nomInput.value = raison; }
   if (siren && siren.length === 9) {
@@ -12389,6 +12405,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuth(); });
   });
+
+  // Détecte les vraies interactions utilisateur (isTrusted = true uniquement pour les événements natifs)
+  // Utilisé par autoSaveBrouillon() pour éviter de sauvegarder les recalculs programmatiques
+  document.addEventListener('input', function(e) {
+    if (e.isTrusted) _userHasEdited = true;
+  }, true);
+  document.addEventListener('change', function(e) {
+    if (e.isTrusted) _userHasEdited = true;
+  }, true);
 });
 
 // Declare page tracker variable
@@ -12432,6 +12457,7 @@ function resetSimulateur() {
 
   // Réinitialiser l'ID du brouillon courant pour éviter les mises à jour parasites
   _currentBrouillonId = null;
+  _userHasEdited = false;
   recalculer();
   showToast('Simulation réinitialisée', 'success');
 }
