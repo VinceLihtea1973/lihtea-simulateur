@@ -5167,7 +5167,7 @@ let currentTenantConfig = null; // full brand_config object
 // ── Client courant — enrichissement SIREN ──────────────────────────────
 let currentClientSiret = null; // SIREN validé lors du lookup
 let _lastTotalAides = 0; // Montant total des aides du dernier recalcul (valeur numérique brute)
-let _autoSaveTimer = null;          // Debounce timer pour l'auto-save brouillon
+let _brouillonTimer = null;          // Debounce timer pour l'auto-save brouillon (Supabase)
 let _currentBrouillonId = null;     // ID du brouillon Supabase en cours
 let _currentProspectId = null;      // ID du prospect courant (mis à jour par syncFindOrCreate)
 let _currentProspectStatut = 'nouveau'; // Statut prospect courant (pour transitions pipeline)
@@ -5948,8 +5948,8 @@ function autoSaveBrouillon() {
   if (!localStorage.getItem('gef_auth_token')) return;
   const clientName = document.getElementById('nom-client')?.value?.trim();
   if (!clientName) return; // pas de client → pas d'auto-save
-  clearTimeout(_autoSaveTimer);
-  _autoSaveTimer = setTimeout(async () => {
+  clearTimeout(_brouillonTimer);
+  _brouillonTimer = setTimeout(async () => {
     try {
       const d = lireParametres();
       const simData = {
@@ -5969,7 +5969,7 @@ function autoSaveBrouillon() {
       const simId = await syncSimulationToSupabase(simData, { statut: 'brouillon', silent: true });
       if (simId) _currentBrouillonId = simId;
     } catch(e) { /* silencieux */ }
-  }, 3000);
+  }, 3000); // eslint-disable-line
 }
 
 // --- Enregistrer l'étude (action explicite du commercial) ---
