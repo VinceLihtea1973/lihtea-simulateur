@@ -5162,6 +5162,7 @@ let currentTenantConfig = null; // full brand_config object
 
 // ── Client courant — enrichissement SIREN ──────────────────────────────
 let currentClientSiret = null; // SIREN validé lors du lookup
+let _lastTotalAides = 0; // Montant total des aides du dernier recalcul (valeur numérique brute)
 let currentClientData  = {};   // données complètes retournées par l'API SIRET
 
 // Legacy alias kept for backward-compat during migration
@@ -6368,6 +6369,7 @@ function recalculer() {
 
   // Calcul unique via calculerAides()
   const a = calculerAides({ inv, kwh, cours, tauxADEMEselect, taille, duree, taux });
+  _lastTotalAides = a.totalSubventions; // Mémorise pour le bandeau de contexte
 
   // Économies énergie (always MWh-based internally)
   const mwhEco = conso * gain / 100;
@@ -7603,11 +7605,8 @@ function updateContextBand(show) {
     const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':Math.round(n)+'€';
     document.getElementById('cb-client').textContent = nomClient;
     document.getElementById('cb-invest').textContent = fek(inv) + ' d\'investissement';
-    // Récupérer les aides du dernier recalcul
-    const amtCEE = parseFloat(document.getElementById('amt-cee')?.textContent)||0;
-    const amtADEME = parseFloat(document.getElementById('amt-ademe')?.textContent)||0;
-    const totalAides = amtCEE + amtADEME;
-    document.getElementById('cb-aides').textContent = totalAides>0 ? fek(totalAides)+' d\'aides' : 'Aides à calculer';
+    // Récupérer les aides du dernier recalcul (valeur numérique brute, pas le DOM formaté)
+    document.getElementById('cb-aides').textContent = _lastTotalAides > 0 ? fek(_lastTotalAides) + ' d\'aides' : 'Aides à calculer';
   } else {
     band.classList.remove('visible');
   }
