@@ -5766,13 +5766,20 @@ async function syncSimulationToSupabase(simData, options = {}) {
       notes: simData.name || ''
     };
 
-    const res = await fetch(ADMIN_API + '/simulations', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(payload)
-    });
+    // Upsert: si on a déjà un brouillon en cours, le mettre à jour (PUT) plutôt que créer un doublon (POST)
+    const existingId = (statut === 'brouillon' && _currentBrouillonId) ? _currentBrouillonId : null;
+    const res = await fetch(
+      existingId ? ADMIN_API + '/simulations/' + existingId : ADMIN_API + '/simulations',
+      {
+        method: existingId ? 'PUT' : 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      }
+    );
     const result = await res.json();
-    const simId = result?.data?.id || result?.data?.[0]?.id || null;
+    const simId = existingId || result?.data?.id || result?.data?.[0]?.id || null;
+    // Mémoriser l'ID du brouillon courant pour les prochains auto-saves
+    if (statut === 'brouillon' && simId) _currentBrouillonId = simId;
 
     // Transition pipeline : nouveau → qualifie quand une étude est enregistrée
     if (simId && prospectId && statut === 'etudie' && _currentProspectStatut === 'nouveau') {
@@ -6001,7 +6008,8 @@ async function enregistrerEtude() {
     };
     const simId = await syncSimulationToSupabase(simData, { statut: 'etudie', isReference: true, silent: false });
     if (simId) {
-      _currentBrouillonId = simId;
+      // Réinitialiser l'ID brouillon : le prochain auto-save créera un nouveau brouillon séparé
+      _currentBrouillonId = null;
       showToast('✓ Étude enregistrée — marquée comme référence', 'success');
     } else {
       showToast('Erreur lors de l\'enregistrement', 'error');
@@ -8455,6 +8463,8 @@ async function downloadDoc(simIdOrEl, nom, mimeType) {
 // Lance une simulation pré-remplie avec le client
 function startSimForClient(raison, siren, params) {
   closeClientDrawer();
+  // Nouveau client = nouveau contexte de brouillon
+  _currentBrouillonId = null;
   const nomInput = document.getElementById('nom-client');
   if (nomInput && raison) { nomInput.value = raison; }
   if (siren && siren.length === 9) {
@@ -12420,6 +12430,8 @@ function resetSimulateur() {
     if (toggle) toggle.classList.toggle('on', val);
   });
 
+  // Réinitialiser l'ID du brouillon courant pour éviter les mises à jour parasites
+  _currentBrouillonId = null;
   recalculer();
   showToast('Simulation réinitialisée', 'success');
 }
