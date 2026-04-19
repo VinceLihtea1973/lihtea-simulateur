@@ -6000,7 +6000,7 @@ async function syncPropositionToSupabase(propData, pdfBlob, nomFichier) {
           nom: docNom,
           type_document: 'devis',
           description: 'Proposition commerciale ' + (propData.type||'').toUpperCase() + ' — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
-          statut: 'genere',
+          statut: 'brouillon',
           date_document: new Date().toISOString().slice(0,10),
           mime_type: isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           storage_path: storagePath || null
@@ -8281,20 +8281,69 @@ function renderDrawerContent(p) {
       </div>
     </div>
     <div style="padding:16px 20px;">
-      <div class="info-grid-2">
-        ${[
-          {l:'Contact',v:(p.contact_prenom||'')+' '+(p.contact_nom||'')||'—'},
-          {l:'Fonction',v:p.contact_fonction||'—'},
-          {l:'Email',v:p.contact_email||'—'},
-          {l:'Téléphone',v:p.contact_telephone||'—'},
-          {l:'Secteur / NAF',v:p.libelle_naf?p.code_naf+' — '+p.libelle_naf:(p.code_naf||'—')},
-          {l:'Taille',v:(p.taille||'—').toUpperCase()},
-          {l:'Effectifs',v:p.effectifs||'—'},
-          {l:'Ville',v:p.ville?p.code_postal+' '+p.ville:'—'},
-          {l:'Source',v:p.source||'—'},
-          {l:'Créé le',v:fd(p.created_at)},
-        ].map(f=>`<div class="info-field"><div class="if-label">${f.l}</div><div class="if-val">${f.v}</div></div>`).join('')}
+
+      <!-- ── Section Entreprise ── -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Entreprise
+        </div>
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
+          ${[
+            {l:'Raison sociale', v:p.raison_sociale||'—', full:true},
+            {l:'SIREN',          v:p.siren ? `<span style="font-family:monospace;font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--c-navy)">${p.siren}</span>` : '—'},
+            {l:'SIRET',          v:p.siret ? `<span style="font-family:monospace;font-size:12px;">${p.siret}</span>` : '—'},
+            {l:'Secteur / NAF',  v:p.libelle_naf ? `${p.code_naf} — ${p.libelle_naf}` : (p.code_naf||'—')},
+            {l:'Taille',         v:(p.taille||'—').toUpperCase()},
+            {l:'Effectifs',      v:p.effectifs||'—'},
+            {l:'Ville',          v:p.ville ? (p.code_postal||'')+' '+p.ville : '—'},
+          ].map((f,i,arr)=>`
+            <div style="display:flex;align-items:${f.full?'flex-start':'center'};padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
+              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
+            </div>`).join('')}
+        </div>
       </div>
+
+      <!-- ── Section Contact ── -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Contact
+        </div>
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
+          ${[
+            {l:'Nom',       v:[(p.contact_prenom||''),(p.contact_nom||'')].filter(Boolean).join(' ')||'—'},
+            {l:'Fonction',  v:p.contact_fonction||'—'},
+            {l:'Email',     v:p.contact_email ? `<a href="mailto:${p.contact_email}" style="color:var(--c-teal);text-decoration:none;font-weight:500;">${p.contact_email}</a>` : '—'},
+            {l:'Téléphone', v:p.contact_telephone ? `<a href="tel:${p.contact_telephone}" style="color:var(--c-teal);text-decoration:none;font-weight:500;">${p.contact_telephone}</a>` : '—'},
+          ].map((f,i,arr)=>`
+            <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
+              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- ── Section Suivi ── -->
+      <div style="margin-bottom:4px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Suivi
+        </div>
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
+          ${[
+            {l:'Source',          v:p.source||'—'},
+            {l:'Créé le',         v:fd(p.created_at)},
+            {l:'Dernier contact',  v:p.date_dernier_contact ? fd(p.date_dernier_contact) : '—'},
+            {l:'Montant potentiel',v:p.montant_potentiel>0 ? fek(p.montant_potentiel) : '—'},
+          ].map((f,i,arr)=>`
+            <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
+              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:none"><!-- legacy info-grid-2 replaced --></div>
+      <div>
       ${p.next_action_label?`<div style="margin-top:14px;padding:12px;background:${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.06)':'rgba(13,148,136,.06)'};border:1px solid ${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.2)':'rgba(13,148,136,.2)'};border-radius:8px;">
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-teal);font-weight:700;margin-bottom:4px;">Prochaine action</div>
         <div style="font-size:13px;font-weight:600;">${p.prochaine_action||'—'}</div>
