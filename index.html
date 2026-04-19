@@ -8204,22 +8204,32 @@ function _kbPhone(prospectId, triggerEl) {
   }, 50);
 }
 
-// Reset J+X after a contact action (updates updated_at + saves note)
+// Reset J+X after a quick contact (phone popover) — POST activite + update updated_at
 async function _kbMarkContacted(prospectId) {
   const note = document.getElementById('_kb-note')?.value?.trim() || '';
   document.getElementById('_kb-phone-pop')?.remove();
   try {
-    const body = { updated_at: new Date().toISOString() };
-    // Append note to notes field if provided
-    const existing = (_pipelineClients||[]).find(p => p.id === prospectId);
-    if (note && existing) body.notes = (existing.notes ? existing.notes + '\n' : '') + new Date().toLocaleDateString('fr-FR') + ' — ' + note;
-    const res = await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(body)
+    // Enregistrer l'activité dans la table activites
+    const actBody = {
+      prospect_id:   prospectId,
+      type:          'call',
+      titre:         'Appel téléphonique — Contact marqué',
+      description:   note || null,
+      statut:        'realise',
+      date_realisee: new Date().toISOString(),
+    };
+    await fetch(ADMIN_API + '/activites', {
+      method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(actBody),
     });
-    if (!res.ok) throw new Error('PUT ' + res.status);
+    // Réinitialiser J+X sur le prospect
+    await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PUT', headers: getAuthHeaders(),
+      body: JSON.stringify({ updated_at: new Date().toISOString() }),
+    });
     showToast('✓ Contact enregistré — J+X réinitialisé', 'success');
     setTimeout(() => {
       if (typeof renderPipelinePage === 'function') renderPipelinePage();
+      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
     }, 400);
   } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
 }
@@ -8267,11 +8277,12 @@ const ACT_RESULTS = [
 ];
 
 // Récupère la prochaine relance planifiée depuis les activités
+// Champ DB : date_planifiee (table activites)
 function getNextRelance(prospect) {
-  const acts = (prospect.activites || []).filter(a => a.next_relance);
+  const acts = (prospect.activites || []).filter(a => a.date_planifiee);
   if (!acts.length) return null;
   acts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  return acts[0].next_relance; // ISO date string (YYYY-MM-DD)
+  return acts[0].date_planifiee.split('T')[0]; // YYYY-MM-DD
 }
 
 // Rendu de l'onglet Activités complet
@@ -8419,14 +8430,14 @@ function _renderActivitesTab(p) {
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
                 <span style="font-size:12px;font-weight:700;color:var(--c-text);">${h.titre || h.description || '—'}</span>
-                ${h.resultat ? resultBadge(h.resultat) : ''}
+                ${h.statut ? resultBadge(h.statut) : ''}
               </div>
-              ${h.notes ? `<div style="font-size:11px;color:var(--c-text-2);margin-bottom:4px;line-height:1.4;font-style:italic;">"${h.notes}"</div>` : ''}
+              ${h.description ? `<div style="font-size:11px;color:var(--c-text-2);margin-bottom:4px;line-height:1.4;font-style:italic;">"${h.description}"</div>` : ''}
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 <span style="font-size:10px;color:var(--c-text-3);">${fdShort(h.date_realisee || h.created_at)}</span>
-                ${h.next_relance ? `<span style="font-size:10px;font-weight:700;color:${h.next_relance <= today ? '#dc2626' : '#f59e0b'};
-                  background:${h.next_relance <= today ? '#fee2e2' : '#fef3c7'};padding:1px 6px;border-radius:5px;">
-                  📅 Relance : ${new Date(h.next_relance).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>` : ''}
+                ${h.date_planifiee ? `<span style="font-size:10px;font-weight:700;color:${h.date_planifiee.split('T')[0] <= today ? '#dc2626' : '#f59e0b'};
+                  background:${h.date_planifiee.split('T')[0] <= today ? '#fee2e2' : '#fef3c7'};padding:1px 6px;border-radius:5px;">
+                  📅 Relance : ${new Date(h.date_planifiee).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>` : ''}
               </div>
             </div>
           </div>`;
@@ -8435,66 +8446,69 @@ function _renderActivitesTab(p) {
     </div>`;
 }
 
-// Logger une activité depuis le formulaire du drawer
+// Logger une activité — POST dans la table `activites` (table séparée)
 async function logActivity(prospectId) {
   const typeEl   = document.querySelector(`[name="act-type-${prospectId}"]:checked`);
   const resultEl = document.getElementById(`act-result-${prospectId}`);
   const notesEl  = document.getElementById(`act-notes-${prospectId}`);
   const relanceEl= document.getElementById(`act-relance-${prospectId}`);
 
-  const type       = typeEl?.value || 'note';
-  const result     = resultEl?.value || '';
-  const notes      = notesEl?.value?.trim() || '';
-  const nextRelance= relanceEl?.value || null;
+  const type        = typeEl?.value || 'note';
+  const statut      = resultEl?.value || null;   // → colonne `statut` dans activites
+  const description = notesEl?.value?.trim() || null;  // → colonne `description`
+  const datePlanifiee = relanceEl?.value        // → colonne `date_planifiee`
+    ? new Date(relanceEl.value).toISOString()
+    : null;
 
-  const typeLabel = ACT_TYPES.find(t => t.id === type)?.label || type;
-  const resultLabel= ACT_RESULTS.find(r => r.id === result)?.label || '';
+  const typeLabel   = ACT_TYPES.find(t => t.id === type)?.label || type;
+  const statutLabel = ACT_RESULTS.find(r => r.id === statut)?.label || '';
+  const titre       = typeLabel + (statutLabel ? ' — ' + statutLabel : '');
 
-  const newActivity = {
-    id:            crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+  // Corps conforme au schéma de la table `activites`
+  const body = {
+    prospect_id:    prospectId,
     type,
-    titre:         typeLabel + (resultLabel ? ' — ' + resultLabel : ''),
-    resultat:      result || undefined,
-    notes:         notes || undefined,
-    next_relance:  nextRelance || undefined,
-    date_realisee: new Date().toISOString(),
-    created_at:    new Date().toISOString(),
+    titre,
+    description:    description || null,
+    statut:         statut || null,
+    date_planifiee: datePlanifiee || null,
+    date_realisee:  new Date().toISOString(),
   };
-  // Supprimer les clés undefined
-  Object.keys(newActivity).forEach(k => newActivity[k] === undefined && delete newActivity[k]);
 
   try {
-    // Récupérer les activités existantes
-    const res0 = await fetch(ADMIN_API + '/prospects/' + prospectId, { headers: getAuthHeaders() });
-    const p0   = res0.ok ? await res0.json() : null;
-    const existing = p0?.data?.activites || p0?.activites || [];
-
-    const body = {
-      activites:  [...existing, newActivity],
-      updated_at: new Date().toISOString(),
-    };
-
-    const res = await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(body),
+    const res = await fetch(ADMIN_API + '/activites', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error('PUT ' + res.status);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error('POST /activites ' + res.status + (err.error ? ' — ' + err.error : ''));
+    }
 
-    showToast('✓ Contact enregistré' + (nextRelance ? ' · Relance le ' + new Date(nextRelance).toLocaleDateString('fr-FR') : ''), 'success');
+    // Mettre à jour updated_at sur le prospect pour réinitialiser J+X
+    await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ updated_at: new Date().toISOString() }),
+    });
 
-    // Rafraîchir le drawer
+    showToast('✓ Contact enregistré' + (datePlanifiee ? ' · Relance le ' + new Date(datePlanifiee).toLocaleDateString('fr-FR') : ''), 'success');
+
+    // Rafraîchir le drawer sur l'onglet Activités
     await openClientDrawer(prospectId);
     setTimeout(() => {
       const btn = document.querySelector('.drawer-tab-btn[onclick*="historique"]');
       if (btn) switchDrawerTab('historique', btn);
     }, 200);
 
-    // Rafraîchir le pipeline et le dashboard
+    // Rafraîchir pipeline et dashboard
     setTimeout(() => {
       if (typeof renderPipelinePage === 'function' && pageCourante === 'pipeline') renderPipelinePage();
       if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
-    }, 500);
+    }, 600);
   } catch(e) {
-    showToast('⚠️ Erreur : ' + e.message, 'error');
+    showToast('⚠️ ' + e.message, 'error');
   }
 }
 
