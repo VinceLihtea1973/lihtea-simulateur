@@ -10862,6 +10862,12 @@ function dashPipelineFunnel(containerId, funnelData, outcomeData) {
     + outcomeHtml;
 }
 
+// Deep-link depuis dashboard → fiche client (évite les quotes imbriquées dans onclick)
+function openProspectFromDash(id) {
+  switchPage('clients', document.querySelector('[data-page="clients"]'));
+  setTimeout(function() { openClientDrawer(id); }, 400);
+}
+
 async function renderGlobalDashboard() {
   // ── Date header
   const dateEl = document.getElementById('dash-date');
@@ -10973,18 +10979,21 @@ async function renderGlobalDashboard() {
       if (top5.length === 0) {
         top5El.innerHTML = '<div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Aucun prospect</div>';
       } else {
+        const SL = { nouveau:'Nouveau Lead', qualifie:'Qualifié', en_discussion:'En discussion', proposition:'Proposition', negociation:'Négociation', dossier_depose:'Dossier déposé', gagne:'Gagné ✓', perdu:'Perdu' };
         top5El.innerHTML = top5.map((c, i) => {
           const scoreColor = c.score >= 70 ? '#059669' : c.score >= 40 ? '#d97706' : '#dc2626';
-          const SL = { nouveau:'Nouveau Lead', qualifie:'Qualifié', en_discussion:'En discussion', proposition:'Proposition', negociation:'Négociation', dossier_depose:'Dossier déposé', gagne:'Gagné ✓', perdu:'Perdu' };
-          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--c-border);">' +
-            '<div style="width:20px;height:20px;border-radius:50%;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--c-text-3);flex-shrink:0;">' + (i+1) + '</div>' +
-            '<div style="flex:1;min-width:0;cursor:pointer;" onclick="switchPage(\'clients\',document.querySelector(\'[data-page=\\\"clients\\\"]\'));setTimeout(()=>openClientDrawer(\'' + c.id + '\'),400);"' +
-              ' onmouseover="this.querySelector(\'.t5n\').style.color=\'var(--c-teal)\'" onmouseout="this.querySelector(\'.t5n\').style.color=\'var(--c-navy)\'">' +
-              '<div class="t5n" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--c-navy);transition:color .15s;">' + (c.raison_sociale||'—') + '</div>' +
-              '<div style="font-size:10px;color:var(--c-text-3);">' + dashFmtK(c.totalInvest) + ' · ' + (SL[c.statut]||c.statut||'—') + '</div>' +
-            '</div>' +
-            '<div style="font-size:13px;font-weight:800;color:' + scoreColor + ';font-family:var(--font-mono);flex-shrink:0;">' + Math.round(c.score) + '</div>' +
-          '</div>';
+          const isLast = i === top5.length - 1;
+          return '<div class="dash-top5-row" data-prospect-id="' + c.id + '" style="display:flex;align-items:center;gap:10px;padding:9px 8px;' + (!isLast ? 'border-bottom:1px solid var(--c-border);' : '') + 'border-radius:8px;cursor:pointer;transition:background .15s;"'
+               + ' onmouseover="this.style.background=\'var(--c-teal-bg,#f0fdfa)\'"'
+               + ' onmouseout="this.style.background=\'transparent\'"'
+               + ' onclick="openProspectFromDash(this.dataset.prospectId)">'
+               + '<div style="width:22px;height:22px;border-radius:50%;background:var(--c-bg);border:1px solid var(--c-border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--c-text-3);flex-shrink:0;">' + (i+1) + '</div>'
+               + '<div style="flex:1;min-width:0;">'
+               +   '<div style="font-size:12px;font-weight:600;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
+               +   '<div style="font-size:10px;color:var(--c-text-3);margin-top:1px;">' + dashFmtK(c.totalInvest) + ' · ' + (SL[c.statut]||c.statut||'—') + '</div>'
+               + '</div>'
+               + '<div style="font-size:14px;font-weight:800;color:' + scoreColor + ';font-family:var(--font-mono);flex-shrink:0;min-width:28px;text-align:right;">' + Math.round(c.score) + '</div>'
+               + '</div>';
         }).join('');
       }
     }
@@ -11005,7 +11014,7 @@ async function renderGlobalDashboard() {
               '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>' +
               '<div style="font-size:10px;color:var(--c-text-3);">' + c.daysInactive + ' jours sans contact</div>' +
             '</div>' +
-            '<button onclick="switchPage(\'clients\',document.querySelector(\'[data-page=\\\"clients\\\"]\'));setTimeout(()=>openClientDrawer(\'' + c.id + '\'),400);" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
+            '<button data-prospect-id="' + c.id + '" onclick="openProspectFromDash(this.dataset.prospectId)" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
           '</div>'
         ).join('');
       }
