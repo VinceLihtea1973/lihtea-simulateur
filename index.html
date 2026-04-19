@@ -10729,73 +10729,106 @@ function dashDonut(data, svgId, legendId) {
          + '</div>';
   }).join('');
 }
-function dashPipelineFunnel(containerId, data) {
+function dashPipelineFunnel(containerId, funnelData, outcomeData) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  if (!data || data.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--c-text-3);font-size:12px;">Aucune donnée pipeline</div>';
-    return;
+
+  const navFn = "switchPage('pipeline',document.querySelector('[data-page=\"pipeline\"]'))";
+  const BAR_H = 130; // hauteur max zone barres (px)
+  const maxV  = Math.max(...(funnelData||[]).map(d => d.v), 1);
+
+  // ── Lignes de grille horizontales
+  const gridLines = [];
+  if (maxV >= 1) gridLines.push(maxV);
+  if (maxV >= 2) gridLines.push(Math.ceil(maxV / 2));
+  let gridHtml = gridLines.filter((v,i,a) => a.indexOf(v)===i).map(gv => {
+    const yPct = 100 - Math.round(gv / maxV * 100);
+    return '<div style="position:absolute;left:0;right:20px;top:' + yPct + '%;'
+         + 'border-top:1px dashed var(--c-border);pointer-events:none;">'
+         + '<span style="position:absolute;right:-18px;top:-8px;font-size:8px;'
+         + 'color:var(--c-text-3);font-family:var(--font-mono);">' + gv + '</span>'
+         + '</div>';
+  }).join('');
+
+  // ── Colonnes (toujours toutes les 6 étapes)
+  let colsHtml = (funnelData||[]).map(d => {
+    const hPx   = d.v > 0 ? Math.max(8, Math.round(d.v / maxV * BAR_H)) : 3;
+    const empty = d.v === 0;
+    // Label : 1 mot par ligne
+    const words = d.label.split(' ');
+    const lines = [];
+    for (let i = 0; i < words.length; i += 2) lines.push(words.slice(i, i+2).join(' '));
+
+    return '<div onclick="' + navFn + '"'
+         + ' title="' + d.label + ' — ' + d.v + ' prospect' + (d.v!==1?'s':'')
+         + (d.val>0?' · '+dashFmtK(d.val):'') + '"'
+         + ' style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;cursor:pointer;"'
+         + ' onmouseover="var b=this.querySelector(\'.pcb\');if(b){b.style.opacity=\'1\';b.style.transform=\'scaleY(1.06)\'}"'
+         + ' onmouseout="var b=this.querySelector(\'.pcb\');if(b){b.style.opacity=\'' + (empty?'.25':'.85') + '\';b.style.transform=\'scaleY(1)\'}">'
+
+         // count au-dessus
+         + '<div style="font-size:12px;font-weight:800;font-family:var(--font-mono);min-height:18px;'
+         + 'color:' + (empty ? 'var(--c-text-3)' : d.c) + ';margin-bottom:3px;">'
+         + (empty ? '—' : d.v)
+         + '</div>'
+
+         // zone barre
+         + '<div style="width:80%;max-width:36px;display:flex;align-items:flex-end;height:' + BAR_H + 'px;">'
+         + '<div class="pcb" style="width:100%;height:' + hPx + 'px;border-radius:5px 5px 2px 2px;'
+         + 'background:' + (empty
+             ? 'var(--c-bg)'
+             : 'linear-gradient(180deg,'+d.c+'f0 0%,'+d.c+'88 100%)')
+         + ';opacity:' + (empty ? '.25' : '.85') + ';transition:opacity .2s,transform .2s;'
+         + 'transform-origin:bottom;'
+         + (empty ? '' : 'box-shadow:0 3px 10px '+d.c+'33;')
+         + (empty ? 'border:1px dashed var(--c-border);' : '')
+         + '"></div>'
+         + '</div>'
+
+         // valeur k€
+         + '<div style="font-size:9px;color:var(--c-text-3);font-family:var(--font-mono);margin-top:5px;min-height:12px;text-align:center;">'
+         + (d.val > 0 ? dashFmtK(d.val) : '')
+         + '</div>'
+
+         // label (multi-lignes)
+         + '<div style="text-align:center;margin-top:3px;line-height:1.25;">'
+         + lines.map((ln, i) =>
+             '<div style="font-size:' + (i===0?'9':'8.5') + 'px;font-weight:' + (i===0?'700':'500') + ';'
+           + 'color:' + (i===0?'var(--c-navy)':'var(--c-text-3)') + ';white-space:nowrap;">' + ln + '</div>'
+           ).join('')
+         + '</div>'
+
+         // point coloré
+         + '<div style="width:6px;height:6px;border-radius:3px;margin-top:5px;background:' + d.c + ';opacity:' + (empty?'.3':'1') + ';"></div>'
+         + '</div>';
+  }).join('');
+
+  // ── Résultats Gagné / Perdu
+  let outcomeHtml = '';
+  if (outcomeData && outcomeData.length > 0) {
+    outcomeHtml = '<div style="border-top:1px solid var(--c-border);margin-top:12px;padding-top:10px;display:flex;gap:8px;">'
+      + outcomeData.map(d =>
+          '<div onclick="' + navFn + '"'
+        + ' style="flex:1;padding:9px 11px;border-radius:9px;background:'+d.c+'0d;border:1px solid '+d.c+'2a;'
+        + 'display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;"'
+        + ' onmouseover="this.style.borderColor=\''+d.c+'\'" onmouseout="this.style.borderColor=\''+d.c+'2a\'">'
+        + '<div>'
+        +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:'+d.c+';margin-bottom:3px;">'
+        +     (d.key==='gagne'?'✅':'✗') + ' ' + d.label
+        +   '</div>'
+        +   '<div style="font-size:14px;font-weight:800;color:'+d.c+';font-family:var(--font-mono);">'+dashFmtK(d.val)+'</div>'
+        + '</div>'
+        + '<span style="font-size:22px;font-weight:900;font-family:var(--font-mono);color:'+d.c+';opacity:.45;">'+d.v+'</span>'
+        + '</div>'
+      ).join('')
+      + '</div>';
   }
 
-  const navFn  = "switchPage('pipeline',document.querySelector('[data-page=\"pipeline\"]'))";
-  const BAR_H  = 120; // px — hauteur max de la zone barres
-  const maxV   = Math.max(...data.map(d => d.v), 1);
-
-  // ── Grille de référence (lignes horizontales)
-  const gridVals = [maxV, Math.ceil(maxV / 2)].filter((v,i,a) => a.indexOf(v) === i && v > 0);
-  let gridHtml = '';
-  gridVals.forEach(gv => {
-    const yPct = 100 - Math.round(gv / maxV * 100);
-    gridHtml += '<div style="position:absolute;left:0;right:0;top:' + yPct + '%;border-top:1px dashed var(--c-border);pointer-events:none;">'
-              + '<span style="position:absolute;right:0;top:-9px;font-size:8px;color:var(--c-text-3);font-family:var(--font-mono);">' + gv + '</span>'
-              + '</div>';
-  });
-
-  // ── Colonnes verticales
-  let colsHtml = '';
-  data.forEach(d => {
-    const hPct   = Math.round(d.v / maxV * 100);
-    const hPx    = Math.max(4, Math.round(hPct / 100 * BAR_H));
-    // Label court (2 lignes max) — coupe après 2e mot si trop long
-    const words  = d.label.split(' ');
-    const l1     = words.slice(0, words.length > 2 ? 1 : words.length).join(' ');
-    const l2     = words.length > 1 ? words.slice(1).join(' ') : '';
-
-    colsHtml += '<div onclick="' + navFn + '" title="' + d.label + ' — ' + d.v + ' prospect' + (d.v > 1 ? 's' : '') + (d.val > 0 ? ' · ' + dashFmtK(d.val) : '') + '"'
-              +   ' style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;group:true;" '
-              +   ' onmouseover="this.querySelector(\'.pc-bar\').style.opacity=\'1\';this.querySelector(\'.pc-bar\').style.transform=\'scaleY(1.04)\'" '
-              +   ' onmouseout="this.querySelector(\'.pc-bar\').style.opacity=\'.82\';this.querySelector(\'.pc-bar\').style.transform=\'scaleY(1)\'">'
-              // count above bar
-              +   '<div style="font-size:11px;font-weight:800;color:' + d.c + ';font-family:var(--font-mono);margin-bottom:4px;min-height:16px;">'
-              +     (d.v > 0 ? d.v : '')
-              +   '</div>'
-              // bar
-              +   '<div style="width:100%;display:flex;align-items:flex-end;height:' + BAR_H + 'px;">'
-              +     '<div class="pc-bar" style="width:100%;height:' + hPx + 'px;border-radius:5px 5px 2px 2px;'
-              +       'background:linear-gradient(180deg,' + d.c + 'ee 0%,' + d.c + '99 100%);'
-              +       'opacity:.82;transition:opacity .2s,transform .2s;transform-origin:bottom;'
-              +       'box-shadow:0 2px 8px ' + d.c + '44;"></div>'
-              +   '</div>'
-              // value below bar
-              +   '<div style="font-size:9px;color:var(--c-text-3);font-family:var(--font-mono);margin-top:5px;min-height:11px;">'
-              +     (d.val > 0 ? dashFmtK(d.val) : '')
-              +   '</div>'
-              // stage label (2 lines)
-              +   '<div style="text-align:center;margin-top:4px;line-height:1.2;">'
-              +     '<div style="font-size:9px;font-weight:700;color:var(--c-navy);">' + l1 + '</div>'
-              +     (l2 ? '<div style="font-size:9px;color:var(--c-text-3);">' + l2 + '</div>' : '')
-              +   '</div>'
-              +   // colored dot
-                  '<div style="width:6px;height:6px;border-radius:3px;background:' + d.c + ';margin-top:5px;"></div>'
-              + '</div>';
-  });
-
   el.innerHTML = '<div style="position:relative;">'
-    + '<div style="position:absolute;inset:0 18px 52px 0;pointer-events:none;">' + gridHtml + '</div>'
-    + '<div style="display:flex;align-items:flex-end;gap:5px;padding-right:20px;">'
-    + colsHtml
+    + '<div style="position:absolute;top:18px;left:0;right:0;bottom:60px;pointer-events:none;">' + gridHtml + '</div>'
+    + '<div style="display:flex;align-items:flex-end;gap:4px;padding-right:22px;">' + colsHtml + '</div>'
     + '</div>'
-    + '</div>';
+    + outcomeHtml;
 }
 
 async function renderGlobalDashboard() {
@@ -10862,17 +10895,29 @@ async function renderGlobalDashboard() {
       {key:'gagne',          label:'Gagné',          c:'#059669'},
       {key:'perdu',          label:'Perdu',          c:'#dc2626'},
     ];
-    const pipeData = FUNNEL_STAGES.map(s => ({
-      key: s.key, label: s.label, c: s.c,
-      v:   clients.filter(c => c.statut === s.key).length,
-      val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
-    })).filter(d => d.v > 0);
-    dashPipelineFunnel('dash-pipeline-chart', pipeData);
+    // Étapes actives : toujours toutes affichées (même à 0)
+    const ACTIVE_KEYS = ['nouveau','qualifie','en_discussion','proposition','negociation','dossier_depose'];
+    const funnelData = FUNNEL_STAGES
+      .filter(s => ACTIVE_KEYS.includes(s.key))
+      .map(s => ({
+        key: s.key, label: s.label, c: s.c,
+        v:   clients.filter(c => c.statut === s.key).length,
+        val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
+      }));
+    // Résultats (Gagné / Perdu) : affichés seulement si > 0
+    const outcomeData = FUNNEL_STAGES
+      .filter(s => ['gagne','perdu'].includes(s.key))
+      .map(s => ({
+        key: s.key, label: s.label, c: s.c,
+        v:   clients.filter(c => c.statut === s.key).length,
+        val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
+      })).filter(d => d.v > 0);
+    dashPipelineFunnel('dash-pipeline-chart', funnelData, outcomeData);
 
     // Update subtitle with total active count
     const subEl = document.getElementById('dash-pipeline-subtitle');
     if (subEl) {
-      const activeCount = pipeData.filter(d => !['gagne','perdu'].includes(d.key)).reduce((s,d) => s+d.v, 0);
+      const activeCount = funnelData.reduce((s,d) => s+d.v, 0);
       subEl.textContent = activeCount + ' prospect' + (activeCount > 1 ? 's' : '') + ' en cours · ' + dashFmtK(pipeVal) + ' pipeline actif';
     }
 
