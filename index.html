@@ -7946,6 +7946,7 @@ const PIPELINE_STAGES = [
   { id: 'negociation',  label: 'Négociation',     color: '#ea580c', bg: '#ffedd5' },
   { id: 'dossier_depose', label: 'Dossier déposé', color: '#0d9488', bg: '#f0fdfa' },
   { id: 'gagne',        label: 'Gagné ✓',         color: '#059669', bg: '#d1fae5' },
+  { id: 'perdu',        label: 'Perdu ✗',         color: '#dc2626', bg: '#fee2e2' },
 ];
 
 let _pipelineClients = [];
@@ -10884,24 +10885,33 @@ function dashPipelineFunnel(containerId, funnelData, outcomeData) {
          + '</div>';
   }).join('');
 
-  // ── Résultats Gagné / Perdu
+  // ── Résultats Gagné / Perdu — toujours affichés (même à 0)
   let outcomeHtml = '';
   if (outcomeData && outcomeData.length > 0) {
     outcomeHtml = '<div style="border-top:1px solid var(--c-border);margin-top:12px;padding-top:10px;display:flex;gap:8px;">'
-      + outcomeData.map(d =>
-          '<div onclick="' + navFn + '"'
-        + ' style="flex:1;padding:9px 11px;border-radius:9px;background:'+d.c+'0d;border:1px solid '+d.c+'2a;'
-        + 'display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;"'
-        + ' onmouseover="this.style.borderColor=\''+d.c+'\'" onmouseout="this.style.borderColor=\''+d.c+'2a\'">'
-        + '<div>'
-        +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:'+d.c+';margin-bottom:3px;">'
-        +     (d.key==='gagne'?'✅':'✗') + ' ' + d.label
-        +   '</div>'
-        +   '<div style="font-size:14px;font-weight:800;color:'+d.c+';font-family:var(--font-mono);">'+dashFmtK(d.val)+'</div>'
-        + '</div>'
-        + '<span style="font-size:22px;font-weight:900;font-family:var(--font-mono);color:'+d.c+';opacity:.45;">'+d.v+'</span>'
-        + '</div>'
-      ).join('')
+      + outcomeData.map(d => {
+          const empty = d.v === 0;
+          const col   = empty ? 'var(--c-text-3)' : d.c;
+          return '<div onclick="' + navFn + '"'
+            + ' style="flex:1;padding:9px 11px;border-radius:9px;'
+            + 'background:' + (empty ? 'var(--c-bg)' : d.c + '0d') + ';'
+            + 'border:1px solid ' + (empty ? 'var(--c-border)' : d.c + '2a') + ';'
+            + 'display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;"'
+            + (empty ? '' : ' onmouseover="this.style.borderColor=\'' + d.c + '\'" onmouseout="this.style.borderColor=\'' + d.c + '2a\'"')
+            + '>'
+            + '<div>'
+            +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:' + col + ';margin-bottom:3px;">'
+            +     (d.key === 'gagne' ? '✅' : '✗') + ' ' + d.label
+            +   '</div>'
+            +   '<div style="font-size:14px;font-weight:800;color:' + col + ';font-family:var(--font-mono);">'
+            +     (empty ? '0 €' : dashFmtK(d.val))
+            +   '</div>'
+            + '</div>'
+            + '<span style="font-size:22px;font-weight:900;font-family:var(--font-mono);color:' + col + ';opacity:' + (empty ? '.2' : '.45') + ';">'
+            +   d.v
+            + '</span>'
+            + '</div>';
+        }).join('')
       + '</div>';
   }
 
@@ -11013,7 +11023,8 @@ async function renderGlobalDashboard() {
         key: s.key, label: s.label, c: s.c,
         v:   clients.filter(c => c.statut === s.key).length,
         val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
-      })).filter(d => d.v > 0);
+      }));
+    // Toujours afficher Gagné ET Perdu même à 0 — comme dans le mockup
     dashPipelineFunnel('dash-pipeline-chart', funnelData, outcomeData);
 
     // ── Tableau de pondération par étape
