@@ -6072,13 +6072,20 @@ async function syncPropositionToSupabase(propData, pdfBlob, nomFichier) {
 async function updateProspectStatut(prospectId, newStatut) {
   if (!prospectId) return;
   try {
-    await fetch(ADMIN_API + '/prospects/' + prospectId, {
+    const res = await fetch(ADMIN_API + '/prospects/' + prospectId, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ statut: newStatut, date_dernier_contact: new Date().toISOString() })
+      body: JSON.stringify({
+        statut: newStatut,
+        updated_at: new Date().toISOString(),
+        date_dernier_contact: new Date().toISOString()
+      })
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     _currentProspectStatut = newStatut;
     console.log('[Sync] Prospect statut →', newStatut);
+    // Rafraîchir le Dashboard si actif
+    if (typeof renderGlobalDashboard === 'function') setTimeout(renderGlobalDashboard, 500);
   } catch(e) {
     console.warn('[Sync] Prospect statut update error:', e);
   }
@@ -8020,14 +8027,24 @@ async function _pipelineDrop(newStatut) {
   const client = _pipelineClients.find(c => c.id === _pipelineDragId);
   if (!client || client.statut === newStatut) return;
   const prevStatut = client.statut;
+  const dragId = _pipelineDragId;
   // Optimistic UI update
   client.statut = newStatut;
   _renderPipelineBoard();
   try {
-    const res = await fetch(ADMIN_API + '/prospects/' + _pipelineDragId, {
-      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ statut: newStatut })
+    const res = await fetch(ADMIN_API + '/prospects/' + dragId, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ statut: newStatut, updated_at: new Date().toISOString() })
     });
     if (!res.ok) throw new Error('PUT /prospects ' + res.status);
+    const SLBL = { nouveau:'Nouveau Lead', qualifie:'Qualifié', en_discussion:'En discussion', proposition:'Proposition', negociation:'Négociation', dossier_depose:'Dossier déposé', gagne:'Gagné ✓', perdu:'Perdu' };
+    showToast('✓ Statut → ' + (SLBL[newStatut] || newStatut), 'success');
+    // Synchronisation bidirectionnelle : rafraîchir Clients + Dashboard
+    setTimeout(() => {
+      if (typeof renderClientsPage === 'function') renderClientsPage();
+      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+    }, 400);
   } catch(e) {
     // Rollback UI on failure
     client.statut = prevStatut;
@@ -8542,18 +8559,25 @@ async function updateClientStatut(newStatut) {
   try {
     const res = await fetch(ADMIN_API + '/prospects/' + _drawerClientId, {
       method: 'PUT', headers: getAuthHeaders(),
-      body: JSON.stringify({ statut: newStatut })
+      body: JSON.stringify({ statut: newStatut, updated_at: new Date().toISOString() })
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data?.updated) {
-      showToast(newStatut === 'dossier_depose' ? '📤 Dossier soumis — Admin notifié ✓' : 'Statut mis à jour ✓', 'success');
+    if (data?.updated || data?.data) {
+      showToast(newStatut === 'dossier_depose' ? '📤 Dossier soumis — Admin notifié ✓' : '✓ Statut mis à jour', 'success');
       if (_drawerClientData) {
         _drawerClientData.statut = newStatut;
         _drawerClientData.needs_admin_review = newStatut === 'dossier_depose';
         renderDrawerContent(_drawerClientData);
       }
-      // Rafraîchir Clients + Pipeline (synchronisation bidirectionnelle)
-      setTimeout(() => { renderClientsPage(); if (pageCourante === 'pipeline') renderPipelinePage(); }, 300);
+      // Synchronisation complète : Clients + Pipeline + Dashboard
+      setTimeout(() => {
+        if (typeof renderClientsPage === 'function') renderClientsPage();
+        if (typeof renderPipelinePage === 'function' && pageCourante === 'pipeline') renderPipelinePage();
+        if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+      }, 350);
+    } else {
+      showToast('⚠️ Statut non mis à jour — vérifiez votre connexion', 'error');
     }
   } catch(e) { showToast('Erreur : '+e.message, 'error'); }
   if (select) { select.disabled = false; select.value = ''; }
