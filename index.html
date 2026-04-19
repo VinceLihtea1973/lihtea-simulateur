@@ -10692,65 +10692,65 @@ function dashPipelineFunnel(containerId, data) {
     return;
   }
 
-  const ICONS = { nouveau:'🌱', qualifie:'⭐', en_discussion:'💬', proposition:'📋', negociation:'🤝', dossier_depose:'📁', gagne:'✅', perdu:'✗' };
-  const outcomes  = data.filter(d => ['gagne','perdu'].includes(d.key));
-  const funnel    = data.filter(d => !['gagne','perdu'].includes(d.key));
-  const maxV      = Math.max(...funnel.map(d => d.v), 1);
-  const navFn     = "switchPage('pipeline',document.querySelector('[data-page=\"pipeline\"]'))";
+  const navFn  = "switchPage('pipeline',document.querySelector('[data-page=\"pipeline\"]'))";
+  const BAR_H  = 120; // px — hauteur max de la zone barres
+  const maxV   = Math.max(...data.map(d => d.v), 1);
 
-  // ── Funnel rows
-  let html = '<div>';
-  funnel.forEach((d, i) => {
-    const pct = Math.round(d.v / maxV * 100);
-    const prev = funnel[i - 1];
-    const convPct = prev && prev.v > 0 ? Math.round(d.v / prev.v * 100) : null;
-
-    if (convPct !== null) {
-      html += '<div style="display:flex;align-items:center;gap:6px;margin:2px 0 2px 22px;opacity:.55;">'
-            + '<div style="width:1px;height:10px;background:var(--c-border);margin:0 1px;"></div>'
-            + '<span style="font-size:9px;color:var(--c-text-3);letter-spacing:.02em;">↓ ' + convPct + '% conversion</span>'
-            + '</div>';
-    }
-
-    html += '<div onclick="' + navFn + '" '
-          +   'style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s;" '
-          +   'onmouseover="this.style.background=\'var(--c-teal-bg,#f0fdfa)\'" onmouseout="this.style.background=\'transparent\'">'
-          +   '<div style="width:3px;height:36px;border-radius:2px;background:' + d.c + ';flex-shrink:0;"></div>'
-          +   '<span style="font-size:14px;flex-shrink:0;line-height:1;">' + (ICONS[d.key]||'●') + '</span>'
-          +   '<div style="flex:1;min-width:0;">'
-          +     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'
-          +       '<span style="font-size:11px;font-weight:700;color:var(--c-navy);">' + d.label + '</span>'
-          +       '<div style="display:flex;align-items:center;gap:5px;">'
-          +         (d.val > 0 ? '<span style="font-size:10px;color:var(--c-text-3);font-family:var(--font-mono);">' + dashFmtK(d.val) + '</span>' : '')
-          +         '<span style="font-size:10px;font-weight:800;color:' + d.c + ';background:' + d.c + '1a;padding:1px 8px;border-radius:10px;font-family:var(--font-mono);">' + d.v + '</span>'
-          +       '</div>'
-          +     '</div>'
-          +     '<div style="height:5px;background:var(--c-bg);border-radius:3px;overflow:hidden;">'
-          +       '<div style="height:5px;border-radius:3px;background:linear-gradient(90deg,' + d.c + 'cc,' + d.c + ');width:' + pct + '%;transition:width .55s cubic-bezier(.4,0,.2,1);"></div>'
-          +     '</div>'
-          +   '</div>'
-          + '</div>';
+  // ── Grille de référence (lignes horizontales)
+  const gridVals = [maxV, Math.ceil(maxV / 2)].filter((v,i,a) => a.indexOf(v) === i && v > 0);
+  let gridHtml = '';
+  gridVals.forEach(gv => {
+    const yPct = 100 - Math.round(gv / maxV * 100);
+    gridHtml += '<div style="position:absolute;left:0;right:0;top:' + yPct + '%;border-top:1px dashed var(--c-border);pointer-events:none;">'
+              + '<span style="position:absolute;right:0;top:-9px;font-size:8px;color:var(--c-text-3);font-family:var(--font-mono);">' + gv + '</span>'
+              + '</div>';
   });
-  html += '</div>';
 
-  // ── Outcome chips (Gagné / Perdu)
-  if (outcomes.length > 0) {
-    html += '<div style="border-top:1px solid var(--c-border);margin-top:10px;padding-top:10px;display:flex;gap:8px;">';
-    outcomes.forEach(d => {
-      html += '<div onclick="' + navFn + '" '
-            +   'style="flex:1;padding:9px 12px;border-radius:9px;background:' + d.c + '0f;border:1px solid ' + d.c + '33;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;" '
-            +   'onmouseover="this.style.borderColor=\'' + d.c + '\'" onmouseout="this.style.borderColor=\'' + d.c + '33\'">'
-            +   '<div>'
-            +     '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:' + d.c + ';margin-bottom:3px;">' + (ICONS[d.key]||'') + ' ' + d.label + '</div>'
-            +     '<div style="font-size:14px;font-weight:800;color:' + d.c + ';font-family:var(--font-mono);">' + dashFmtK(d.val) + '</div>'
-            +   '</div>'
-            +   '<span style="font-size:22px;font-weight:900;color:' + d.c + ';font-family:var(--font-mono);opacity:.5;">' + d.v + '</span>'
-            + '</div>';
-    });
-    html += '</div>';
-  }
+  // ── Colonnes verticales
+  let colsHtml = '';
+  data.forEach(d => {
+    const hPct   = Math.round(d.v / maxV * 100);
+    const hPx    = Math.max(4, Math.round(hPct / 100 * BAR_H));
+    // Label court (2 lignes max) — coupe après 2e mot si trop long
+    const words  = d.label.split(' ');
+    const l1     = words.slice(0, words.length > 2 ? 1 : words.length).join(' ');
+    const l2     = words.length > 1 ? words.slice(1).join(' ') : '';
 
-  el.innerHTML = html;
+    colsHtml += '<div onclick="' + navFn + '" title="' + d.label + ' — ' + d.v + ' prospect' + (d.v > 1 ? 's' : '') + (d.val > 0 ? ' · ' + dashFmtK(d.val) : '') + '"'
+              +   ' style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;group:true;" '
+              +   ' onmouseover="this.querySelector(\'.pc-bar\').style.opacity=\'1\';this.querySelector(\'.pc-bar\').style.transform=\'scaleY(1.04)\'" '
+              +   ' onmouseout="this.querySelector(\'.pc-bar\').style.opacity=\'.82\';this.querySelector(\'.pc-bar\').style.transform=\'scaleY(1)\'">'
+              // count above bar
+              +   '<div style="font-size:11px;font-weight:800;color:' + d.c + ';font-family:var(--font-mono);margin-bottom:4px;min-height:16px;">'
+              +     (d.v > 0 ? d.v : '')
+              +   '</div>'
+              // bar
+              +   '<div style="width:100%;display:flex;align-items:flex-end;height:' + BAR_H + 'px;">'
+              +     '<div class="pc-bar" style="width:100%;height:' + hPx + 'px;border-radius:5px 5px 2px 2px;'
+              +       'background:linear-gradient(180deg,' + d.c + 'ee 0%,' + d.c + '99 100%);'
+              +       'opacity:.82;transition:opacity .2s,transform .2s;transform-origin:bottom;'
+              +       'box-shadow:0 2px 8px ' + d.c + '44;"></div>'
+              +   '</div>'
+              // value below bar
+              +   '<div style="font-size:9px;color:var(--c-text-3);font-family:var(--font-mono);margin-top:5px;min-height:11px;">'
+              +     (d.val > 0 ? dashFmtK(d.val) : '')
+              +   '</div>'
+              // stage label (2 lines)
+              +   '<div style="text-align:center;margin-top:4px;line-height:1.2;">'
+              +     '<div style="font-size:9px;font-weight:700;color:var(--c-navy);">' + l1 + '</div>'
+              +     (l2 ? '<div style="font-size:9px;color:var(--c-text-3);">' + l2 + '</div>' : '')
+              +   '</div>'
+              +   // colored dot
+                  '<div style="width:6px;height:6px;border-radius:3px;background:' + d.c + ';margin-top:5px;"></div>'
+              + '</div>';
+  });
+
+  el.innerHTML = '<div style="position:relative;">'
+    + '<div style="position:absolute;inset:0 18px 52px 0;pointer-events:none;">' + gridHtml + '</div>'
+    + '<div style="display:flex;align-items:flex-end;gap:5px;padding-right:20px;">'
+    + colsHtml
+    + '</div>'
+    + '</div>';
 }
 
 async function renderGlobalDashboard() {
