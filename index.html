@@ -3978,6 +3978,17 @@
         </div>
       </div>
 
+      <!-- Relances du jour -->
+      <div class="card" style="padding:20px;margin-top:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--c-navy);">Relances du jour 📅 <span id="dash-relance-badge" style="display:none;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
+            <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Prospects à rappeler aujourd'hui ou en retard de relance</div>
+          </div>
+        </div>
+        <div id="dash-relances"></div>
+      </div>
+
     </div>
 
     <!-- PAGE: SIMULATEUR -->
@@ -5001,7 +5012,7 @@
   <div class="drawer-tabs">
     <button class="drawer-tab-btn active" onclick="switchDrawerTab('infos',this)">Infos</button>
     <button class="drawer-tab-btn" onclick="switchDrawerTab('simulations',this)">Simulations <span id="dt-sim-count" style="font-size:10px;"></span></button>
-    <button class="drawer-tab-btn" onclick="switchDrawerTab('historique',this)">Historique</button>
+    <button class="drawer-tab-btn" onclick="switchDrawerTab('historique',this)">Activités <span id="dt-act-badge" style="font-size:10px;"></span></button>
     <button class="drawer-tab-btn" onclick="switchDrawerTab('documents',this)">Documents <span id="dt-doc-count" style="font-size:10px;"></span></button>
   </div>
   <div class="client-drawer-body" style="padding:0;">
@@ -7946,7 +7957,7 @@ async function renderPipelinePage() {
       const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total || s.resultats?.total_aides)||0), 0);
       const lastContact = new Date(p.updated_at || p.created_at).getTime();
       const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
-      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score: calcScoreICP({...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact}) };
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, activites: p.activites || [], score: calcScoreICP({...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact}) };
     });
     const overdue = _pipelineClients.filter(p => p.daysInactive > 15 && !['gagne','perdu'].includes(p.statut)).length;
     const badge = document.getElementById('badge-pipeline-overdue');
@@ -8103,9 +8114,19 @@ function _renderPipelineBoard() {
 
             <!-- Footer : date + actions -->
             <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--c-border);padding-top:8px;">
-              <span style="font-size:10px;font-weight:700;color:${overdue ? '#ef4444' : 'var(--c-text-3)'};background:${overdue ? '#fee2e2' : 'var(--c-surface)'};border:1px solid ${overdue ? '#fca5a5' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">
-                📅 ${dayLbl}
-              </span>
+              ${(() => {
+                const nr = getNextRelance(c);
+                const todayK = new Date().toISOString().split('T')[0];
+                if (nr && nr <= todayK) {
+                  const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+                  return `<span style="font-size:10px;font-weight:700;color:#dc2626;background:#fee2e2;border:1px solid #fca5a5;padding:2px 7px;border-radius:6px;" title="Relance prévue le ${nrDate}">🔴 Relance ${nrDate}</span>`;
+                }
+                if (nr) {
+                  const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+                  return `<span style="font-size:10px;font-weight:700;color:#f59e0b;background:#fef3c7;border:1px solid #fde68a;padding:2px 7px;border-radius:6px;" title="Prochaine relance">📅 ${nrDate}</span>`;
+                }
+                return `<span style="font-size:10px;font-weight:700;color:${overdue ? '#ef4444' : 'var(--c-text-3)'};background:${overdue ? '#fee2e2' : 'var(--c-surface)'};border:1px solid ${overdue ? '#fca5a5' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">📅 ${dayLbl}</span>`;
+              })()}
               <div style="display:flex;gap:4px;">
                 ${actionBtns(c)}
               </div>
@@ -8223,6 +8244,261 @@ function _kbDossier(prospectId) { _kbOpenDrawerTab(prospectId, 'documents'); }
 function _kbScenarios(prospectId) { _kbOpenDrawerTab(prospectId, 'simulations'); }
 
 // ─── End kanban quick-action handlers ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════════════
+// MODULE ACTIVITÉS & RELANCES
+// ═══════════════════════════════════════════════════════════════════
+
+const ACT_TYPES = [
+  { id: 'call',  label: 'Appel téléphonique', icon: '📞' },
+  { id: 'email', label: 'Email',               icon: '📧' },
+  { id: 'rdv',   label: 'Rendez-vous',         icon: '🤝' },
+  { id: 'note',  label: 'Note interne',        icon: '📝' },
+];
+
+const ACT_RESULTS = [
+  { id: 'interesse',      label: 'Intéressé ✓',        color: '#059669' },
+  { id: 'rdv_pris',       label: 'RDV pris 📅',         color: '#8b5cf6' },
+  { id: 'rappel_demande', label: 'Rappel demandé',      color: '#f59e0b' },
+  { id: 'objection',      label: 'Objection',           color: '#dc2626' },
+  { id: 'pas_disponible', label: 'Pas disponible',      color: '#64748b' },
+  { id: 'absent',         label: 'Absent / Messagerie', color: '#94a3b8' },
+  { id: 'message',        label: 'Message laissé',      color: '#0ea5e9' },
+];
+
+// Récupère la prochaine relance planifiée depuis les activités
+function getNextRelance(prospect) {
+  const acts = (prospect.activites || []).filter(a => a.next_relance);
+  if (!acts.length) return null;
+  acts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return acts[0].next_relance; // ISO date string (YYYY-MM-DD)
+}
+
+// Rendu de l'onglet Activités complet
+function _renderActivitesTab(p) {
+  const tab = document.getElementById('drawer-tab-historique');
+  if (!tab) return;
+  const acts = (p.activites || []).slice().reverse(); // plus récent en premier
+  const nextRelance = getNextRelance(p);
+  const today = new Date().toISOString().split('T')[0];
+  const relanceOverdue = nextRelance && nextRelance <= today;
+
+  const fdShort = d => {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' })
+      + ' ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  };
+
+  const resultBadge = r => {
+    const found = ACT_RESULTS.find(x => x.id === r);
+    if (!found) return '';
+    return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;
+      background:${found.color}18;color:${found.color};border:1px solid ${found.color}30;">
+      ${found.label}</span>`;
+  };
+
+  const typeIcon = t => ACT_TYPES.find(x => x.id === t)?.icon || '•';
+
+  tab.innerHTML = `
+    <!-- Bannière prochaine relance -->
+    ${nextRelance ? `
+    <div style="margin:16px 20px 0;padding:10px 14px;border-radius:10px;
+      background:${relanceOverdue ? '#fee2e2' : 'var(--c-teal-bg,#f0fdfa)'};
+      border:1px solid ${relanceOverdue ? '#fca5a5' : 'var(--c-teal-border,#99f6e4)'};
+      display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">${relanceOverdue ? '🔴' : '📅'}</span>
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:${relanceOverdue ? '#dc2626' : 'var(--c-teal)'};margin-bottom:1px;">
+          ${relanceOverdue ? 'Relance en retard !' : 'Prochaine relance planifiée'}
+        </div>
+        <div style="font-size:12px;font-weight:800;color:${relanceOverdue ? '#b91c1c' : 'var(--c-navy)'};">
+          ${new Date(nextRelance).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })}
+        </div>
+      </div>
+      <button onclick="_kbMarkContacted('${p.id}')"
+        style="font-size:10px;padding:4px 9px;border-radius:6px;border:none;
+          background:${relanceOverdue ? '#dc2626' : 'var(--c-teal)'};color:#fff;
+          font-weight:700;cursor:pointer;font-family:var(--font-body);">
+        ✓ Marquer fait
+      </button>
+    </div>` : ''}
+
+    <!-- Formulaire logger une activité -->
+    <div style="margin:14px 20px 0;">
+      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('+') ? '▲ Fermer' : '+ Logger un contact'"
+        style="width:100%;padding:9px;border:2px dashed var(--c-border);border-radius:9px;
+          background:transparent;color:var(--c-teal);font-size:12px;font-weight:700;
+          cursor:pointer;font-family:var(--font-body);transition:all .15s;"
+        onmouseover="this.style.borderColor='var(--c-teal)';this.style.background='var(--c-teal-bg,#f0fdfa)'"
+        onmouseout="this.style.borderColor='var(--c-border)';this.style.background='transparent'">
+        + Logger un contact
+      </button>
+
+      <!-- Formulaire (caché par défaut) -->
+      <div id="act-form-${p.id}" style="display:none;margin-top:10px;background:var(--c-surface);
+        border:1px solid var(--c-border);border-radius:10px;padding:14px;">
+
+        <!-- Type d'activité -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Type</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${ACT_TYPES.map((t, i) => `
+              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
+                padding:5px 10px;border-radius:7px;border:1px solid var(--c-border);
+                font-size:11px;font-weight:600;color:var(--c-text-2);
+                background:var(--c-bg);transition:all .15s;">
+                <input type="radio" name="act-type-${p.id}" value="${t.id}" ${i===0?'checked':''} style="display:none;"
+                  onchange="document.querySelectorAll('[name=act-type-${p.id}]').forEach(r=>r.closest('label').style.cssText=r.checked?'display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:7px;border:1px solid var(--c-teal);background:var(--c-teal-bg,#f0fdfa);font-size:11px;font-weight:700;color:var(--c-teal);transition:all .15s;':'display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:7px;border:1px solid var(--c-border);background:var(--c-bg);font-size:11px;font-weight:600;color:var(--c-text-2);transition:all .15s;')">
+                ${t.icon} ${t.label}
+              </label>`).join('')}
+          </div>
+        </div>
+
+        <!-- Résultat -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Résultat</div>
+          <select id="act-result-${p.id}" style="width:100%;padding:7px 9px;border:1px solid var(--c-border);border-radius:7px;
+            background:var(--c-bg);color:var(--c-text);font-size:12px;font-family:var(--font-body);outline:none;">
+            <option value="">— Sélectionner un résultat —</option>
+            ${ACT_RESULTS.map(r => `<option value="${r.id}">${r.label}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Notes -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Notes & compte-rendu</div>
+          <textarea id="act-notes-${p.id}" rows="3" placeholder="Ex: Intéressé par la chaufferie biomasse, budget 90k€ confirmé. Attends validation DG avant RDV."
+            style="width:100%;box-sizing:border-box;border:1px solid var(--c-border);border-radius:7px;
+              padding:8px 10px;font-size:12px;font-family:var(--font-body);resize:vertical;
+              background:var(--c-bg);color:var(--c-text);outline:none;"></textarea>
+        </div>
+
+        <!-- Prochaine relance -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Prochaine relance (optionnel)</div>
+          <input type="date" id="act-relance-${p.id}" min="${today}"
+            style="width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--c-border);border-radius:7px;
+              background:var(--c-bg);color:var(--c-text);font-size:12px;font-family:var(--font-body);outline:none;">
+        </div>
+
+        <!-- Boutons -->
+        <div style="display:flex;gap:8px;">
+          <button onclick="logActivity('${p.id}')"
+            style="flex:1;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;
+              font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);">
+            ✓ Enregistrer
+          </button>
+          <button onclick="document.getElementById('act-form-${p.id}').style.display='none'"
+            style="padding:9px 14px;border:1px solid var(--c-border);border-radius:7px;background:var(--c-bg);
+              color:var(--c-text-2);font-size:12px;cursor:pointer;font-family:var(--font-body);">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline des activités -->
+    <div style="padding:14px 20px 20px;">
+      ${!acts.length ? `
+        <div style="text-align:center;padding:32px 0;color:var(--c-text-3);">
+          <div style="font-size:28px;margin-bottom:8px;">📋</div>
+          <div style="font-size:12px;">Aucun contact enregistré</div>
+          <div style="font-size:11px;margin-top:4px;color:var(--c-text-3);">Utilisez le formulaire ci-dessus pour logger votre premier échange</div>
+        </div>` :
+        acts.map((h, i) => {
+          const isSystem = ['create','sim','proposition','connexion','update','dossier_depose'].includes(h.type);
+          const icon = isSystem ? { create:'◆', sim:'⚡', proposition:'📋', connexion:'🔑', update:'✏️', dossier_depose:'📤' }[h.type] || '•' : typeIcon(h.type);
+          return `
+          <div style="display:flex;gap:12px;padding:10px 0;${i < acts.length-1 ? 'border-bottom:1px solid var(--c-border);' : ''}">
+            <!-- Icône -->
+            <div style="width:32px;height:32px;border-radius:50%;background:${isSystem ? 'var(--c-surface)' : 'var(--c-teal-bg,#f0fdfa)'};
+              border:1px solid ${isSystem ? 'var(--c-border)' : 'var(--c-teal-border,#99f6e4)'};
+              display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;">${icon}</div>
+            <!-- Contenu -->
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+                <span style="font-size:12px;font-weight:700;color:var(--c-text);">${h.titre || h.description || '—'}</span>
+                ${h.resultat ? resultBadge(h.resultat) : ''}
+              </div>
+              ${h.notes ? `<div style="font-size:11px;color:var(--c-text-2);margin-bottom:4px;line-height:1.4;font-style:italic;">"${h.notes}"</div>` : ''}
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:10px;color:var(--c-text-3);">${fdShort(h.date_realisee || h.created_at)}</span>
+                ${h.next_relance ? `<span style="font-size:10px;font-weight:700;color:${h.next_relance <= today ? '#dc2626' : '#f59e0b'};
+                  background:${h.next_relance <= today ? '#fee2e2' : '#fef3c7'};padding:1px 6px;border-radius:5px;">
+                  📅 Relance : ${new Date(h.next_relance).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>` : ''}
+              </div>
+            </div>
+          </div>`;
+        }).join('')
+      }
+    </div>`;
+}
+
+// Logger une activité depuis le formulaire du drawer
+async function logActivity(prospectId) {
+  const typeEl   = document.querySelector(`[name="act-type-${prospectId}"]:checked`);
+  const resultEl = document.getElementById(`act-result-${prospectId}`);
+  const notesEl  = document.getElementById(`act-notes-${prospectId}`);
+  const relanceEl= document.getElementById(`act-relance-${prospectId}`);
+
+  const type       = typeEl?.value || 'note';
+  const result     = resultEl?.value || '';
+  const notes      = notesEl?.value?.trim() || '';
+  const nextRelance= relanceEl?.value || null;
+
+  const typeLabel = ACT_TYPES.find(t => t.id === type)?.label || type;
+  const resultLabel= ACT_RESULTS.find(r => r.id === result)?.label || '';
+
+  const newActivity = {
+    id:            crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+    type,
+    titre:         typeLabel + (resultLabel ? ' — ' + resultLabel : ''),
+    resultat:      result || undefined,
+    notes:         notes || undefined,
+    next_relance:  nextRelance || undefined,
+    date_realisee: new Date().toISOString(),
+    created_at:    new Date().toISOString(),
+  };
+  // Supprimer les clés undefined
+  Object.keys(newActivity).forEach(k => newActivity[k] === undefined && delete newActivity[k]);
+
+  try {
+    // Récupérer les activités existantes
+    const res0 = await fetch(ADMIN_API + '/prospects/' + prospectId, { headers: getAuthHeaders() });
+    const p0   = res0.ok ? await res0.json() : null;
+    const existing = p0?.data?.activites || p0?.activites || [];
+
+    const body = {
+      activites:  [...existing, newActivity],
+      updated_at: new Date().toISOString(),
+    };
+
+    const res = await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('PUT ' + res.status);
+
+    showToast('✓ Contact enregistré' + (nextRelance ? ' · Relance le ' + new Date(nextRelance).toLocaleDateString('fr-FR') : ''), 'success');
+
+    // Rafraîchir le drawer
+    await openClientDrawer(prospectId);
+    setTimeout(() => {
+      const btn = document.querySelector('.drawer-tab-btn[onclick*="historique"]');
+      if (btn) switchDrawerTab('historique', btn);
+    }, 200);
+
+    // Rafraîchir le pipeline et le dashboard
+    setTimeout(() => {
+      if (typeof renderPipelinePage === 'function' && pageCourante === 'pipeline') renderPipelinePage();
+      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+    }, 500);
+  } catch(e) {
+    showToast('⚠️ Erreur : ' + e.message, 'error');
+  }
+}
+
+// ─── End Module Activités ──────────────────────────────────────────────────────
 
 async function _pipelineDrop(newStatut) {
   if (!_pipelineDragId) return;
@@ -8700,18 +8976,16 @@ function renderDrawerContent(p) {
     </div>`;
   }
 
-  // ── ONGLET 3 : Historique (source : activites de l'API)
+  // ── ONGLET 3 : Activités & Relances
   const tabHist = document.getElementById('drawer-tab-historique');
   if (tabHist) {
-    const ICONS = { create:'◆', email:'✉', call:'✆', rdv:'◉', sim:'▣', sign:'✓', note:'✎', dossier_depose:'📤', proposition:'📋', connexion:'🔑', update:'✏️' };
-    const acts = p.activites || [];
-    tabHist.innerHTML = `<div style="padding:16px 20px;">
-      ${!acts.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">Aucun événement enregistré</div>`
-      :acts.slice().reverse().map(h=>`<div class="timeline-entry">
-        <div class="te-icon">${ICONS[h.type]||'•'}</div>
-        <div style="flex:1;"><div class="te-msg">${h.titre||h.description||'—'}</div><div class="te-date">${fd(h.date_realisee||h.created_at)}</div></div>
-      </div>`).join('')}
-    </div>`;
+    _renderActivitesTab(p);
+    const badge = document.getElementById('dt-act-badge');
+    if (badge) {
+      const acts = p.activites || [];
+      badge.textContent = acts.length > 0 ? acts.length : '';
+      badge.style.cssText = acts.length > 0 ? 'background:rgba(13,148,136,.15);color:var(--c-teal);border-radius:8px;padding:1px 5px;' : '';
+    }
   }
 
   // ── ONGLET 4 : Documents
@@ -11310,6 +11584,52 @@ async function renderGlobalDashboard() {
             '<button data-prospect-id="' + c.id + '" onclick="openProspectFromDash(this.dataset.prospectId)" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
           '</div>'
         ).join('');
+      }
+    }
+
+    // ── Relances du jour
+    const relancesEl    = document.getElementById('dash-relances');
+    const relanceBadge  = document.getElementById('dash-relance-badge');
+    const todayStr      = new Date().toISOString().split('T')[0];
+    const withRelance   = clients.map(c => {
+      const nr = getNextRelance(c);
+      return nr ? { ...c, nextRelance: nr } : null;
+    }).filter(Boolean).filter(c => c.nextRelance <= todayStr && !['gagne','perdu'].includes(c.statut));
+    withRelance.sort((a,b) => a.nextRelance.localeCompare(b.nextRelance));
+
+    if (relanceBadge) {
+      if (withRelance.length > 0) {
+        relanceBadge.textContent = withRelance.length + ' à faire';
+        relanceBadge.style.display = 'inline';
+      } else {
+        relanceBadge.style.display = 'none';
+      }
+    }
+
+    if (relancesEl) {
+      if (!withRelance.length) {
+        relancesEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">✅ Aucune relance prévue pour aujourd\'hui</div>';
+      } else {
+        relancesEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">'
+          + withRelance.slice(0, 6).map(c => {
+            const isLate = c.nextRelance < todayStr;
+            const nr = new Date(c.nextRelance);
+            const nrStr = nr.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+            const stageColor = PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.color || '#64748b';
+            return '<div style="padding:12px 14px;border-radius:10px;border:1px solid '
+              + (isLate ? '#fca5a5' : 'var(--c-border)') + ';background:'
+              + (isLate ? '#fff5f5' : 'var(--c-surface)') + ';cursor:pointer;transition:box-shadow .15s;"'
+              + ' onclick="openProspectFromDash(\'' + c.id + '\')"'
+              + ' onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.1)\'"'
+              + ' onmouseout="this.style.boxShadow=\'none\'">'
+              + '<div style="font-size:12px;font-weight:700;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
+              + '<div style="font-size:10px;color:var(--c-text-3);margin-bottom:6px;">' + (c.ville||'—') + ' · <span style="color:' + stageColor + ';font-weight:600;">' + (PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.label || c.statut) + '</span></div>'
+              + '<div style="font-size:11px;font-weight:700;color:' + (isLate ? '#dc2626' : '#f59e0b') + ';">'
+              + (isLate ? '🔴 En retard — ' : '📅 ') + nrStr + '</div>'
+              + '<button onclick="event.stopPropagation();_kbPhone(\'' + c.id + '\',this)" style="margin-top:8px;width:100%;padding:5px;border-radius:6px;border:1px solid var(--c-teal-border,#99f6e4);background:var(--c-teal-bg,#f0fdfa);color:var(--c-teal);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);">📞 Appeler maintenant</button>'
+              + '</div>';
+          }).join('')
+          + '</div>';
       }
     }
 
