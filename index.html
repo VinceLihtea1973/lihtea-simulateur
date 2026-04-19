@@ -8394,9 +8394,14 @@ function renderDrawerContent(p) {
             <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
           </div>`).join('')}
         </div>
-        <button onclick="startSimForClient('${raisonEsc}','${sirenEsc}',window._drawerSimParams['${reParamsKey}'])" style="width:100%;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
-          ↩ Reprendre cette simulation
-        </button>
+        <div style="display:flex;gap:8px;">
+          <button onclick="startSimForClient('${raisonEsc}','${sirenEsc}',window._drawerSimParams['${reParamsKey}'])" style="flex:1;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+            ↩ Reprendre
+          </button>
+          <button onclick="genererPropositionDepuisDrawer('${reParamsKey}','${raisonEsc}','${sirenEsc}')" style="flex:1;padding:9px;border:1px solid var(--c-teal);border-radius:7px;background:#fff;color:var(--c-teal);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+            📄 Générer la proposition
+          </button>
+        </div>
       </div>`;
     })() : '';
 
@@ -8410,13 +8415,28 @@ function renderDrawerContent(p) {
         const inv=Number(s.parametres?.investissement)||0;
         const c2=SC2[s.statut]||'#6b7280';
         const isRef = s.is_reference_etude ? ' 📌' : '';
+        // Stocker les params pour le bouton "Générer la proposition"
+        window._drawerSimParams = window._drawerSimParams || {};
+        const sParamsKey = 'sim_' + s.id;
+        window._drawerSimParams[sParamsKey] = s.parametres || {};
+        const hasParams = s.parametres && Object.keys(s.parametres).length > 0 && s.statut !== 'brouillon';
+        const sRaisonEsc = (p.raison_sociale||'').replace(/'/g,"\\'");
+        const sSirenEsc = (p.siren||'');
         return `<div class="client-drawer-sim-row" onclick="loadSimFromDrawer('${s.id}')">
           <div style="width:8px;height:8px;border-radius:4px;background:${c2};flex-shrink:0;margin-top:3px;"></div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;color:var(--c-navy);">${inv>0?fek(inv)+' · investissement':'Simulation'}${isRef}</div>
             <div style="font-size:11px;color:var(--c-text-3);">${fd(s.created_at)} · ${s.montant_aides_total>0?fek(s.montant_aides_total)+' d\'aides':'sans aide calculée'}</div>
           </div>
-          <span style="font-size:10px;font-weight:700;color:${c2};background:${c2}18;padding:2px 7px;border-radius:6px;flex-shrink:0;">${SL2[s.statut]||s.statut}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            ${hasParams ? `<button
+              onclick="event.stopPropagation();genererPropositionDepuisDrawer('${sParamsKey}','${sRaisonEsc}','${sSirenEsc}')"
+              title="Générer la proposition PDF"
+              style="width:26px;height:26px;border:1px solid var(--c-teal-border,#99f6e4);border-radius:6px;background:var(--c-teal-bg,#f0fdfa);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;"
+              onmouseover="this.style.background='var(--c-teal)';this.style.color='#fff'"
+              onmouseout="this.style.background='var(--c-teal-bg,#f0fdfa)';this.style.color='inherit'">📄</button>` : ''}
+            <span style="font-size:10px;font-weight:700;color:${c2};background:${c2}18;padding:2px 7px;border-radius:6px;">${SL2[s.statut]||s.statut}</span>
+          </div>
         </div>`;
       }).join('')}
       <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}')" style="width:100%;margin-top:10px;padding:10px;border:2px dashed var(--c-teal);border-radius:8px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nouvelle simulation pour ce client</button>
@@ -8696,6 +8716,67 @@ function startSimForClient(raison, siren, params) {
 
   recalculer();
   switchPage('resultats', document.querySelector('[data-page="resultats"]'));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GÉNÉRER PROPOSITION DEPUIS LE DRAWER (sans quitter le drawer)
+// ═══════════════════════════════════════════════════════════════════
+async function genererPropositionDepuisDrawer(paramsKey, clientNom, siren) {
+  const params = window._drawerSimParams && window._drawerSimParams[paramsKey];
+  if (!params || !Object.keys(params).length) {
+    showToast('Paramètres de simulation introuvables', 'error');
+    return;
+  }
+
+  // Pré-remplir nom client
+  const nomInput = document.getElementById('nom-client');
+  if (nomInput && clientNom) nomInput.value = clientNom;
+
+  // Pré-remplir SIREN
+  if (siren) {
+    const sirenInput = document.getElementById('client-siren');
+    if (sirenInput) sirenInput.value = siren;
+    currentClientSiret = siren;
+    resetClientEnrichment(false);
+  }
+
+  // Remplir les sliders (même logique que startSimForClient)
+  const setSlider = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val != null && !isNaN(val)) {
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  };
+  const setNum = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val != null && !isNaN(val)) el.value = Number(val).toLocaleString('fr-FR');
+  };
+  if (params.investissement != null) { setSlider('inv', params.investissement); setNum('inv-number', params.investissement); }
+  if (params.consommation != null) setSlider('conso', params.consommation);
+  if (params.gain_energetique != null) setSlider('gain', params.gain_energetique);
+  if (params.duree_ans != null) setSlider('duree', params.duree_ans);
+  if (params.prix_energie != null) setSlider('prix', params.prix_energie);
+  if (params.kwh_cumac != null) setSlider('kwh', params.kwh_cumac);
+  if (params.cours_cee != null) setSlider('cours', params.cours_cee);
+  if (params.taille) { const el = document.getElementById('taille'); if (el) el.value = params.taille; }
+  if (params.equipement_index != null) {
+    const eq = document.getElementById('equip-type');
+    if (eq && params.equipement_index < eq.options.length) eq.selectedIndex = params.equipement_index;
+  }
+
+  recalculer();
+  showToast('📄 Génération de la proposition en cours…', 'info');
+
+  // Générer le PDF (téléchargement + sync Supabase)
+  await exporterPDF();
+
+  showToast('✓ Proposition générée — visible dans l\'onglet Documents', 'success');
+
+  // Rafraîchir le drawer après un délai pour laisser le sync Supabase se terminer
+  if (_drawerClientId) {
+    setTimeout(() => openClientDrawer(_drawerClientId), 3500);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
