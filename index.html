@@ -3926,7 +3926,13 @@
       <!-- Charts -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
         <div class="card" style="padding:20px;">
-          <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:16px;">Répartition Pipeline</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition Pipeline</div>
+              <div id="dash-pipeline-subtitle" style="font-size:10px;color:var(--c-text-3);">Entonnoir commercial</div>
+            </div>
+            <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:10px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-body);">Voir le kanban →</button>
+          </div>
           <div id="dash-pipeline-chart"></div>
         </div>
         <div class="card" style="padding:20px;">
@@ -10678,23 +10684,73 @@ function dashDonut(data, svgId, legendId) {
     '</div>'
   ).join('');
 }
-function dashBarChart(containerId, data) {
+function dashPipelineFunnel(containerId, data) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  if (!data || data.length === 0) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Aucune donnée</div>'; return; }
-  const maxV = Math.max(...data.map(d => d.v), 1);
-  el.innerHTML = data.map(d => {
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--c-text-3);font-size:12px;">Aucune donnée pipeline</div>';
+    return;
+  }
+
+  const ICONS = { nouveau:'🌱', qualifie:'⭐', en_discussion:'💬', proposition:'📋', negociation:'🤝', dossier_depose:'📁', gagne:'✅', perdu:'✗' };
+  const outcomes  = data.filter(d => ['gagne','perdu'].includes(d.key));
+  const funnel    = data.filter(d => !['gagne','perdu'].includes(d.key));
+  const maxV      = Math.max(...funnel.map(d => d.v), 1);
+  const navFn     = "switchPage('pipeline',document.querySelector('[data-page=\"pipeline\"]'))";
+
+  // ── Funnel rows
+  let html = '<div>';
+  funnel.forEach((d, i) => {
     const pct = Math.round(d.v / maxV * 100);
-    return '<div style="margin-bottom:10px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-        '<span style="font-size:12px;color:var(--c-text-2);">' + d.label + '</span>' +
-        '<span style="font-size:12px;font-weight:700;color:' + d.c + ';font-family:var(--font-mono);">' + d.v + '</span>' +
-      '</div>' +
-      '<div style="height:8px;background:var(--c-bg);border-radius:4px;overflow:hidden;">' +
-        '<div style="height:8px;border-radius:4px;background:' + d.c + ';width:' + pct + '%;transition:width .4s;"></div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+    const prev = funnel[i - 1];
+    const convPct = prev && prev.v > 0 ? Math.round(d.v / prev.v * 100) : null;
+
+    if (convPct !== null) {
+      html += '<div style="display:flex;align-items:center;gap:6px;margin:2px 0 2px 22px;opacity:.55;">'
+            + '<div style="width:1px;height:10px;background:var(--c-border);margin:0 1px;"></div>'
+            + '<span style="font-size:9px;color:var(--c-text-3);letter-spacing:.02em;">↓ ' + convPct + '% conversion</span>'
+            + '</div>';
+    }
+
+    html += '<div onclick="' + navFn + '" '
+          +   'style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s;" '
+          +   'onmouseover="this.style.background=\'var(--c-teal-bg,#f0fdfa)\'" onmouseout="this.style.background=\'transparent\'">'
+          +   '<div style="width:3px;height:36px;border-radius:2px;background:' + d.c + ';flex-shrink:0;"></div>'
+          +   '<span style="font-size:14px;flex-shrink:0;line-height:1;">' + (ICONS[d.key]||'●') + '</span>'
+          +   '<div style="flex:1;min-width:0;">'
+          +     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'
+          +       '<span style="font-size:11px;font-weight:700;color:var(--c-navy);">' + d.label + '</span>'
+          +       '<div style="display:flex;align-items:center;gap:5px;">'
+          +         (d.val > 0 ? '<span style="font-size:10px;color:var(--c-text-3);font-family:var(--font-mono);">' + dashFmtK(d.val) + '</span>' : '')
+          +         '<span style="font-size:10px;font-weight:800;color:' + d.c + ';background:' + d.c + '1a;padding:1px 8px;border-radius:10px;font-family:var(--font-mono);">' + d.v + '</span>'
+          +       '</div>'
+          +     '</div>'
+          +     '<div style="height:5px;background:var(--c-bg);border-radius:3px;overflow:hidden;">'
+          +       '<div style="height:5px;border-radius:3px;background:linear-gradient(90deg,' + d.c + 'cc,' + d.c + ');width:' + pct + '%;transition:width .55s cubic-bezier(.4,0,.2,1);"></div>'
+          +     '</div>'
+          +   '</div>'
+          + '</div>';
+  });
+  html += '</div>';
+
+  // ── Outcome chips (Gagné / Perdu)
+  if (outcomes.length > 0) {
+    html += '<div style="border-top:1px solid var(--c-border);margin-top:10px;padding-top:10px;display:flex;gap:8px;">';
+    outcomes.forEach(d => {
+      html += '<div onclick="' + navFn + '" '
+            +   'style="flex:1;padding:9px 12px;border-radius:9px;background:' + d.c + '0f;border:1px solid ' + d.c + '33;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;" '
+            +   'onmouseover="this.style.borderColor=\'' + d.c + '\'" onmouseout="this.style.borderColor=\'' + d.c + '33\'">'
+            +   '<div>'
+            +     '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:' + d.c + ';margin-bottom:3px;">' + (ICONS[d.key]||'') + ' ' + d.label + '</div>'
+            +     '<div style="font-size:14px;font-weight:800;color:' + d.c + ';font-family:var(--font-mono);">' + dashFmtK(d.val) + '</div>'
+            +   '</div>'
+            +   '<span style="font-size:22px;font-weight:900;color:' + d.c + ';font-family:var(--font-mono);opacity:.5;">' + d.v + '</span>'
+            + '</div>';
+    });
+    html += '</div>';
+  }
+
+  el.innerHTML = html;
 }
 
 async function renderGlobalDashboard() {
@@ -10750,22 +10806,30 @@ async function renderGlobalDashboard() {
       dashKpiCard('📈', convRate + '%',        'Taux de Conversion', gagnes.length + ' deals gagnés / ' + total, '#2563eb') +
       dashKpiCard('⚡', Math.round(totalEco).toLocaleString('fr-FR') + ' kWh/an', 'Impact Énergie', 'Économies estimées', '#d97706');
 
-    // ── Pipeline bar chart (by statut)
-    const STAGE_MAP = [
-      {key:'nouveau',        label:'Nouveau',       c:'#6366f1'},
-      {key:'qualifie',       label:'Qualifié',      c:'#0891b2'},
-      {key:'en_discussion',  label:'Discussion',    c:'#2563eb'},
-      {key:'proposition',    label:'Proposition',   c:'#d97706'},
-      {key:'negociation',    label:'Négociation',   c:'#ea580c'},
-      {key:'dossier_depose', label:'Dossier',       c:'#0d9488'},
-      {key:'gagne',          label:'Gagné',         c:'#059669'},
-      {key:'perdu',          label:'Perdu',         c:'#dc2626'},
+    // ── Pipeline funnel chart (by statut)
+    const FUNNEL_STAGES = [
+      {key:'nouveau',        label:'Nouveau Lead',   c:'#64748b'},
+      {key:'qualifie',       label:'Qualifié',       c:'#8b5cf6'},
+      {key:'en_discussion',  label:'En discussion',  c:'#0ea5e9'},
+      {key:'proposition',    label:'Proposition',    c:'#f59e0b'},
+      {key:'negociation',    label:'Négociation',    c:'#ea580c'},
+      {key:'dossier_depose', label:'Dossier déposé', c:'#0d9488'},
+      {key:'gagne',          label:'Gagné',          c:'#059669'},
+      {key:'perdu',          label:'Perdu',          c:'#dc2626'},
     ];
-    const pipeData = STAGE_MAP.map(s => ({
-      label: s.label, c: s.c,
-      v: clients.filter(c => c.statut === s.key).length
+    const pipeData = FUNNEL_STAGES.map(s => ({
+      key: s.key, label: s.label, c: s.c,
+      v:   clients.filter(c => c.statut === s.key).length,
+      val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
     })).filter(d => d.v > 0);
-    dashBarChart('dash-pipeline-chart', pipeData);
+    dashPipelineFunnel('dash-pipeline-chart', pipeData);
+
+    // Update subtitle with total active count
+    const subEl = document.getElementById('dash-pipeline-subtitle');
+    if (subEl) {
+      const activeCount = pipeData.filter(d => !['gagne','perdu'].includes(d.key)).reduce((s,d) => s+d.v, 0);
+      subEl.textContent = activeCount + ' prospect' + (activeCount > 1 ? 's' : '') + ' en cours · ' + dashFmtK(pipeVal) + ' pipeline actif';
+    }
 
     // ── Sector donut
     const sectorMap = {};
