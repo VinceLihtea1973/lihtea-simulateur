@@ -2543,14 +2543,25 @@
     .sidebar-section-title {
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.2);
-      padding: 16px 18px 4px;
+      color: rgba(255,255,255,0.28);
+      padding: 20px 18px 5px;
       user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
+    .sidebar-section-title::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+    .sidebar-section-title:first-child { padding-top: 10px; }
     .sidebar.collapsed .sidebar-section-title { display: none; }
-    .sidebar-section-title:first-child { padding-top: 8px; }
 
     /* ─── Badge numérique sur item sidebar ─── */
     .sidebar-item-badge {
@@ -3805,50 +3816,50 @@
 
     <nav class="sidebar-nav">
 
-      <!-- ── VENTES ───────────────────── -->
-      <div class="sidebar-section-title">Ventes</div>
+      <!-- ── 1. VENTES & PILOTAGE ─────── -->
+      <div class="sidebar-section-title">Ventes &amp; Pilotage</div>
 
       <a class="sidebar-item active" data-page="dashboard" onclick="switchPage('dashboard', this)">
         <span class="sidebar-item-icon">◫</span>
         <span class="sidebar-item-label">Dashboard</span>
-      </a>
-      <a class="sidebar-item" data-page="clients" onclick="switchPage('clients', this)">
-        <span class="sidebar-item-icon">👥</span>
-        <span class="sidebar-item-label">Clients</span>
-        <span class="sidebar-item-badge" id="badge-clients-alerte"></span>
       </a>
       <a class="sidebar-item" data-page="pipeline" onclick="switchPage('pipeline', this)">
         <span class="sidebar-item-icon">⊞</span>
         <span class="sidebar-item-label">Pipeline</span>
         <span class="sidebar-item-badge" id="badge-pipeline-overdue"></span>
       </a>
+      <a class="sidebar-item" data-page="clients" onclick="switchPage('clients', this)">
+        <span class="sidebar-item-icon">👥</span>
+        <span class="sidebar-item-label">Clients</span>
+        <span class="sidebar-item-badge" id="badge-clients-alerte"></span>
+      </a>
 
-      <!-- ── OUTILS ───────────────────── -->
-      <div class="sidebar-section-title">Outils</div>
+      <!-- ── 2. EXPERTISE TECHNIQUE ───── -->
+      <div class="sidebar-section-title">Expertise Technique</div>
 
       <a class="sidebar-item" data-page="resultats" onclick="switchPage('resultats', this)">
-        <span class="sidebar-item-icon">⚙</span>
+        <span class="sidebar-item-icon">⚡</span>
         <span class="sidebar-item-label">Simulateur</span>
       </a>
       <a class="sidebar-item" data-page="scenarios" onclick="switchPage('scenarios', this)">
         <span class="sidebar-item-icon">⚖</span>
         <span class="sidebar-item-label">Scénarios</span>
       </a>
-      <a class="sidebar-item" data-page="ressources" onclick="switchPage('ressources', this)">
-        <span class="sidebar-item-icon">📚</span>
-        <span class="sidebar-item-label">Ressources</span>
-      </a>
 
-      <!-- ── DOSSIERS ──────────────────── -->
-      <div class="sidebar-section-title">Dossiers</div>
+      <!-- ── 3. DOCUMENTS & SUIVI ──────── -->
+      <div class="sidebar-section-title">Documents &amp; Suivi</div>
 
-      <a class="sidebar-item" data-page="dossier" onclick="switchPage('dossier', this)">
-        <span class="sidebar-item-icon">📋</span>
-        <span class="sidebar-item-label">Dossier</span>
-      </a>
       <a class="sidebar-item" data-page="propositions" onclick="switchPage('propositions', this)">
         <span class="sidebar-item-icon">📤</span>
         <span class="sidebar-item-label">Propositions</span>
+      </a>
+      <a class="sidebar-item" data-page="dossier" onclick="switchPage('dossier', this)">
+        <span class="sidebar-item-icon">📁</span>
+        <span class="sidebar-item-label">Dossiers</span>
+      </a>
+      <a class="sidebar-item" data-page="ressources" onclick="switchPage('ressources', this)">
+        <span class="sidebar-item-icon">📚</span>
+        <span class="sidebar-item-label">Ressources</span>
       </a>
 
     </nav>
