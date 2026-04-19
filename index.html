@@ -10913,7 +10913,7 @@ async function renderGlobalDashboard() {
       dashKpiCard('💼', dashFmtK(pipeVal),    'Valeur Pipeline',    active.length + ' prospects actifs', 'var(--c-navy)') +
       dashKpiCard('🎯', dashFmtK(totalAides), 'Aides Identifiées',  'Total toutes aides', '#059669') +
       dashKpiCard('📈', convRate + '%',        'Taux de Conversion', gagnes.length + ' deals gagnés / ' + total, '#2563eb') +
-      dashKpiCard('⚡', Math.round(totalEco).toLocaleString('fr-FR') + ' kWh/an', 'Impact Énergie', 'Économies estimées', '#d97706');
+      dashKpiCard('⚡', (totalEco / 1000).toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' MWh/an', 'Impact Énergie', 'Économies estimées · parc client', '#d97706');
 
     // ── Pipeline funnel chart (by statut)
     const FUNNEL_STAGES = [
@@ -10975,11 +10975,13 @@ async function renderGlobalDashboard() {
       } else {
         top5El.innerHTML = top5.map((c, i) => {
           const scoreColor = c.score >= 70 ? '#059669' : c.score >= 40 ? '#d97706' : '#dc2626';
+          const SL = { nouveau:'Nouveau Lead', qualifie:'Qualifié', en_discussion:'En discussion', proposition:'Proposition', negociation:'Négociation', dossier_depose:'Dossier déposé', gagne:'Gagné ✓', perdu:'Perdu' };
           return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--c-border);">' +
             '<div style="width:20px;height:20px;border-radius:50%;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--c-text-3);flex-shrink:0;">' + (i+1) + '</div>' +
-            '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>' +
-              '<div style="font-size:10px;color:var(--c-text-3);">' + dashFmtK(c.totalInvest) + ' · ' + (c.statut||'—') + '</div>' +
+            '<div style="flex:1;min-width:0;cursor:pointer;" onclick="switchPage(\'clients\',document.querySelector(\'[data-page=\\\"clients\\\"]\'));setTimeout(()=>openClientDrawer(\'' + c.id + '\'),400);"' +
+              ' onmouseover="this.querySelector(\'.t5n\').style.color=\'var(--c-teal)\'" onmouseout="this.querySelector(\'.t5n\').style.color=\'var(--c-navy)\'">' +
+              '<div class="t5n" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--c-navy);transition:color .15s;">' + (c.raison_sociale||'—') + '</div>' +
+              '<div style="font-size:10px;color:var(--c-text-3);">' + dashFmtK(c.totalInvest) + ' · ' + (SL[c.statut]||c.statut||'—') + '</div>' +
             '</div>' +
             '<div style="font-size:13px;font-weight:800;color:' + scoreColor + ';font-family:var(--font-mono);flex-shrink:0;">' + Math.round(c.score) + '</div>' +
           '</div>';
@@ -11003,7 +11005,7 @@ async function renderGlobalDashboard() {
               '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>' +
               '<div style="font-size:10px;color:var(--c-text-3);">' + c.daysInactive + ' jours sans contact</div>' +
             '</div>' +
-            '<button onclick="switchPage(\'clients\')" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);">Voir</button>' +
+            '<button onclick="switchPage(\'clients\',document.querySelector(\'[data-page=\\\"clients\\\"]\'));setTimeout(()=>openClientDrawer(\'' + c.id + '\'),400);" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
           '</div>'
         ).join('');
       }
