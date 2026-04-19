@@ -8371,42 +8371,65 @@ function _kbPhone(prospectId, triggerEl) {
 }
 
 // Reset J+X after a quick contact (phone popover) — POST activite + update updated_at
-async function _kbMarkContacted(prospectId) {
+async function _kbMarkContacted(prospectId, activityId) {
   const note = document.getElementById('_kb-note')?.value?.trim() || '';
   document.getElementById('_kb-phone-pop')?.remove();
   try {
-    // Enregistrer l'activité dans la table activites
-    const actBody = {
-      prospect_id:   prospectId,
-      tenant_id:     currentTenantId || localStorage.getItem('gef_tenant_id') || null,
-      type:          'appel',
-      titre:         'Appel téléphonique — Contact marqué',
-      description:   note || null,
-      statut:        'realisee',
-      date_realisee: new Date().toISOString(),
-    };
-    await fetch(ADMIN_API + '/activites', {
-      method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(actBody),
-    });
-    // Réinitialiser J+X sur le prospect
-    await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PUT', headers: getAuthHeaders(),
-      body: JSON.stringify({ updated_at: new Date().toISOString() }),
-    });
-    showToast('✓ Contact enregistré — relance clôturée', 'success');
-    // Refresh drawer (activities tab) + pipeline + dashboard
-    setTimeout(() => {
-      if (typeof openClientDrawer === 'function') {
-        openClientDrawer(prospectId).then(() => {
-          setTimeout(() => {
-            const btn = document.querySelector('.drawer-tab-btn[onclick*="activites"]');
-            if (btn) btn.click();
-          }, 150);
+    const hdrs = { ...getAuthHeaders(), 'Content-Type': 'application/json' };
+    const now  = new Date().toISOString();
+
+    // 1. Clore les activités planifiées ouvertes (date_planifiee non nulle, statut planifiee)
+    const pendingRelances = (_drawerCrmData?.activites || [])
+      .filter(a => a.statut === 'planifiee' && a.date_planifiee);
+    for (const act of pendingRelances) {
+      if (act.id) {
+        await fetch(ADMIN_API + '/activites/' + act.id, {
+          method: 'PATCH', headers: hdrs,
+          body: JSON.stringify({ statut: 'realisee', date_realisee: now }),
         });
       }
-      if (typeof renderPipelinePage === 'function') renderPipelinePage();
-      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
-    }, 400);
+    }
+    // Si un activityId spécifique est passé (bouton "Fait" par activité), le marquer aussi
+    if (activityId) {
+      await fetch(ADMIN_API + '/activites/' + activityId, {
+        method: 'PATCH', headers: hdrs,
+        body: JSON.stringify({ statut: 'realisee', date_realisee: now }),
+      });
+    }
+
+    // 2. Enregistrer l'appel si déclenché depuis la bannière (pas depuis un bouton individuel)
+    if (!activityId) {
+      const actBody = {
+        prospect_id:   prospectId,
+        tenant_id:     currentTenantId || localStorage.getItem('gef_tenant_id') || null,
+        type:          'appel',
+        titre:         'Appel téléphonique — Relance clôturée',
+        description:   note || null,
+        statut:        'realisee',
+        date_realisee: now,
+      };
+      await fetch(ADMIN_API + '/activites', {
+        method: 'POST', headers: hdrs, body: JSON.stringify(actBody),
+      });
+    }
+
+    // 3. Réinitialiser J+X sur le prospect
+    await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PATCH', headers: hdrs,
+      body: JSON.stringify({ updated_at: now }),
+    });
+
+    showToast('✓ Relance clôturée', 'success');
+
+    // 4. Refresh drawer sur onglet Activités
+    await openClientDrawer(prospectId);
+    setTimeout(() => {
+      const btn = document.querySelector('.drawer-tab-btn[onclick*="historique"]');
+      if (btn) switchDrawerTab('historique', btn);
+    }, 150);
+
+    if (typeof renderPipelinePage   === 'function') renderPipelinePage();
+    if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
   } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
 }
 
@@ -8461,64 +8484,163 @@ function getNextRelance(prospect) {
   return acts[0].date_planifiee.split('T')[0]; // YYYY-MM-DD
 }
 
-// Rendu de l'onglet Activités complet
+// Rendu de l'onglet Activités complet — CRM best-in-class
 function _renderActivitesTab(p) {
   const tab = document.getElementById('drawer-tab-historique');
   if (!tab) return;
-  const acts = (p.activites || []).slice().reverse(); // plus récent en premier
-  const nextRelance = getNextRelance(p);
-  const today = new Date().toISOString().split('T')[0];
+  const acts    = (p.activites || []).slice().reverse();
+  const nextRelance    = getNextRelance(p);
+  const today   = new Date().toISOString().split('T')[0];
   const relanceOverdue = nextRelance && nextRelance <= today;
+
+  // Couleurs par type
+  const TYPE_COLORS = { appel:'#0d9488', email:'#2563eb', rdv:'#7c3aed', note:'#d97706', visite:'#059669', relance:'#ea580c', proposition:'#0ea5e9', signature:'#059669' };
+  const typeColor = t => TYPE_COLORS[t] || '#64748b';
+  const typeIcon  = t => ACT_TYPES.find(x => x.id === t)?.icon || '•';
 
   const fdShort = d => {
     if (!d) return '—';
     const dt = new Date(d);
-    return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' })
-      + ' ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const diffDays = Math.floor((Date.now() - dt.getTime()) / 86400000);
+    if (diffDays === 0) return 'Aujourd\'hui ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    if (diffDays === 1) return 'Hier ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) + ' · ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
   };
 
-  const resultBadge = r => {
-    const found = ACT_RESULTS.find(x => x.id === r);
-    if (!found) return '';
-    return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;
-      background:${found.color}18;color:${found.color};border:1px solid ${found.color}30;">
-      ${found.label}</span>`;
+  // Grouper les activités par période
+  const groupLabel = d => {
+    if (!d) return 'Sans date';
+    const dt = new Date(d);
+    const diffDays = Math.floor((Date.now() - dt.getTime()) / 86400000);
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Hier';
+    if (diffDays <= 7) return 'Cette semaine';
+    if (diffDays <= 30) return 'Ce mois-ci';
+    return 'Plus ancien';
   };
 
-  const typeIcon = t => ACT_TYPES.find(x => x.id === t)?.icon || '•';
+  // Types actifs (premier sélectionné par défaut)
+  const defaultType = ACT_TYPES[0].id;
+
+  const renderTypePills = pid => ACT_TYPES.map((t,i) => {
+    const active = i === 0;
+    const col = typeColor(t.id);
+    return `<button type="button" data-acttype="${t.id}" data-actpid="${pid}"
+      onclick="_actSelectType(this,'${pid}')"
+      style="padding:6px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all .15s;
+        border:1.5px solid ${active?col:'var(--c-border)'};
+        background:${active?col+'18':'var(--c-bg)'};
+        color:${active?col:'var(--c-text-2)'};">
+      ${t.icon} ${t.label}
+    </button>`;
+  }).join('');
+
+  // Render des activités groupées
+  let timelineHtml = '';
+  if (!acts.length) {
+    timelineHtml = `<div style="text-align:center;padding:32px 0;color:var(--c-text-3);">
+      <div style="font-size:28px;margin-bottom:8px;">📋</div>
+      <div style="font-size:12px;font-weight:600;">Aucun contact enregistré</div>
+      <div style="font-size:11px;margin-top:4px;">Utilisez le formulaire ci-dessus pour logger votre premier échange</div>
+    </div>`;
+  } else {
+    let currentGroup = null;
+    acts.forEach((h, i) => {
+      const isSystem = ['create','sim','proposition','connexion','update','dossier_depose'].includes(h.type);
+      const icon  = isSystem ? ({ create:'◆', sim:'⚡', proposition:'📋', connexion:'🔑', update:'✏️', dossier_depose:'📤' }[h.type]||'•') : typeIcon(h.type);
+      const col   = isSystem ? 'var(--c-border)' : typeColor(h.type);
+      const bgCol = isSystem ? 'var(--c-surface)' : typeColor(h.type)+'15';
+      const sMap  = { realisee:{l:'Réalisé',c:'#059669'}, planifiee:{l:'Planifié',c:'#f59e0b'}, annulee:{l:'Annulé',c:'#dc2626'}, reportee:{l:'Reporté',c:'#64748b'} };
+      const stat  = sMap[h.statut];
+      const grp   = groupLabel(h.date_realisee || h.created_at);
+      // En-tête de groupe
+      if (grp !== currentGroup) {
+        currentGroup = grp;
+        timelineHtml += `<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);padding:12px 0 6px;${i>0?'margin-top:4px;':''}">${grp}</div>`;
+      }
+      // Date de planification (si future)
+      const relDate = h.date_planifiee ? h.date_planifiee.split('T')[0] : null;
+      const relOverdue = relDate && relDate <= today;
+      const relBadge = relDate ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;
+        background:${relOverdue?'#fee2e2':'#fef3c7'};color:${relOverdue?'#dc2626':'#b45309'};">
+        📅 Relance ${relOverdue?'EN RETARD':new Date(relDate+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span>` : '';
+      // Note tronquée + expand
+      const desc = h.description || '';
+      const descId = 'act-desc-' + (h.id || i);
+      const descHtml = desc ? `
+        <div style="margin-top:5px;">
+          <div id="${descId}-short" style="font-size:11px;color:var(--c-text-2);line-height:1.5;font-style:italic;
+            display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            "${desc}"
+          </div>
+          <div id="${descId}-full" style="display:none;font-size:11px;color:var(--c-text-2);line-height:1.5;font-style:italic;
+            padding:8px 10px;margin-top:4px;background:var(--c-bg);border-radius:6px;border:1px solid var(--c-border);
+            white-space:pre-wrap;">"${desc}"</div>
+          ${desc.length > 100 ? `<button onclick="_actToggleNote('${descId}')"
+            style="margin-top:3px;background:none;border:none;color:var(--c-teal);font-size:10px;font-weight:700;
+              cursor:pointer;font-family:var(--font-body);padding:0;" id="${descId}-btn">Voir la note →</button>` : ''}
+        </div>` : '';
+      // Bouton "✓ Fait" pour les activités planifiées
+      const doneBtn = (h.statut === 'planifiee' && h.id && !isSystem) ? `
+        <button onclick="_kbMarkContacted('${p.id}','${h.id}')"
+          style="font-size:10px;padding:3px 9px;border-radius:6px;border:none;
+            background:#f59e0b;color:#fff;font-weight:700;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
+          ✓ Fait
+        </button>` : '';
+
+      timelineHtml += `
+      <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--c-border);">
+        <div style="width:30px;height:30px;border-radius:50%;background:${bgCol};border:1.5px solid ${col};
+          display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px;">${icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
+            <div style="flex:1;min-width:0;">
+              <span style="font-size:12px;font-weight:700;color:var(--c-text);">${h.titre||'—'}</span>
+              ${stat ? `<span style="margin-left:6px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;
+                background:${stat.c}15;color:${stat.c};border:1px solid ${stat.c}30;">${stat.l}</span>` : ''}
+            </div>
+            ${doneBtn}
+          </div>
+          ${descHtml}
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span style="font-size:10px;color:var(--c-text-3);">${fdShort(h.date_realisee||h.created_at)}</span>
+            ${relBadge}
+          </div>
+        </div>
+      </div>`;
+    });
+  }
 
   tab.innerHTML = `
     <!-- Bannière prochaine relance -->
     ${nextRelance ? `
-    <div style="margin:16px 20px 0;padding:10px 14px;border-radius:10px;
-      background:${relanceOverdue ? '#fee2e2' : 'var(--c-teal-bg,#f0fdfa)'};
-      border:1px solid ${relanceOverdue ? '#fca5a5' : 'var(--c-teal-border,#99f6e4)'};
+    <div style="margin:14px 20px 0;padding:10px 14px;border-radius:10px;
+      background:${relanceOverdue?'#fee2e2':'var(--c-teal-bg,#f0fdfa)'};
+      border:1px solid ${relanceOverdue?'#fca5a5':'var(--c-teal-border,#99f6e4)'};
       display:flex;align-items:center;gap:10px;">
-      <span style="font-size:18px;">${relanceOverdue ? '🔴' : '📅'}</span>
+      <span style="font-size:18px;">${relanceOverdue?'🔴':'📅'}</span>
       <div style="flex:1;">
-        <div style="font-size:11px;font-weight:700;color:${relanceOverdue ? '#dc2626' : 'var(--c-teal)'};margin-bottom:1px;">
-          ${relanceOverdue ? 'Relance en retard !' : 'Prochaine relance planifiée'}
+        <div style="font-size:11px;font-weight:700;color:${relanceOverdue?'#dc2626':'var(--c-teal)'};margin-bottom:1px;">
+          ${relanceOverdue?'Relance en retard !':'Prochaine relance planifiée'}
         </div>
-        <div style="font-size:12px;font-weight:800;color:${relanceOverdue ? '#b91c1c' : 'var(--c-navy)'};">
-          ${new Date(nextRelance).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })}
+        <div style="font-size:12px;font-weight:800;color:${relanceOverdue?'#b91c1c':'var(--c-navy)'};">
+          ${new Date(nextRelance+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
         </div>
       </div>
       <button onclick="_kbMarkContacted('${p.id}')"
-        style="font-size:10px;padding:4px 9px;border-radius:6px;border:none;
-          background:${relanceOverdue ? '#dc2626' : 'var(--c-teal)'};color:#fff;
+        style="font-size:10px;padding:5px 10px;border-radius:6px;border:none;
+          background:${relanceOverdue?'#dc2626':'var(--c-teal)'};color:#fff;
           font-weight:700;cursor:pointer;font-family:var(--font-body);">
-        ✓ Marquer fait
+        ✓ Clôturer
       </button>
     </div>` : ''}
 
-    <!-- Formulaire logger une activité -->
+    <!-- Bouton ouvrir formulaire -->
     <div style="margin:14px 20px 0;">
-      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('+') ? '▲ Fermer' : '+ Logger un contact'"
+      <button id="act-toggle-${p.id}" onclick="_actToggleForm('${p.id}')"
         style="width:100%;padding:9px;border:2px dashed var(--c-border);border-radius:9px;
           background:transparent;color:var(--c-teal);font-size:12px;font-weight:700;
-          cursor:pointer;font-family:var(--font-body);transition:all .15s;"
-        onmouseover="this.style.borderColor='var(--c-teal)';this.style.background='var(--c-teal-bg,#f0fdfa)'"
-        onmouseout="this.style.borderColor='var(--c-border)';this.style.background='transparent'">
+          cursor:pointer;font-family:var(--font-body);transition:all .15s;">
         + Logger un contact
       </button>
 
@@ -8526,20 +8648,13 @@ function _renderActivitesTab(p) {
       <div id="act-form-${p.id}" style="display:none;margin-top:10px;background:var(--c-surface);
         border:1px solid var(--c-border);border-radius:10px;padding:14px;">
 
-        <!-- Type d'activité -->
-        <div style="margin-bottom:10px;">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Type</div>
+        <!-- Type — pills sélectionnables, premier actif par défaut -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:8px;">Type de contact</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            ${ACT_TYPES.map((t, i) => `
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;
-                padding:5px 10px;border-radius:7px;border:1px solid var(--c-border);
-                font-size:11px;font-weight:600;color:var(--c-text-2);
-                background:var(--c-bg);transition:all .15s;">
-                <input type="radio" name="act-type-${p.id}" value="${t.id}" ${i===0?'checked':''} style="display:none;"
-                  onchange="document.querySelectorAll('[name=act-type-${p.id}]').forEach(r=>r.closest('label').style.cssText=r.checked?'display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:7px;border:1px solid var(--c-teal);background:var(--c-teal-bg,#f0fdfa);font-size:11px;font-weight:700;color:var(--c-teal);transition:all .15s;':'display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:7px;border:1px solid var(--c-border);background:var(--c-bg);font-size:11px;font-weight:600;color:var(--c-text-2);transition:all .15s;')">
-                ${t.icon} ${t.label}
-              </label>`).join('')}
+            ${renderTypePills(p.id)}
           </div>
+          <input type="hidden" id="act-type-val-${p.id}" value="${defaultType}">
         </div>
 
         <!-- Résultat -->
@@ -8548,35 +8663,35 @@ function _renderActivitesTab(p) {
           <select id="act-result-${p.id}" style="width:100%;padding:7px 9px;border:1px solid var(--c-border);border-radius:7px;
             background:var(--c-bg);color:var(--c-text);font-size:12px;font-family:var(--font-body);outline:none;">
             <option value="">— Sélectionner un résultat —</option>
-            ${ACT_RESULTS.map(r => `<option value="${r.id}">${r.label}</option>`).join('')}
+            ${ACT_RESULTS.map(r=>`<option value="${r.id}">${r.label}</option>`).join('')}
           </select>
         </div>
 
-        <!-- Notes -->
+        <!-- Notes & compte-rendu -->
         <div style="margin-bottom:10px;">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Notes & compte-rendu</div>
-          <textarea id="act-notes-${p.id}" rows="3" placeholder="Ex: Intéressé par la chaufferie biomasse, budget 90k€ confirmé. Attends validation DG avant RDV."
+          <textarea id="act-notes-${p.id}" rows="4" placeholder="Ex: Intéressé par la chaufferie biomasse, budget 90k€ confirmé. Attends validation DG avant RDV."
             style="width:100%;box-sizing:border-box;border:1px solid var(--c-border);border-radius:7px;
               padding:8px 10px;font-size:12px;font-family:var(--font-body);resize:vertical;
-              background:var(--c-bg);color:var(--c-text);outline:none;"></textarea>
+              background:var(--c-bg);color:var(--c-text);outline:none;line-height:1.5;"></textarea>
         </div>
 
         <!-- Prochaine relance -->
-        <div style="margin-bottom:12px;">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">Prochaine relance (optionnel)</div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:6px;">📅 Planifier une relance (optionnel)</div>
           <input type="date" id="act-relance-${p.id}" min="${today}"
             style="width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--c-border);border-radius:7px;
               background:var(--c-bg);color:var(--c-text);font-size:12px;font-family:var(--font-body);outline:none;">
         </div>
 
-        <!-- Boutons -->
+        <!-- Actions -->
         <div style="display:flex;gap:8px;">
           <button onclick="logActivity('${p.id}')"
             style="flex:1;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;
               font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);">
             ✓ Enregistrer
           </button>
-          <button onclick="document.getElementById('act-form-${p.id}').style.display='none'"
+          <button onclick="_actToggleForm('${p.id}')"
             style="padding:9px 14px;border:1px solid var(--c-border);border-radius:7px;background:var(--c-bg);
               color:var(--c-text-2);font-size:12px;cursor:pointer;font-family:var(--font-body);">
             Annuler
@@ -8585,56 +8700,55 @@ function _renderActivitesTab(p) {
       </div>
     </div>
 
-    <!-- Timeline des activités -->
-    <div style="padding:14px 20px 20px;">
-      ${!acts.length ? `
-        <div style="text-align:center;padding:32px 0;color:var(--c-text-3);">
-          <div style="font-size:28px;margin-bottom:8px;">📋</div>
-          <div style="font-size:12px;">Aucun contact enregistré</div>
-          <div style="font-size:11px;margin-top:4px;color:var(--c-text-3);">Utilisez le formulaire ci-dessus pour logger votre premier échange</div>
-        </div>` :
-        acts.map((h, i) => {
-          const isSystem = ['create','sim','proposition','connexion','update','dossier_depose'].includes(h.type);
-          const icon = isSystem ? { create:'◆', sim:'⚡', proposition:'📋', connexion:'🔑', update:'✏️', dossier_depose:'📤' }[h.type] || '•' : typeIcon(h.type);
-          return `
-          <div style="display:flex;gap:12px;padding:10px 0;${i < acts.length-1 ? 'border-bottom:1px solid var(--c-border);' : ''}">
-            <!-- Icône -->
-            <div style="width:32px;height:32px;border-radius:50%;background:${isSystem ? 'var(--c-surface)' : 'var(--c-teal-bg,#f0fdfa)'};
-              border:1px solid ${isSystem ? 'var(--c-border)' : 'var(--c-teal-border,#99f6e4)'};
-              display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;">${icon}</div>
-            <!-- Contenu -->
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
-                <span style="font-size:12px;font-weight:700;color:var(--c-text);">${h.titre || h.description || '—'}</span>
-                ${(() => {
-                  // Déterminer badge statut DB (planifiee/realisee/annulee/reportee)
-                  const sMap = { realisee:{l:'Réalisé',c:'#059669'}, planifiee:{l:'Planifié',c:'#f59e0b'}, annulee:{l:'Annulé',c:'#dc2626'}, reportee:{l:'Reporté',c:'#64748b'} };
-                  const s = sMap[h.statut];
-                  return s ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:${s.c}18;color:${s.c};border:1px solid ${s.c}30;">${s.l}</span>` : '';
-                })()}
-              </div>
-              ${h.description ? `<div style="font-size:11px;color:var(--c-text-2);margin-bottom:4px;line-height:1.4;font-style:italic;">"${h.description}"</div>` : ''}
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span style="font-size:10px;color:var(--c-text-3);">${fdShort(h.date_realisee || h.created_at)}</span>
-                ${h.date_planifiee ? `<span style="font-size:10px;font-weight:700;color:${h.date_planifiee.split('T')[0] <= today ? '#dc2626' : '#f59e0b'};
-                  background:${h.date_planifiee.split('T')[0] <= today ? '#fee2e2' : '#fef3c7'};padding:1px 6px;border-radius:5px;">
-                  📅 Relance : ${new Date(h.date_planifiee).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>` : ''}
-              </div>
-            </div>
-          </div>`;
-        }).join('')
-      }
+    <!-- Timeline -->
+    <div style="padding:4px 20px 20px;">
+      ${timelineHtml}
     </div>`;
+}
+
+/* ── Helpers activités ── */
+function _actToggleForm(pid) {
+  const form = document.getElementById('act-form-' + pid);
+  const btn  = document.getElementById('act-toggle-' + pid);
+  if (!form) return;
+  const opening = form.style.display === 'none';
+  form.style.display = opening ? 'block' : 'none';
+  if (btn) btn.textContent = opening ? '▲ Fermer' : '+ Logger un contact';
+}
+
+function _actSelectType(el, pid) {
+  const col = { appel:'#0d9488', email:'#2563eb', rdv:'#7c3aed', note:'#d97706', visite:'#059669', relance:'#ea580c' };
+  const type = el.dataset.acttype;
+  document.querySelectorAll(`[data-actpid="${pid}"]`).forEach(b => {
+    const t = b.dataset.acttype;
+    const c = col[t] || '#64748b';
+    b.style.border    = `1.5px solid ${t===type?c:'var(--c-border)'}`;
+    b.style.background = t===type ? c+'18' : 'var(--c-bg)';
+    b.style.color      = t===type ? c : 'var(--c-text-2)';
+  });
+  const hidden = document.getElementById('act-type-val-' + pid);
+  if (hidden) hidden.value = type;
+}
+
+function _actToggleNote(descId) {
+  const s   = document.getElementById(descId + '-short');
+  const f   = document.getElementById(descId + '-full');
+  const btn = document.getElementById(descId + '-btn');
+  if (!s || !f) return;
+  const showing = f.style.display !== 'none';
+  f.style.display = showing ? 'none' : 'block';
+  s.style.display = showing ? '-webkit-box' : 'none';
+  if (btn) btn.textContent = showing ? 'Voir la note →' : '▲ Réduire';
 }
 
 // Logger une activité — POST dans la table `activites` (table séparée)
 async function logActivity(prospectId) {
-  const typeEl   = document.querySelector(`[name="act-type-${prospectId}"]:checked`);
+  const typeEl   = document.getElementById(`act-type-val-${prospectId}`);
   const resultEl = document.getElementById(`act-result-${prospectId}`);
   const notesEl  = document.getElementById(`act-notes-${prospectId}`);
   const relanceEl= document.getElementById(`act-relance-${prospectId}`);
 
-  const type          = typeEl?.value || 'note';
+  const type          = typeEl?.value || 'appel';
   const resultatId    = resultEl?.value || null;
   const description   = notesEl?.value?.trim() || null;
   const datePlanifiee = relanceEl?.value
@@ -8661,36 +8775,34 @@ async function logActivity(prospectId) {
     date_realisee:  new Date().toISOString(),
   };
 
+  const hdrs = { ...getAuthHeaders(), 'Content-Type': 'application/json' };
+
   try {
     const res = await fetch(ADMIN_API + '/activites', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(body),
+      method: 'POST', headers: hdrs, body: JSON.stringify(body),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error('POST /activites ' + res.status + (err.error ? ' — ' + err.error : ''));
     }
 
-    // Mettre à jour updated_at sur le prospect pour réinitialiser J+X
+    // Mettre à jour updated_at sur le prospect
     await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
+      method: 'PATCH', headers: hdrs,
       body: JSON.stringify({ updated_at: new Date().toISOString() }),
     });
 
-    showToast('✓ Contact enregistré' + (datePlanifiee ? ' · Relance le ' + new Date(datePlanifiee).toLocaleDateString('fr-FR') : ''), 'success');
+    showToast('✓ Contact enregistré' + (datePlanifiee ? ' · Relance planifiée le ' + new Date(datePlanifiee+'T12:00:00').toLocaleDateString('fr-FR') : ''), 'success');
 
-    // Rafraîchir le drawer sur l'onglet Activités
+    // Rafraîchir drawer sur onglet Activités
     await openClientDrawer(prospectId);
     setTimeout(() => {
       const btn = document.querySelector('.drawer-tab-btn[onclick*="historique"]');
       if (btn) switchDrawerTab('historique', btn);
     }, 200);
 
-    // Rafraîchir pipeline et dashboard
     setTimeout(() => {
-      if (typeof renderPipelinePage === 'function' && pageCourante === 'pipeline') renderPipelinePage();
+      if (typeof renderPipelinePage   === 'function' && pageCourante === 'pipeline') renderPipelinePage();
       if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
     }, 600);
   } catch(e) {
