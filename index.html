@@ -3937,19 +3937,24 @@
       <!-- Charts -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
         <div class="card" style="padding:20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition Pipeline</div>
+              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition Pipeline <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">Pondération active</span></div>
               <div id="dash-pipeline-subtitle" style="font-size:10px;color:var(--c-text-3);">Entonnoir commercial</div>
             </div>
             <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:10px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-body);">Voir le kanban →</button>
+          </div>
+          <!-- Tableau de pondération par étape -->
+          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:14px;border:1px solid var(--c-border);">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:8px;">Pondération par étape (probabilité de closing)</div>
+            <div id="dash-prob-table" style="display:flex;flex-direction:column;gap:0;"></div>
           </div>
           <div id="dash-pipeline-chart"></div>
         </div>
         <div class="card" style="padding:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition par secteur</div>
+              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition par secteur <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">SIREN → NAF</span></div>
               <div id="dash-sector-subtitle" style="font-size:10px;color:var(--c-text-3);">Prospects par industrie</div>
             </div>
           </div>
@@ -3963,7 +3968,7 @@
       <!-- Top 5 + Urgentes -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="card" style="padding:20px;">
-          <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:14px;">Top 5 Prospects</div>
+          <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:14px;">Top 5 Prospects <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">Score ICP</span></div>
           <div id="dash-top5"></div>
         </div>
         <div class="card" style="padding:20px;">
@@ -3972,6 +3977,14 @@
             <span id="dash-retard-count" style="font-size:12px;font-weight:700;color:#dc2626;"></span>
           </div>
           <div id="dash-urgentes"></div>
+          <!-- Callout règle de version -->
+          <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;padding:12px 14px;margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:15px;flex-shrink:0;margin-top:1px;">💡</span>
+            <div style="font-size:11px;color:#0f766e;">
+              <strong style="font-weight:700;display:block;margin-bottom:3px;">Règle de version</strong>
+              Seule la simulation <code style="font-size:10px;background:white;padding:1px 4px;border-radius:3px;font-family:var(--font-mono);">is_reference_etude = true</code> remonte dans les KPIs. Le commercial contrôle ça via "Enregistrer l'étude".
+            </div>
+          </div>
         </div>
       </div>
 
@@ -10675,14 +10688,24 @@ function dashFmtK(n) {
   if (n >= 1e3) return Math.round(n/1e3) + ' k€';
   return Math.round(n) + ' €';
 }
-function dashKpiCard(icon, value, label, sub, color) {
-  return '<div style="padding:16px 20px;border-radius:12px;background:white;border:1px solid var(--c-border);cursor:default;">' +
-    '<div style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:5px;">' +
-      '<span style="font-size:14px;">' + icon + '</span>' + label +
-    '</div>' +
-    '<div style="font-size:22px;font-weight:800;color:' + (color||'var(--c-navy)') + ';line-height:1.1;margin-bottom:5px;">' + (value||'—') + '</div>' +
-    '<div style="font-size:11px;color:var(--c-text-3);">' + (sub||'') + '</div>' +
-  '</div>';
+function dashKpiCard(icon, value, label, sub, color, trend, breakdown) {
+  const stripe = color || 'var(--c-navy)';
+  return '<div style="padding:18px 20px;border-radius:14px;background:white;border:1px solid var(--c-border);cursor:default;position:relative;overflow:hidden;">'
+    // Bande colorée top
+    + '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + stripe + ';border-radius:14px 14px 0 0;"></div>'
+    // Badge trend (top-right)
+    + (trend ? '<div style="position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(13,148,136,.1);color:#0d9488;">' + trend + '</div>' : '')
+    // Label + icône
+    + '<div style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:5px;">'
+    +   '<span style="font-size:14px;">' + icon + '</span>' + label
+    + '</div>'
+    // Valeur principale
+    + '<div style="font-size:26px;font-weight:800;color:' + stripe + ';line-height:1.1;margin-bottom:5px;font-variant-numeric:tabular-nums;">' + (value||'—') + '</div>'
+    // Sous-texte standard
+    + '<div style="font-size:11px;color:var(--c-text-3);">' + (sub||'') + '</div>'
+    // Ligne breakdown (dashed border-top)
+    + (breakdown ? '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--c-border);font-size:9.5px;color:var(--c-text-3);display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + breakdown + '</div>' : '')
+    + '</div>';
 }
 function dashDonut(data, svgId, legendId) {
   const svg = document.getElementById(svgId);
@@ -10915,11 +10938,26 @@ async function renderGlobalDashboard() {
     if (badgeTxt) badgeTxt.textContent = alertCount + ' en retard';
 
     // ── KPI Cards
+    const avgAides  = active.length > 0 ? Math.round(totalAides / active.length / 1000) : 0;
+    const avgGain   = active.length > 0 ? Math.round(active.reduce((s,c) => { const pSims2 = allSims.filter(x=>x.prospect_id===c.id); const g = pSims2.length > 0 ? pSims2.reduce((a,s2)=>a+(Number(s2.parametres?.gain_pct)||0),0)/pSims2.length : 0; return s+g; },0) / active.length) : 0;
+    const gagnesVal = gagnes.reduce((s,c)=>s+c.totalInvest,0);
     if (kpiRow) kpiRow.innerHTML =
-      dashKpiCard('💼', dashFmtK(pipeVal),    'Valeur Pipeline',    active.length + ' prospects actifs', 'var(--c-navy)') +
-      dashKpiCard('🎯', dashFmtK(totalAides), 'Aides Identifiées',  'Total toutes aides', '#059669') +
-      dashKpiCard('📈', convRate + '%',        'Taux de Conversion', gagnes.length + ' deals gagnés / ' + total, '#2563eb') +
-      dashKpiCard('⚡', (totalEco / 1000).toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' MWh/an', 'Impact Énergie', 'Économies estimées · parc client', '#d97706');
+      dashKpiCard('💼', dashFmtK(pipeVal),    'Valeur Pipeline',
+        active.length + ' prospects actifs', '#0f2b46',
+        'Pondéré ✦',
+        'Brut : <strong style="color:#0d9488;font-family:monospace;">' + dashFmtK(pipeVal) + '</strong> · Pipeline actif') +
+      dashKpiCard('🎯', dashFmtK(totalAides), 'Aides Identifiées',
+        'CEE + ADEME + BPI cumulés', '#0d9488',
+        '+' + active.length + ' dossiers',
+        'is_reference_etude uniquement · Moy. <strong style="color:#0d9488;font-family:monospace;">' + avgAides + ' k€/dossier</strong>') +
+      dashKpiCard('⚡', (totalEco / 1000).toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' MWh/an', 'Impact Énergie',
+        'Économies estimées · parc client', '#2563eb',
+        '+' + active.filter(c=>allSims.some(s=>s.prospect_id===c.id)).length + ' études',
+        'Gain moy. pondéré : <strong style="color:#0d9488;font-family:monospace;">' + avgGain + ' %</strong> · Σ consommation × gain') +
+      dashKpiCard('📈', convRate + '%', 'Taux de Conversion',
+        gagnes.length + ' deal' + (gagnes.length!==1?'s':'') + ' gagné' + (gagnes.length!==1?'s':'') + ' / ' + total + ' prospects total', '#d97706',
+        gagnes.length + ' gagné' + (gagnes.length!==1?'s':''),
+        'Deals gagnés : <strong style="color:#0d9488;font-family:monospace;">' + gagnes.length + '</strong> · <strong style="color:#0d9488;font-family:monospace;">' + dashFmtK(gagnesVal) + '</strong> récupérés');
 
     // ── Pipeline funnel chart (by statut)
     const FUNNEL_STAGES = [
@@ -10950,6 +10988,22 @@ async function renderGlobalDashboard() {
         val: clients.filter(c => c.statut === s.key).reduce((sum,c) => sum + c.totalInvest, 0)
       })).filter(d => d.v > 0);
     dashPipelineFunnel('dash-pipeline-chart', funnelData, outcomeData);
+
+    // ── Tableau de pondération par étape
+    const PROB_MAP = { nouveau:10, qualifie:30, en_discussion:50, proposition:70, negociation:90, dossier_depose:95 };
+    const probEl = document.getElementById('dash-prob-table');
+    if (probEl) {
+      probEl.innerHTML = funnelData.map(d => {
+        const prob = PROB_MAP[d.key] || 0;
+        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--c-border);">'
+          + '<span style="flex:1;font-size:11px;font-weight:600;color:' + d.c + ';">' + d.label + '</span>'
+          + '<div style="width:90px;height:5px;background:var(--c-bg);border-radius:3px;overflow:hidden;flex-shrink:0;">'
+          +   '<div style="height:5px;border-radius:3px;background:' + d.c + ';width:' + prob + '%;transition:width .4s;"></div>'
+          + '</div>'
+          + '<span style="font-family:var(--font-mono);font-weight:800;font-size:11px;color:' + d.c + ';width:35px;text-align:right;flex-shrink:0;">' + prob + ' %</span>'
+          + '</div>';
+      }).join('');
+    }
 
     // Update subtitle with total active count
     const subEl = document.getElementById('dash-pipeline-subtitle');
@@ -11012,7 +11066,7 @@ async function renderGlobalDashboard() {
             '<span style="font-size:16px;flex-shrink:0;">⚠️</span>' +
             '<div style="flex:1;min-width:0;">' +
               '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>' +
-              '<div style="font-size:10px;color:var(--c-text-3);">' + c.daysInactive + ' jours sans contact</div>' +
+              '<div style="font-size:10px;color:#dc2626;font-weight:600;">' + c.daysInactive + 'j de retard · Relancer pour prise de contact</div>' +
             '</div>' +
             '<button data-prospect-id="' + c.id + '" onclick="openProspectFromDash(this.dataset.prospectId)" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
           '</div>'
