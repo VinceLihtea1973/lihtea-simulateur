@@ -7971,10 +7971,11 @@ async function renderPipelinePage() {
     const sims  = await simsRes.json();
     _pipelineClients = (prosp?.data || []).map(p => {
       const pSims = (sims?.data || []).filter(s => s.prospect_id === p.id);
-      const inv = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const inv   = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
+      const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total || s.resultats?.total_aides)||0), 0);
       const lastContact = new Date(p.updated_at || p.created_at).getTime();
       const daysInact = Math.floor((Date.now() - lastContact) / 86400000);
-      return { ...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact, score: calcScoreICP({...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact}) };
+      return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score: calcScoreICP({...p, nb_sims: pSims.length, totalInvest: inv, daysInactive: daysInact}) };
     });
     const overdue = _pipelineClients.filter(p => p.daysInactive > 15 && !['gagne','perdu'].includes(p.statut)).length;
     const badge = document.getElementById('badge-pipeline-overdue');
@@ -7990,32 +7991,139 @@ async function renderPipelinePage() {
 function _renderPipelineBoard() {
   const board = document.getElementById('pipeline-board');
   if (!board) return;
-  const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':'';
+
+  // Formatters
+  const fmtK = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M€' : n >= 1000 ? Math.round(n/1000)+'k€' : n > 0 ? n+'€' : '—';
+  const fmtEur = n => n > 0 ? Math.round(n).toLocaleString('fr-FR')+'€' : '—';
+
+  // Progress bar width per stage (visual advancement %)
+  const PROGRESS = { nouveau:8, qualifie:22, en_discussion:38, proposition:56, negociation:72, dossier_depose:88, gagne:100, perdu:100 };
+
+  // Contextual sub-status text (shown under city)
+  function subStatus(c) {
+    if (c.statut === 'gagne')   return 'Dossier accepté ✓';
+    if (c.statut === 'perdu')   return 'Dossier non retenu';
+    if (c.nb_sims > 0)          return 'Simulation faite';
+    if (c.statut === 'dossier_depose') return 'Dossier déposé';
+    if (c.statut === 'negociation')    return 'En négociation';
+    if (c.statut === 'proposition')    return 'Proposition envoyée';
+    if (c.statut === 'en_discussion')  return 'Échanges en cours';
+    if (c.statut === 'qualifie')       return 'Contact établi';
+    if (c.siren)                return 'SIREN capturé';
+    return c.source || 'Nouveau lead';
+  }
+
+  // Two contextual fields per stage group
+  function contextFields(c, color) {
+    const lbl = (k,v) =>
+      `<div style="display:flex;flex-direction:column;gap:1px;">
+        <span style="font-size:9px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;">${k}</span>
+        <span style="font-size:11px;font-weight:700;color:var(--c-text);">${v||'—'}</span>
+      </div>`;
+
+    if (['nouveau'].includes(c.statut)) {
+      return lbl('Statut', c.sous_statut || 'En attente') + lbl('Source', c.source || '—');
+    }
+    if (['qualifie','en_discussion'].includes(c.statut)) {
+      const pot = c.potentiel ? (c.potentiel.charAt(0).toUpperCase()+c.potentiel.slice(1)) : '—';
+      const typ = c.type_equipement || c.type_projet || '—';
+      return lbl('Potentiel', pot) + lbl('Type', typ);
+    }
+    // proposition, negociation, dossier_depose, gagne, perdu
+    return `<div style="display:flex;flex-direction:column;gap:1px;">
+        <span style="font-size:9px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;">Invest. HT</span>
+        <span style="font-size:11px;font-weight:700;color:${color};">${fmtEur(c.totalInvest)}</span>
+      </div>`
+      + `<div style="display:flex;flex-direction:column;gap:1px;">
+        <span style="font-size:9px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;">Aides est.</span>
+        <span style="font-size:11px;font-weight:700;color:#0d9488;">${fmtEur(c.totalAides)}</span>
+      </div>`;
+  }
+
+  // Action buttons in footer
+  function actionBtns(c) {
+    const btn = (icon, fn, title) =>
+      `<button title="${title}" onclick="event.stopPropagation();${fn}"
+        style="width:28px;height:28px;border-radius:7px;border:1px solid var(--c-border);
+               background:var(--c-surface);cursor:pointer;font-size:13px;display:flex;
+               align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"
+        onmouseover="this.style.borderColor='var(--c-teal)';this.style.background='var(--c-teal-bg,#f0fdfa)'"
+        onmouseout="this.style.borderColor='var(--c-border)';this.style.background='var(--c-surface)'">${icon}</button>`;
+    let btns = '';
+    // Quick sim button (all active stages)
+    if (!['gagne','perdu'].includes(c.statut)) {
+      const rEsc = (c.raison_sociale||'').replace(/'/g,"\\'");
+      const sEsc = (c.siren||'').replace(/'/g,"\\'");
+      btns += btn('⚡', `startSimForClient('${rEsc}','${sEsc}')`, 'Lancer une simulation');
+    }
+    // Phone button if phone exists
+    if (c.telephone) {
+      btns += btn('📞', `window.open('tel:${c.telephone}')`, 'Appeler');
+    }
+    // View last sim if exists
+    if (c.nb_sims > 0) {
+      btns += btn('🔗', `openClientDrawer('${c.id}')`, 'Voir la fiche');
+    }
+    return btns;
+  }
+
   board.innerHTML = PIPELINE_STAGES.map(stage => {
     const cards = _pipelineClients.filter(c => c.statut === stage.id);
     const total = cards.reduce((a, c) => a + c.totalInvest, 0);
+    const progress = PROGRESS[stage.id] || 10;
+
     return `<div class="pipeline-col">
       <div class="pipeline-col-header" style="background:${stage.color};color:#fff;">
         <span>${stage.label}</span>
-        <span class="col-count">${cards.length}</span>
+        <span class="col-count">${cards.length}${total > 0 ? ' · ' + fmtK(total) : ''}</span>
       </div>
       <div class="pipeline-col-body" id="pcol-${stage.id}"
         ondragover="event.preventDefault();this.classList.add('drag-over')"
         ondragleave="this.classList.remove('drag-over')"
         ondrop="event.preventDefault();this.classList.remove('drag-over');_pipelineDrop('${stage.id}')">
-        ${total > 0 ? `<div style="font-size:10px;font-weight:700;color:${stage.color};text-align:right;padding:2px 4px;">${fek(total)}</div>` : ''}
         ${cards.map(c => {
           const overdue = c.daysInactive > 15 && !['gagne','perdu'].includes(c.statut);
-          const score = c.score || 0;
+          const dayLbl = 'J+' + c.daysInactive;
+
           return `<div class="pipeline-kanban-card" draggable="true"
             ondragstart="_pipelineDragStart('${c.id}')" ondragend="_pipelineDragEnd()"
             onclick="openClientDrawer('${c.id}')">
-            <div class="pkc-name">${c.raison_sociale||'—'}${overdue?'<span class="overdue-dot"></span>':''}</div>
-            <div class="pkc-meta">${c.ville||'—'} · ${c.taille?.toUpperCase()||'—'}</div>
-            ${c.totalInvest > 0 ? `<div class="pkc-amount">${fek(c.totalInvest)}</div>` : ''}
-            <div style="margin-top:6px;"><span class="score-badge ${scoreClass(score)}">${score}</span></div>
+
+            <!-- Nom -->
+            <div style="font-size:12px;font-weight:800;color:var(--c-navy);line-height:1.2;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+              ${c.raison_sociale||'—'}
+              ${overdue ? '<span style="width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span>' : ''}
+            </div>
+
+            <!-- Ville + sous-statut -->
+            <div style="font-size:10px;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+              <span>📍</span>
+              <span>${c.ville||'—'}</span>
+              <span style="color:var(--c-border);">·</span>
+              <span style="font-style:italic;">${subStatus(c)}</span>
+            </div>
+
+            <!-- Barre de progression -->
+            <div style="height:3px;background:var(--c-border);border-radius:3px;overflow:hidden;margin-bottom:10px;">
+              <div style="height:3px;border-radius:3px;background:${stage.color};width:${progress}%;transition:width .4s;"></div>
+            </div>
+
+            <!-- Champs contextuels -->
+            <div style="display:flex;gap:10px;justify-content:space-between;margin-bottom:10px;">
+              ${contextFields(c, stage.color)}
+            </div>
+
+            <!-- Footer : date + actions -->
+            <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--c-border);padding-top:8px;">
+              <span style="font-size:10px;font-weight:700;color:${overdue ? '#ef4444' : 'var(--c-text-3)'};background:${overdue ? '#fee2e2' : 'var(--c-surface)'};border:1px solid ${overdue ? '#fca5a5' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">
+                📅 ${dayLbl}
+              </span>
+              <div style="display:flex;gap:4px;">
+                ${actionBtns(c)}
+              </div>
+            </div>
           </div>`;
-        }).join('') || '<div style="font-size:11px;color:var(--c-text-3);text-align:center;padding:12px;">Aucun client</div>'}
+        }).join('') || '<div style="font-size:11px;color:var(--c-text-3);text-align:center;padding:18px 8px;">Aucun prospect</div>'}
       </div>
     </div>`;
   }).join('');
