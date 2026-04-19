@@ -4540,35 +4540,7 @@
           </div>
         </div>
 
-        <!-- ══ CRM ROW : ENTREPRISE + CONTACTS ══ -->
-        <div class="crm-top-row" id="crm-top-row" style="display:none;">
-
-          <!-- ─ ENTREPRISE ─ -->
-          <div class="crm-card" id="crm-entreprise-card">
-            <div class="crm-card-head">
-              <div class="crm-card-title"><span>🏢</span> Entreprise</div>
-              <div id="crm-ent-actions" style="display:flex;gap:6px;">
-                <button class="crm-btn crm-btn-edit" onclick="toggleEntrepriseEdit(true)">✏ Modifier</button>
-              </div>
-            </div>
-            <div class="crm-card-body" id="crm-entreprise-body">
-              <!-- Généré par renderDossierEntreprise() -->
-              <div style="color:var(--c-text-3);font-size:12px;text-align:center;padding:20px 0;">Sélectionnez un client pour afficher ses informations</div>
-            </div>
-          </div>
-
-          <!-- ─ CONTACTS ─ -->
-          <div class="crm-card" id="crm-contacts-card">
-            <div class="crm-card-head">
-              <div class="crm-card-title"><span>👤</span> Contacts</div>
-              <button class="crm-btn-add" onclick="openContactModal(null)">+ Ajouter un contact</button>
-            </div>
-            <div class="crm-card-body" id="crm-contacts-body">
-              <div style="color:var(--c-text-3);font-size:12px;text-align:center;padding:20px 0;">Aucun contact</div>
-            </div>
-          </div>
-
-        </div>
+        <!-- CRM blocs déplacés dans le tiroir client -->
 
         <div class="dossier-grid">
 
@@ -9043,45 +9015,28 @@ function renderDrawerContent(p) {
     </div>
     <div style="padding:16px 20px;">
 
-      <!-- ── Section Entreprise ── -->
+      <!-- ── Section Entreprise CRM ── -->
       <div style="margin-bottom:16px;">
-        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Entreprise
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Entreprise
+          </div>
+          <div id="drawer-crm-ent-actions">
+            <button onclick="toggleDrawerCrmEntEdit(true)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>
+          </div>
         </div>
-        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
-          ${[
-            {l:'Raison sociale', v:p.raison_sociale||'—', full:true},
-            {l:'SIREN',          v:p.siren ? `<span style="font-family:monospace;font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--c-navy)">${p.siren}</span>` : '—'},
-            {l:'SIRET',          v:p.siret ? `<span style="font-family:monospace;font-size:12px;">${p.siret}</span>` : '—'},
-            {l:'Secteur / NAF',  v:p.libelle_naf ? `${p.code_naf} — ${p.libelle_naf}` : (p.code_naf||'—')},
-            {l:'Taille',         v:(p.taille||'—').toUpperCase()},
-            {l:'Effectifs',      v:p.effectifs||'—'},
-            {l:'Ville',          v:p.ville ? (p.code_postal||'')+' '+p.ville : '—'},
-          ].map((f,i,arr)=>`
-            <div style="display:flex;align-items:${f.full?'flex-start':'center'};padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
-              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
-              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
-            </div>`).join('')}
-        </div>
+        <div id="drawer-crm-ent-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;"></div>
       </div>
 
-      <!-- ── Section Contact ── -->
+      <!-- ── Section Contacts CRM ── -->
       <div style="margin-bottom:16px;">
-        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Contact
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Contacts
+          </div>
+          <button onclick="openDrawerCrmContactModal(null)" style="padding:3px 10px;background:var(--c-teal);border:none;border-radius:6px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">+ Ajouter</button>
         </div>
-        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
-          ${[
-            {l:'Nom',       v:[(p.contact_prenom||''),(p.contact_nom||'')].filter(Boolean).join(' ')||'—'},
-            {l:'Fonction',  v:p.contact_fonction||'—'},
-            {l:'Email',     v:p.contact_email ? `<a href="mailto:${p.contact_email}" style="color:var(--c-teal);text-decoration:none;font-weight:500;">${p.contact_email}</a>` : '—'},
-            {l:'Téléphone', v:p.contact_telephone ? `<a href="tel:${p.contact_telephone}" style="color:var(--c-teal);text-decoration:none;font-weight:500;">${p.contact_telephone}</a>` : '—'},
-          ].map((f,i,arr)=>`
-            <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
-              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
-              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
-            </div>`).join('')}
-        </div>
+        <div id="drawer-crm-contacts-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;"></div>
       </div>
 
       <!-- ── Section Suivi ── -->
@@ -9115,6 +9070,11 @@ function renderDrawerContent(p) {
         <button onclick="saveDrawerNotes()" style="margin-top:6px;padding:7px 14px;background:var(--c-navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
       </div>`:''}
     </div>`;
+  // ── Init CRM tiroir
+  _drawerCrmData     = p;
+  _drawerCrmContacts = buildContactsArray(p);
+  renderDrawerCrmEntreprise();
+  renderDrawerCrmContacts();
 
   // ── ONGLET 2 : Simulations
   const tabSims = document.getElementById('drawer-tab-simulations');
@@ -14286,8 +14246,7 @@ function setDossierClient(id, name) {
   if (kpiBar) kpiBar.style.display = _dossierClientId ? 'flex' : 'none';
   renderDossierChecklist();
   refreshDossierKpis();
-  // CRM blocs
-  loadDossierCrmBlocks(_dossierClientId);
+  // CRM blocs dans le tiroir — pas sur la page dossier
 }
 
 // Called by <select> onchange
@@ -14598,6 +14557,248 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
+<!-- ══ CRM TIROIR : fonctions JS ══ -->
+<script>
+/* ─────────────────────────────────────────────────────────────
+   CRM TIROIR — Entreprise + Contacts éditables dans le drawer
+   ───────────────────────────────────────────────────────────── */
+let _drawerCrmData     = null;   // prospect data en cours dans le tiroir
+let _drawerCrmContacts = [];     // tableau contacts éditables
+
+/* ── Render ENTREPRISE (mode lecture) ── */
+function renderDrawerCrmEntreprise() {
+  const p    = _drawerCrmData;
+  const body = document.getElementById('drawer-crm-ent-body');
+  if (!body) return;
+  if (!p) { body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--c-text-3);font-size:12px;">Aucune donnée</div>'; return; }
+  const eh = s => escHtml ? escHtml(String(s||'')) : String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fields = [
+    { l:'Raison sociale', v: p.raison_sociale||'—' },
+    { l:'SIREN',          v: p.siren ? `<span style="font-family:monospace;font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--c-navy)">${eh(p.siren)}</span>` : '—', html:true },
+    { l:'SIRET',          v: p.siret ? `<span style="font-family:monospace;font-size:12px;">${eh(p.siret)}</span>` : '—', html:true },
+    { l:'Forme juridique',v: p.forme_juridique||'—' },
+    { l:'Secteur / NAF',  v: p.libelle_naf ? `${eh(p.code_naf)} — ${eh(p.libelle_naf)}` : (p.code_naf||'—'), html:true },
+    { l:'Taille',         v: ({'tpe':'TPE','pme':'PME','eti':'ETI','ge':'Grande Entreprise'}[p.taille]||p.taille||'—') },
+    { l:'Effectifs',      v: p.effectifs||'—' },
+    { l:'Adresse',        v: [p.adresse, p.code_postal, p.ville].filter(Boolean).join(', ')||'—' },
+    { l:'Téléphone',      v: p.telephone ? `<a href="tel:${p.telephone}" style="color:var(--c-teal);text-decoration:none;">${eh(p.telephone)}</a>` : '—', html:true },
+    { l:'Email société',  v: p.email ? `<a href="mailto:${p.email}" style="color:var(--c-teal);text-decoration:none;">${eh(p.email)}</a>` : '—', html:true },
+    { l:'Site web',       v: p.site_web ? `<a href="${eh(p.site_web)}" target="_blank" style="color:var(--c-teal);text-decoration:none;">${eh(p.site_web)}</a>` : '—', html:true },
+  ];
+  body.innerHTML = fields.map((f,i,arr) => `
+    <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+      <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
+      <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.html ? f.v : (escHtml ? escHtml(String(f.v)) : f.v)}</div>
+    </div>`).join('');
+}
+
+/* ── Toggle mode édition ENTREPRISE ── */
+function toggleDrawerCrmEntEdit(on) {
+  const body = document.getElementById('drawer-crm-ent-body');
+  const acts = document.getElementById('drawer-crm-ent-actions');
+  if (!body || !acts) return;
+  if (on) {
+    const p  = _drawerCrmData || {};
+    const ev = v => (v||'').toString().replace(/"/g,'&quot;');
+    acts.innerHTML = `
+      <button onclick="saveDrawerCrmEntEdit()" style="padding:3px 10px;background:var(--c-teal);border:none;border-radius:6px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;margin-right:4px;">💾 Enregistrer</button>
+      <button onclick="toggleDrawerCrmEntEdit(false)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-text-2);cursor:pointer;font-family:inherit;">Annuler</button>`;
+    const mkInput = (id, lbl, val, type, full) => `
+      <div style="display:flex;flex-direction:column;gap:4px;${full?'grid-column:1/-1;':''}">
+        <label style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
+        <input id="${id}" type="${type}" value="${ev(val)}" style="padding:7px 10px;border:1px solid var(--c-border);border-radius:7px;font-size:12px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);width:100%;box-sizing:border-box;">
+      </div>`;
+    const mkSelect = (id, lbl, val, opts) => `
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
+        <select id="${id}" style="padding:7px 10px;border:1px solid var(--c-border);border-radius:7px;font-size:12px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);">
+          ${opts.map(o=>`<option value="${o[0]}"${val===o[0]?' selected':''}>${o[1]}</option>`).join('')}
+        </select>
+      </div>`;
+    body.innerHTML = `<div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${mkInput('ent-raison_sociale','Raison sociale',p.raison_sociale,'text',true)}
+      ${mkInput('ent-siren','SIREN',p.siren,'text',false)}
+      ${mkInput('ent-siret','SIRET',p.siret,'text',false)}
+      ${mkInput('ent-forme_juridique','Forme juridique',p.forme_juridique,'text',false)}
+      ${mkInput('ent-code_naf','Code NAF',p.code_naf,'text',false)}
+      ${mkSelect('ent-taille','Taille',p.taille,[['','—'],['tpe','TPE'],['pme','PME'],['eti','ETI'],['ge','Grande Entreprise']])}
+      ${mkInput('ent-effectifs','Effectifs',p.effectifs,'text',false)}
+      ${mkInput('ent-adresse','Adresse',p.adresse,'text',true)}
+      ${mkInput('ent-code_postal','Code postal',p.code_postal,'text',false)}
+      ${mkInput('ent-ville','Ville',p.ville,'text',false)}
+      ${mkInput('ent-telephone','Téléphone',p.telephone,'tel',false)}
+      ${mkInput('ent-email','Email société',p.email,'email',false)}
+      ${mkInput('ent-site_web','Site web',p.site_web,'url',true)}
+    </div>`;
+  } else {
+    acts.innerHTML = `<button onclick="toggleDrawerCrmEntEdit(true)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>`;
+    renderDrawerCrmEntreprise();
+  }
+}
+
+/* ── Sauvegarder ENTREPRISE ── */
+async function saveDrawerCrmEntEdit() {
+  const id = _drawerClientId;
+  if (!id) return;
+  const g = eid => (document.getElementById(eid)?.value||'').trim();
+  const payload = {
+    raison_sociale:  g('ent-raison_sociale'),
+    siren:           g('ent-siren'),
+    siret:           g('ent-siret'),
+    forme_juridique: g('ent-forme_juridique'),
+    code_naf:        g('ent-code_naf'),
+    taille:          g('ent-taille'),
+    effectifs:       g('ent-effectifs'),
+    adresse:         g('ent-adresse'),
+    code_postal:     g('ent-code_postal'),
+    ville:           g('ent-ville'),
+    telephone:       g('ent-telephone'),
+    email:           g('ent-email'),
+    site_web:        g('ent-site_web'),
+  };
+  try {
+    const res = await fetch(ADMIN_API + '/prospects/' + id, {
+      method: 'PATCH',
+      headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    Object.assign(_drawerCrmData, payload);
+    // Mettre à jour le header du tiroir
+    if (payload.raison_sociale) {
+      const nomEl = document.getElementById('drawer-nom');
+      if (nomEl) nomEl.textContent = payload.raison_sociale;
+    }
+    toggleDrawerCrmEntEdit(false);
+    if (typeof showToast === 'function') showToast('Entreprise mise à jour ✓', 'success');
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+/* ── Render CONTACTS (mode lecture) ── */
+function renderDrawerCrmContacts() {
+  const body = document.getElementById('drawer-crm-contacts-body');
+  if (!body) return;
+  const eh = s => escHtml ? escHtml(String(s||'')) : String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (!_drawerCrmContacts.length) {
+    body.innerHTML = `<div style="padding:16px;text-align:center;color:var(--c-text-3);font-size:12px;">
+      Aucun contact — <button onclick="openDrawerCrmContactModal(null)" style="background:none;border:none;color:var(--c-teal);font-weight:700;cursor:pointer;font-family:inherit;font-size:12px;">Ajouter le premier →</button>
+    </div>`;
+    return;
+  }
+  body.innerHTML = _drawerCrmContacts.map((c,i) => {
+    const initials = (typeof crmInitials==='function') ? crmInitials(c.prenom,c.nom) : ((c.prenom||'').charAt(0)+(c.nom||'').charAt(0)).toUpperCase()||'?';
+    const color    = (typeof crmAvatarColor==='function') ? crmAvatarColor((c.prenom||'')+(c.nom||'')) : '#0d9488';
+    return `
+    <div style="display:flex;align-items:center;padding:10px 14px;${i<_drawerCrmContacts.length-1?'border-bottom:1px solid var(--c-border);':''}">
+      <div style="width:32px;height:32px;border-radius:50%;background:${color};display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-right:10px;">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--c-navy);">
+          ${eh(c.prenom)} ${eh(c.nom)}
+          ${c.principal?` <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:#f0fdfa;color:var(--c-teal);border:1px solid #99f6e4;margin-left:4px;">Principal</span>`:''}
+        </div>
+        ${c.fonction?`<div style="font-size:10px;color:var(--c-text-3);margin-top:1px;">${eh(c.fonction)}${c.service?' · '+eh(c.service):''}</div>`:''}
+        <div style="display:flex;gap:10px;margin-top:3px;flex-wrap:wrap;">
+          ${c.email?`<a href="mailto:${c.email}" style="font-size:11px;color:var(--c-teal);text-decoration:none;">✉ ${eh(c.email)}</a>`:''}
+          ${c.tel?`<a href="tel:${c.tel}" style="font-size:11px;color:var(--c-teal);text-decoration:none;">📞 ${eh(c.tel)}</a>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px;">
+        <button onclick="openDrawerCrmContactModal(${i})" title="Modifier" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-bg);cursor:pointer;font-size:12px;line-height:1;">✏</button>
+        <button onclick="deleteDrawerCrmContact(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid #fee2e2;background:#fff5f5;color:#dc2626;cursor:pointer;font-size:12px;line-height:1;">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Ouvrir modal contact (contexte tiroir) ── */
+function openDrawerCrmContactModal(idx) {
+  window._crmModalCtx = 'drawer';
+  const modal = document.getElementById('crm-contact-modal');
+  if (!modal) return;
+  const c = (idx !== null && idx !== undefined && _drawerCrmContacts[idx]) ? _drawerCrmContacts[idx] : {};
+  const idxVal = (idx !== null && idx !== undefined) ? String(idx) : '';
+  document.getElementById('crm-contact-idx').value = idxVal;
+  const titleEl = document.getElementById('crm-modal-title');
+  if (titleEl) titleEl.textContent = idxVal !== '' ? 'Modifier le contact' : 'Ajouter un contact';
+  document.getElementById('crm-c-prenom').value   = c.prenom   || '';
+  document.getElementById('crm-c-nom').value      = c.nom      || '';
+  document.getElementById('crm-c-fonction').value = c.fonction || '';
+  document.getElementById('crm-c-service').value  = c.service  || '';
+  document.getElementById('crm-c-email').value    = c.email    || '';
+  document.getElementById('crm-c-tel').value      = c.tel      || '';
+  document.getElementById('crm-c-notes').value    = c.notes    || '';
+  const chk = document.getElementById('crm-c-principal');
+  if (chk) chk.checked = (idxVal === '') ? !_drawerCrmContacts.length : (c.principal||false);
+  modal.style.display = 'flex';
+}
+
+/* ── Dispatcher modal save selon contexte ── */
+function saveAnyContactModal() {
+  if (window._crmModalCtx === 'drawer') saveDrawerCrmContactModal();
+  else saveContactModal();
+}
+
+/* ── Sauvegarder contact (tiroir) ── */
+function saveDrawerCrmContactModal() {
+  const prenom    = (document.getElementById('crm-c-prenom')?.value||'').trim();
+  const nom       = (document.getElementById('crm-c-nom')?.value||'').trim();
+  const fonction  = (document.getElementById('crm-c-fonction')?.value||'').trim();
+  const service   = (document.getElementById('crm-c-service')?.value||'').trim();
+  const email     = (document.getElementById('crm-c-email')?.value||'').trim();
+  const tel       = (document.getElementById('crm-c-tel')?.value||'').trim();
+  const notes     = (document.getElementById('crm-c-notes')?.value||'').trim();
+  const principal = document.getElementById('crm-c-principal')?.checked||false;
+  if (!prenom && !nom) { alert('Prénom ou nom requis'); return; }
+  const rawIdx = document.getElementById('crm-contact-idx')?.value;
+  const idx    = (rawIdx !== '' && rawIdx !== null && rawIdx !== undefined) ? parseInt(rawIdx) : null;
+  const contact = { prenom, nom, fonction, service, email, tel, notes, principal };
+  if (principal) _drawerCrmContacts.forEach(c => c.principal = false);
+  if (idx !== null && !isNaN(idx)) _drawerCrmContacts[idx] = contact;
+  else _drawerCrmContacts.push(contact);
+  closeContactModal();
+  renderDrawerCrmContacts();
+  _saveDrawerCrmContactsToApi();
+}
+
+/* ── Supprimer contact (tiroir) ── */
+function deleteDrawerCrmContact(idx) {
+  if (!confirm('Supprimer ce contact ?')) return;
+  _drawerCrmContacts.splice(idx, 1);
+  renderDrawerCrmContacts();
+  _saveDrawerCrmContactsToApi();
+}
+
+/* ── PATCH contacts vers Supabase ── */
+async function _saveDrawerCrmContactsToApi() {
+  const id = _drawerClientId;
+  if (!id) return;
+  const primary = _drawerCrmContacts.find(c => c.principal) || _drawerCrmContacts[0] || {};
+  const extras  = _drawerCrmContacts.filter(c => c !== primary);
+  const payload = {
+    contact_prenom:            primary.prenom    || '',
+    contact_nom:               primary.nom       || '',
+    contact_fonction:          primary.fonction  || '',
+    contact_email:             primary.email     || '',
+    contact_telephone:         primary.tel       || '',
+    contacts_supplementaires:  extras.length ? extras : null,
+  };
+  try {
+    const res = await fetch(ADMIN_API + '/prospects/' + id, {
+      method: 'PATCH',
+      headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (_drawerCrmData) Object.assign(_drawerCrmData, payload);
+    if (typeof showToast === 'function') showToast('Contact sauvegardé ✓', 'success');
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Erreur sauvegarde contact', 'error');
+  }
+}
+</script>
+
 <!-- ══ MODAL CONTACT CRM ══ -->
 <div class="crm-modal-backdrop" id="crm-contact-modal">
   <div class="crm-modal">
@@ -14653,7 +14854,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="crm-modal-footer">
       <button class="crm-modal-btn-sec" onclick="closeContactModal()">Annuler</button>
-      <button class="crm-modal-btn-main" onclick="saveContactModal()">✓ Enregistrer</button>
+      <button class="crm-modal-btn-main" onclick="saveAnyContactModal()">✓ Enregistrer</button>
     </div>
   </div>
 </div>
