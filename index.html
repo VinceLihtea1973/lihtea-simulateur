@@ -3703,6 +3703,169 @@
     .dossier-kpi-pill strong{color:var(--c-navy);}
     .dossier-kpi-pill.teal strong{color:var(--c-teal);}
 
+    /* ══ DOSSIER PAGE — wider layout ══ */
+    #page-dossier { max-width:1400px !important; }
+
+    /* ══ CRM BLOCS — Entreprise & Contacts ══ */
+    .crm-top-row{display:grid;grid-template-columns:380px 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:960px){.crm-top-row{grid-template-columns:1fr;}}
+
+    /* Card CRM (même base que .dossier-card) */
+    .crm-card{
+      background:var(--c-surface);border:1px solid var(--c-border);
+      border-radius:var(--radius,10px);padding:0;overflow:hidden;
+    }
+    .crm-card-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px 12px;border-bottom:1px solid var(--c-border);
+    }
+    .crm-card-title{
+      font-size:11px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.08em;color:var(--c-text-3);
+      display:flex;align-items:center;gap:8px;
+    }
+    .crm-card-title span{font-size:15px;}
+    .crm-card-body{padding:16px 18px;}
+
+    /* Boutons CRM */
+    .crm-btn{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:6px 12px;border-radius:var(--radius-sm,8px);
+      font-size:12px;font-weight:600;font-family:var(--font-body);
+      cursor:pointer;transition:all .15s;border:1px solid var(--c-border);
+    }
+    .crm-btn-edit{background:var(--c-surface);color:var(--c-text-2);}
+    .crm-btn-edit:hover{border-color:var(--c-border-strong);color:var(--c-navy);}
+    .crm-btn-save{background:var(--c-teal);color:#fff;border-color:var(--c-teal);}
+    .crm-btn-save:hover{background:var(--c-teal-2,#0f766e);}
+    .crm-btn-cancel{background:transparent;color:var(--c-text-3);}
+    .crm-btn-cancel:hover{background:var(--c-bg);color:var(--c-text);}
+    .crm-btn-add{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 14px;border-radius:var(--radius-sm,8px);
+      font-size:12px;font-weight:700;font-family:var(--font-body);
+      cursor:pointer;transition:all .15s;
+      background:var(--c-teal);color:#fff;border:none;
+    }
+    .crm-btn-add:hover{background:var(--c-teal-2,#0f766e);}
+
+    /* Champs — mode lecture */
+    .crm-field-row{
+      display:flex;align-items:flex-start;padding:8px 0;
+      border-bottom:1px solid var(--c-border);
+    }
+    .crm-field-row:last-child{border-bottom:none;}
+    .crm-field-label{
+      font-size:10px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.06em;color:var(--c-text-3);
+      min-width:120px;flex-shrink:0;padding-top:1px;
+    }
+    .crm-field-value{font-size:13px;font-weight:500;color:var(--c-navy);flex:1;line-height:1.4;}
+    .crm-field-value a{color:var(--c-teal);text-decoration:none;}
+    .crm-field-value a:hover{text-decoration:underline;}
+    .crm-field-mono{font-family:var(--font-mono,'monospace');font-size:12px;font-weight:700;letter-spacing:.04em;}
+
+    /* Grille édition */
+    .crm-edit-grid{display:flex;flex-direction:column;gap:10px;}
+    .crm-edit-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .crm-edit-row.full{grid-template-columns:1fr;}
+    .crm-edit-fld{display:flex;flex-direction:column;gap:4px;}
+    .crm-edit-fld label{font-size:11px;font-weight:700;color:var(--c-text-2);text-transform:uppercase;letter-spacing:.05em;}
+    .crm-input{
+      padding:9px 12px;font-size:13px;font-family:var(--font-body);
+      border:1px solid var(--c-border);border-radius:var(--radius-sm,8px);
+      background:var(--c-bg);color:var(--c-text);outline:none;
+      transition:border-color .15s,box-shadow .15s;
+    }
+    .crm-input:focus{border-color:var(--c-teal);background:var(--c-surface);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+    .crm-select{
+      padding:9px 12px;font-size:13px;font-family:var(--font-body);
+      border:1px solid var(--c-border);border-radius:var(--radius-sm,8px);
+      background:var(--c-bg);color:var(--c-text);outline:none;cursor:pointer;
+      transition:border-color .15s;appearance:auto;
+    }
+    .crm-select:focus{border-color:var(--c-teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+    .crm-edit-actions{display:flex;gap:8px;padding-top:4px;justify-content:flex-end;}
+
+    /* CONTACT LIST */
+    .contact-list{display:flex;flex-direction:column;gap:10px;}
+    .contact-item{
+      display:flex;align-items:flex-start;gap:12px;
+      padding:12px 14px;border:1px solid var(--c-border);border-radius:var(--radius-sm,8px);
+      background:var(--c-bg);transition:border-color .15s;position:relative;
+    }
+    .contact-item:hover{border-color:var(--c-teal);}
+    .contact-item.primary{border-color:rgba(13,148,136,.3);background:var(--c-teal-bg,#f0fdfa);}
+    .contact-avatar{
+      width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+      font-weight:800;font-size:13px;color:#fff;flex:0 0 38px;
+    }
+    .contact-info{flex:1;min-width:0;}
+    .contact-name{font-size:14px;font-weight:800;color:var(--c-navy);}
+    .contact-poste{font-size:12px;color:var(--c-text-3);margin-top:1px;}
+    .contact-details{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;}
+    .contact-detail-item{
+      display:flex;align-items:center;gap:5px;
+      font-size:12px;color:var(--c-text-2);
+    }
+    .contact-detail-item a{color:var(--c-teal);text-decoration:none;}
+    .contact-badge-primary{
+      font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+      background:var(--c-teal);color:#fff;padding:2px 7px;border-radius:20px;margin-left:8px;
+    }
+    .contact-item-actions{display:flex;gap:6px;flex-shrink:0;padding-top:2px;}
+    .contact-action-btn{
+      width:28px;height:28px;border-radius:6px;border:1px solid var(--c-border);
+      background:var(--c-surface);color:var(--c-text-3);
+      cursor:pointer;display:grid;place-items:center;font-size:13px;transition:.15s;
+    }
+    .contact-action-btn:hover{border-color:var(--c-border-strong);color:var(--c-navy);}
+    .contact-action-btn.danger:hover{border-color:#fca5a5;background:var(--c-red-bg,#fef2f2);color:var(--c-red,#dc2626);}
+
+    /* MODAL CONTACT */
+    .crm-modal-backdrop{
+      position:fixed;inset:0;background:rgba(15,43,70,.45);
+      z-index:500;display:none;place-items:center;
+      backdrop-filter:blur(4px);
+    }
+    .crm-modal-backdrop.open{display:grid;}
+    .crm-modal{
+      width:min(520px,92vw);background:var(--c-surface);
+      border-radius:16px;box-shadow:0 24px 60px rgba(15,43,70,.22);
+      overflow:hidden;
+    }
+    .crm-modal-head{
+      padding:18px 22px;background:linear-gradient(135deg,var(--c-navy),#1a3d5c);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .crm-modal-head h3{color:#fff;font-size:16px;font-weight:800;margin:0;}
+    .crm-modal-head p{color:rgba(255,255,255,.6);font-size:12px;margin:3px 0 0;}
+    .crm-modal-close{
+      width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+      background:rgba(255,255,255,.12);color:#fff;font-size:16px;
+      display:grid;place-items:center;transition:.15s;
+    }
+    .crm-modal-close:hover{background:rgba(255,255,255,.22);}
+    .crm-modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+    .crm-modal-footer{
+      padding:14px 22px;border-top:1px solid var(--c-border);
+      display:flex;gap:10px;justify-content:flex-end;
+      background:var(--c-bg);
+    }
+    .crm-modal-btn-main{
+      padding:10px 20px;border-radius:var(--radius-sm,8px);border:none;
+      cursor:pointer;background:var(--c-teal);color:#fff;
+      font-size:13px;font-weight:700;font-family:var(--font-body);transition:.15s;
+    }
+    .crm-modal-btn-main:hover{background:var(--c-teal-2,#0f766e);}
+    .crm-modal-btn-sec{
+      padding:10px 16px;border-radius:var(--radius-sm,8px);
+      border:1px solid var(--c-border);cursor:pointer;
+      background:var(--c-surface);color:var(--c-text-2);
+      font-size:13px;font-weight:600;font-family:var(--font-body);transition:.15s;
+    }
+    .crm-modal-btn-sec:hover{border-color:var(--c-navy);color:var(--c-navy);}
+
   </style>
 </head>
 
@@ -4375,6 +4538,36 @@
             <div class="dossier-kpi-pill">Dispositifs : <strong id="dossier-kpi-dispositifs">—</strong></div>
             <div class="dossier-kpi-pill teal">Avancement : <strong id="dossier-pct-label">0%</strong></div>
           </div>
+        </div>
+
+        <!-- ══ CRM ROW : ENTREPRISE + CONTACTS ══ -->
+        <div class="crm-top-row" id="crm-top-row" style="display:none;">
+
+          <!-- ─ ENTREPRISE ─ -->
+          <div class="crm-card" id="crm-entreprise-card">
+            <div class="crm-card-head">
+              <div class="crm-card-title"><span>🏢</span> Entreprise</div>
+              <div id="crm-ent-actions" style="display:flex;gap:6px;">
+                <button class="crm-btn crm-btn-edit" onclick="toggleEntrepriseEdit(true)">✏ Modifier</button>
+              </div>
+            </div>
+            <div class="crm-card-body" id="crm-entreprise-body">
+              <!-- Généré par renderDossierEntreprise() -->
+              <div style="color:var(--c-text-3);font-size:12px;text-align:center;padding:20px 0;">Sélectionnez un client pour afficher ses informations</div>
+            </div>
+          </div>
+
+          <!-- ─ CONTACTS ─ -->
+          <div class="crm-card" id="crm-contacts-card">
+            <div class="crm-card-head">
+              <div class="crm-card-title"><span>👤</span> Contacts</div>
+              <button class="crm-btn-add" onclick="openContactModal(null)">+ Ajouter un contact</button>
+            </div>
+            <div class="crm-card-body" id="crm-contacts-body">
+              <div style="color:var(--c-text-3);font-size:12px;text-align:center;padding:20px 0;">Aucun contact</div>
+            </div>
+          </div>
+
         </div>
 
         <div class="dossier-grid">
@@ -6610,8 +6803,9 @@ function recalculer() {
   const tauxADEMEselect = parseFloat(document.getElementById('equip-type').value);
 
   // ── Lookup taux depuis le barème actif (montant en €, durée en mois) ──
+  // Guard: lookupRate peut ne pas encore être définie lors du 1er appel top-level (script ordering)
   const nbMoisLookup = Math.round(duree * 12);
-  const matchedRule = lookupRate(inv, nbMoisLookup);
+  const matchedRule = (typeof lookupRate === 'function') ? lookupRate(inv, nbMoisLookup) : null;
   const taux = matchedRule ? parseFloat(matchedRule.annual_rate_pct) : parseFloat(document.getElementById('taux').value) || 4.5;
   // Mettre à jour le champ caché pour la compatibilité avec les exports
   document.getElementById('taux').value = taux.toString();
@@ -13728,6 +13922,347 @@ try {
   }
 } catch(e) {}
 
+/* ══════════════════════════════════════════════════
+   CRM DOSSIER — Entreprise & Contacts
+══════════════════════════════════════════════════ */
+let _dossierProspectData  = null;   // données prospects complètes
+let _dossierContacts      = [];     // [ {prenom,nom,fonction,service,email,tel,notes,principal} ]
+let _entrepriseEditMode   = false;
+const CRM_AVATAR_COLORS   = ['#0d9488','#0f2b46','#2563eb','#7c3aed','#d97706','#059669','#ea580c'];
+
+function crmInitials(prenom='', nom='') {
+  return [(prenom[0]||''), (nom[0]||'')].join('').toUpperCase() || '?';
+}
+function crmAvatarColor(str='') {
+  let h = 0; for (let c of str) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return CRM_AVATAR_COLORS[h % CRM_AVATAR_COLORS.length];
+}
+
+/* ── Chargement CRM lors de la sélection du client ── */
+async function loadDossierCrmBlocks(clientId) {
+  const row = document.getElementById('crm-top-row');
+  if (!row) return;
+  if (!clientId) { row.style.display = 'none'; return; }
+  row.style.display = 'grid';
+
+  // Utiliser les données déjà chargées dans _clientsAll pour éviter un appel réseau
+  const fromCache = (typeof _clientsAll !== 'undefined' && _clientsAll)
+    ? _clientsAll.find(c => String(c.id) === String(clientId))
+    : null;
+
+  if (fromCache) {
+    _dossierProspectData = fromCache;
+    _dossierContacts     = buildContactsArray(fromCache);
+    renderDossierEntreprise();
+    renderDossierContacts();
+  } else {
+    // Fallback : fetch
+    try {
+      const res  = await fetch(ADMIN_API + '/prospects/' + clientId + '/detail', { headers: getAuthHeaders() });
+      const data = await res.json();
+      const p    = data?.data;
+      if (p) {
+        _dossierProspectData = p;
+        _dossierContacts     = buildContactsArray(p);
+        renderDossierEntreprise();
+        renderDossierContacts();
+      }
+    } catch(e) { console.warn('CRM load error', e); }
+  }
+}
+
+/* Construire le tableau de contacts depuis les champs plats + contacts_supplementaires JSONB */
+function buildContactsArray(p) {
+  const contacts = [];
+  // Contact principal
+  if (p.contact_nom || p.contact_prenom || p.contact_email) {
+    contacts.push({
+      prenom:    p.contact_prenom || '',
+      nom:       p.contact_nom    || '',
+      fonction:  p.contact_fonction || '',
+      service:   '',
+      email:     p.contact_email     || '',
+      tel:       p.contact_telephone || '',
+      notes:     '',
+      principal: true
+    });
+  }
+  // Contacts supplémentaires (JSONB contacts_supplementaires)
+  if (Array.isArray(p.contacts_supplementaires)) {
+    p.contacts_supplementaires.forEach(c => contacts.push({ ...c, principal: false }));
+  }
+  return contacts;
+}
+
+/* ── Render ENTREPRISE ── */
+function renderDossierEntreprise() {
+  const p = _dossierProspectData;
+  const body = document.getElementById('crm-entreprise-body');
+  if (!body || !p) return;
+  const fields = [
+    { l:'Raison sociale', v: p.raison_sociale || '—', mono: false },
+    { l:'SIREN',          v: p.siren ? `<span class="crm-field-mono">${p.siren}</span>` : '—', html: true },
+    { l:'SIRET',          v: p.siret ? `<span class="crm-field-mono">${p.siret}</span>` : '—', html: true },
+    { l:'Forme juridique',v: p.forme_juridique || '—' },
+    { l:'Code NAF',       v: p.code_naf ? (p.code_naf + (p.libelle_naf ? ' — '+p.libelle_naf : '')) : '—' },
+    { l:'Taille',         v: ({'tpe':'TPE','pme':'PME','eti':'ETI','ge':'Grande Entreprise'}[p.taille] || p.taille || '—') },
+    { l:'Effectifs',      v: p.effectifs || '—' },
+    { l:'Adresse',        v: [p.adresse, p.code_postal, p.ville].filter(Boolean).join(', ') || '—' },
+    { l:'Téléphone',      v: p.telephone ? `<a href="tel:${p.telephone}">${p.telephone}</a>` : '—', html: true },
+    { l:'Email société',  v: p.email ? `<a href="mailto:${p.email}">${p.email}</a>` : '—', html: true },
+    { l:'Site web',       v: p.site_web ? `<a href="${p.site_web}" target="_blank">${p.site_web}</a>` : '—', html: true },
+  ];
+  body.innerHTML = fields.map(f => `
+    <div class="crm-field-row">
+      <span class="crm-field-label">${f.l}</span>
+      <span class="crm-field-value">${f.html ? f.v : escHtml(String(f.v))}</span>
+    </div>`).join('');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── Toggle mode édition ENTREPRISE ── */
+function toggleEntrepriseEdit(on) {
+  _entrepriseEditMode = !!on;
+  const body = document.getElementById('crm-entreprise-body');
+  const acts = document.getElementById('crm-ent-actions');
+  const p = _dossierProspectData || {};
+  if (!body) return;
+
+  if (on) {
+    acts.innerHTML = `
+      <button class="crm-btn crm-btn-cancel" onclick="toggleEntrepriseEdit(false)">Annuler</button>
+      <button class="crm-btn crm-btn-save" onclick="saveEntrepriseEdit()">✓ Enregistrer</button>`;
+    body.innerHTML = `
+      <div class="crm-edit-grid">
+        <div class="crm-edit-row"><div class="crm-edit-fld" style="grid-column:1/-1;">
+          <label>Raison sociale</label>
+          <input class="crm-input" id="ce-raison" value="${escVal(p.raison_sociale)}"/>
+        </div></div>
+        <div class="crm-edit-row">
+          <div class="crm-edit-fld"><label>SIREN</label>
+            <input class="crm-input" id="ce-siren" value="${escVal(p.siren)}" maxlength="9" placeholder="9 chiffres"/>
+          </div>
+          <div class="crm-edit-fld"><label>SIRET</label>
+            <input class="crm-input" id="ce-siret" value="${escVal(p.siret)}" maxlength="14" placeholder="14 chiffres"/>
+          </div>
+        </div>
+        <div class="crm-edit-row">
+          <div class="crm-edit-fld"><label>Forme juridique</label>
+            <select class="crm-select" id="ce-forme">
+              ${['','SAS','SARL','SA','EURL','SNC','GIE','SCI','Autre'].map(v=>`<option value="${v}" ${p.forme_juridique===v?'selected':''}>${v||'— Sélectionner'}</option>`).join('')}
+            </select>
+          </div>
+          <div class="crm-edit-fld"><label>Taille</label>
+            <select class="crm-select" id="ce-taille">
+              <option value="">— Sélectionner</option>
+              <option value="tpe" ${p.taille==='tpe'?'selected':''}>TPE (< 10 sal.)</option>
+              <option value="pme" ${p.taille==='pme'?'selected':''}>PME (10–249 sal.)</option>
+              <option value="eti" ${p.taille==='eti'?'selected':''}>ETI (250–4999 sal.)</option>
+              <option value="ge"  ${p.taille==='ge' ?'selected':''}>Grande entreprise (5000+)</option>
+            </select>
+          </div>
+        </div>
+        <div class="crm-edit-row">
+          <div class="crm-edit-fld"><label>Code NAF</label>
+            <input class="crm-input" id="ce-naf" value="${escVal(p.code_naf)}" placeholder="ex: 5510Z"/>
+          </div>
+          <div class="crm-edit-fld"><label>Effectifs</label>
+            <input class="crm-input" id="ce-effectifs" value="${escVal(p.effectifs)}" placeholder="ex: 250–999"/>
+          </div>
+        </div>
+        <div class="crm-edit-row full"><div class="crm-edit-fld">
+          <label>Adresse</label>
+          <input class="crm-input" id="ce-adresse" value="${escVal(p.adresse)}" placeholder="12 rue de la Paix"/>
+        </div></div>
+        <div class="crm-edit-row">
+          <div class="crm-edit-fld"><label>Code postal</label>
+            <input class="crm-input" id="ce-cp" value="${escVal(p.code_postal)}" maxlength="5" placeholder="75001"/>
+          </div>
+          <div class="crm-edit-fld"><label>Ville</label>
+            <input class="crm-input" id="ce-ville" value="${escVal(p.ville)}" placeholder="Paris"/>
+          </div>
+        </div>
+        <div class="crm-edit-row">
+          <div class="crm-edit-fld"><label>Téléphone société</label>
+            <input class="crm-input" id="ce-tel" value="${escVal(p.telephone)}" type="tel"/>
+          </div>
+          <div class="crm-edit-fld"><label>Email société</label>
+            <input class="crm-input" id="ce-email" value="${escVal(p.email)}" type="email"/>
+          </div>
+        </div>
+        <div class="crm-edit-row full"><div class="crm-edit-fld">
+          <label>Site web</label>
+          <input class="crm-input" id="ce-web" value="${escVal(p.site_web)}" type="url" placeholder="https://"/>
+        </div></div>
+      </div>`;
+  } else {
+    acts.innerHTML = `<button class="crm-btn crm-btn-edit" onclick="toggleEntrepriseEdit(true)">✏ Modifier</button>`;
+    renderDossierEntreprise();
+  }
+}
+function escVal(v) { return (v||'').replace(/"/g,'&quot;'); }
+
+/* ── Sauvegarder ENTREPRISE → Supabase ── */
+async function saveEntrepriseEdit() {
+  if (!_dossierClientId) return;
+  const payload = {
+    raison_sociale:  document.getElementById('ce-raison')?.value.trim()    || null,
+    siren:           document.getElementById('ce-siren')?.value.replace(/\s/g,'') || null,
+    siret:           document.getElementById('ce-siret')?.value.replace(/\s/g,'') || null,
+    forme_juridique: document.getElementById('ce-forme')?.value             || null,
+    taille:          document.getElementById('ce-taille')?.value            || null,
+    code_naf:        document.getElementById('ce-naf')?.value.toUpperCase().trim() || null,
+    effectifs:       document.getElementById('ce-effectifs')?.value.trim()  || null,
+    adresse:         document.getElementById('ce-adresse')?.value.trim()    || null,
+    code_postal:     document.getElementById('ce-cp')?.value.trim()         || null,
+    ville:           document.getElementById('ce-ville')?.value.trim()      || null,
+    telephone:       document.getElementById('ce-tel')?.value.trim()        || null,
+    email:           document.getElementById('ce-email')?.value.trim()      || null,
+    site_web:        document.getElementById('ce-web')?.value.trim()        || null,
+  };
+  try {
+    const res = await fetch(ADMIN_API + '/prospects/' + _dossierClientId, {
+      method: 'PATCH',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Erreur réseau');
+    // Mise à jour locale
+    if (_dossierProspectData) Object.assign(_dossierProspectData, payload);
+    const inCache = (typeof _clientsAll !== 'undefined' && _clientsAll)
+      ? _clientsAll.find(c => String(c.id) === String(_dossierClientId))
+      : null;
+    if (inCache) Object.assign(inCache, payload);
+    toggleEntrepriseEdit(false);
+    showToast('Entreprise mise à jour ✓', 'success');
+  } catch(e) {
+    showToast('Erreur lors de la sauvegarde', 'error');
+    console.error(e);
+  }
+}
+
+/* ── Render CONTACTS ── */
+function renderDossierContacts() {
+  const body = document.getElementById('crm-contacts-body');
+  if (!body) return;
+  if (!_dossierContacts.length) {
+    body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--c-text-3);font-size:13px;">
+      Aucun contact — <button onclick="openContactModal(null)" style="background:none;border:none;color:var(--c-teal);font-weight:700;cursor:pointer;font-family:inherit;">Ajouter le premier contact →</button>
+    </div>`;
+    return;
+  }
+  body.innerHTML = `<div class="contact-list">${_dossierContacts.map((c,i) => {
+    const name    = [c.prenom, c.nom].filter(Boolean).join(' ') || 'Contact sans nom';
+    const initials = crmInitials(c.prenom, c.nom);
+    const color   = crmAvatarColor(name);
+    return `<div class="contact-item${c.principal?' primary':''}">
+      <div class="contact-avatar" style="background:${color}">${initials}</div>
+      <div class="contact-info">
+        <div class="contact-name">${escHtml(name)}${c.principal?'<span class="contact-badge-primary">Principal</span>':''}</div>
+        ${c.fonction?`<div class="contact-poste">${escHtml(c.fonction)}${c.service?' · '+escHtml(c.service):''}</div>`:''}
+        <div class="contact-details">
+          ${c.email?`<div class="contact-detail-item">📧 <a href="mailto:${encodeURIComponent(c.email)}">${escHtml(c.email)}</a></div>`:''}
+          ${c.tel  ?`<div class="contact-detail-item">📞 <a href="tel:${c.tel}">${escHtml(c.tel)}</a></div>`:''}
+          ${c.notes?`<div class="contact-detail-item" style="font-style:italic;color:var(--c-text-3);">${escHtml(c.notes)}</div>`:''}
+        </div>
+      </div>
+      <div class="contact-item-actions">
+        <button class="contact-action-btn" title="Modifier" onclick="openContactModal(${i})">✏</button>
+        <button class="contact-action-btn danger" title="Supprimer" onclick="deleteContact(${i})">🗑</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ── Modal contact : ouvrir ── */
+function openContactModal(idx) {
+  const modal = document.getElementById('crm-contact-modal');
+  if (!modal) return;
+  const isEdit = idx !== null && idx >= 0 && idx < _dossierContacts.length;
+  document.getElementById('crm-modal-title').textContent = isEdit ? 'Modifier le contact' : 'Ajouter un contact';
+  document.getElementById('crm-modal-sub').textContent   = isEdit ? 'Mettez à jour les informations du contact' : 'Renseignez les informations du nouveau contact';
+  document.getElementById('crm-contact-idx').value       = isEdit ? idx : '';
+  const c = isEdit ? _dossierContacts[idx] : {};
+  document.getElementById('crm-c-prenom').value    = c.prenom   || '';
+  document.getElementById('crm-c-nom').value       = c.nom      || '';
+  document.getElementById('crm-c-fonction').value  = c.fonction || '';
+  document.getElementById('crm-c-service').value   = c.service  || '';
+  document.getElementById('crm-c-email').value     = c.email    || '';
+  document.getElementById('crm-c-tel').value       = c.tel      || '';
+  document.getElementById('crm-c-notes').value     = c.notes    || '';
+  document.getElementById('crm-c-principal').checked = isEdit ? !!c.principal : (!_dossierContacts.length);
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('crm-c-prenom').focus(), 80);
+}
+
+function closeContactModal() {
+  document.getElementById('crm-contact-modal')?.classList.remove('open');
+}
+
+/* ── Sauvegarder contact (local + Supabase) ── */
+async function saveContactModal() {
+  const rawIdx = document.getElementById('crm-contact-idx').value;
+  const idx    = rawIdx !== '' ? parseInt(rawIdx) : null;
+  const contact = {
+    prenom:    document.getElementById('crm-c-prenom').value.trim(),
+    nom:       document.getElementById('crm-c-nom').value.trim(),
+    fonction:  document.getElementById('crm-c-fonction').value.trim(),
+    service:   document.getElementById('crm-c-service').value.trim(),
+    email:     document.getElementById('crm-c-email').value.trim(),
+    tel:       document.getElementById('crm-c-tel').value.trim(),
+    notes:     document.getElementById('crm-c-notes').value.trim(),
+    principal: document.getElementById('crm-c-principal').checked,
+  };
+  if (!contact.prenom && !contact.nom && !contact.email) {
+    showToast('Veuillez renseigner au moins un prénom, nom ou email', 'error'); return;
+  }
+  // Si principal, retirer le flag des autres
+  if (contact.principal) _dossierContacts.forEach(c => c.principal = false);
+
+  if (idx !== null && idx >= 0) {
+    _dossierContacts[idx] = contact;
+  } else {
+    _dossierContacts.push(contact);
+  }
+
+  closeContactModal();
+  renderDossierContacts();
+  await _saveDossierContactsToApi();
+}
+
+async function deleteContact(idx) {
+  if (!confirm('Supprimer ce contact ?')) return;
+  _dossierContacts.splice(idx, 1);
+  renderDossierContacts();
+  await _saveDossierContactsToApi();
+}
+
+async function _saveDossierContactsToApi() {
+  if (!_dossierClientId || !_dossierContacts.length) return;
+  // Contact principal → met à jour les champs plats
+  const principal = _dossierContacts.find(c => c.principal) || _dossierContacts[0];
+  // Contacts supplémentaires → contacts_supplementaires JSONB
+  const extras = _dossierContacts.filter(c => !c.principal);
+  const payload = {
+    contact_prenom:     principal.prenom   || null,
+    contact_nom:        principal.nom      || null,
+    contact_fonction:   principal.fonction || null,
+    contact_email:      principal.email    || null,
+    contact_telephone:  principal.tel      || null,
+    contacts_supplementaires: extras.length ? extras : null,
+  };
+  try {
+    await fetch(ADMIN_API + '/prospects/' + _dossierClientId, {
+      method: 'PATCH',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (_dossierProspectData) Object.assign(_dossierProspectData, payload);
+    showToast('Contact enregistré ✓', 'success');
+  } catch(e) { showToast('Erreur de sauvegarde', 'error'); }
+}
+
 /* ── Sélection d'un client ─────────────────────────────── */
 function setDossierClient(id, name) {
   _dossierClientId   = id   || '';
@@ -13751,6 +14286,8 @@ function setDossierClient(id, name) {
   if (kpiBar) kpiBar.style.display = _dossierClientId ? 'flex' : 'none';
   renderDossierChecklist();
   refreshDossierKpis();
+  // CRM blocs
+  loadDossierCrmBlocks(_dossierClientId);
 }
 
 // Called by <select> onchange
@@ -13762,6 +14299,11 @@ function setDossierClientFromSelect(id, label) {
 function openDossierForClient() {
   if (!_drawerClientId) return;
   var name = (_drawerClientData && (_drawerClientData.raison_sociale || _drawerClientData.name)) || _drawerClientId;
+  // Si les données du drawer sont disponibles, les injecter directement dans le CRM dossier
+  if (_drawerClientData) {
+    _dossierProspectData = _drawerClientData;
+    _dossierContacts     = buildContactsArray(_drawerClientData);
+  }
   setDossierClient(_drawerClientId, name);
   closeClientDrawer();
   switchPage('dossier');
@@ -14053,6 +14595,66 @@ document.addEventListener('DOMContentLoaded', function() {
       Génération de l'aperçu…
     </div>
     <iframe id="pdf-preview-frame" style="width:100%;height:100%;border:none;opacity:0;transition:opacity .3s;" onload="document.getElementById('pdf-preview-loader').style.display='none';this.style.opacity='1';" src="about:blank"></iframe>
+  </div>
+</div>
+
+<!-- ══ MODAL CONTACT CRM ══ -->
+<div class="crm-modal-backdrop" id="crm-contact-modal">
+  <div class="crm-modal">
+    <div class="crm-modal-head">
+      <div>
+        <h3 id="crm-modal-title">Ajouter un contact</h3>
+        <p id="crm-modal-sub">Renseignez les informations du contact</p>
+      </div>
+      <button class="crm-modal-close" onclick="closeContactModal()">✕</button>
+    </div>
+    <div class="crm-modal-body">
+      <input type="hidden" id="crm-contact-idx" value="">
+      <div class="crm-edit-row">
+        <div class="crm-edit-fld">
+          <label>Prénom</label>
+          <input class="crm-input" id="crm-c-prenom" placeholder="ex: Sophie"/>
+        </div>
+        <div class="crm-edit-fld">
+          <label>Nom</label>
+          <input class="crm-input" id="crm-c-nom" placeholder="ex: Renard"/>
+        </div>
+      </div>
+      <div class="crm-edit-row">
+        <div class="crm-edit-fld">
+          <label>Fonction / Poste</label>
+          <input class="crm-input" id="crm-c-fonction" placeholder="ex: Directrice Générale"/>
+        </div>
+        <div class="crm-edit-fld">
+          <label>Service / Département</label>
+          <input class="crm-input" id="crm-c-service" placeholder="ex: Direction Financière"/>
+        </div>
+      </div>
+      <div class="crm-edit-row">
+        <div class="crm-edit-fld">
+          <label>Email</label>
+          <input class="crm-input" id="crm-c-email" type="email" placeholder="ex: s.renard@entreprise.fr"/>
+        </div>
+        <div class="crm-edit-fld">
+          <label>Téléphone</label>
+          <input class="crm-input" id="crm-c-tel" type="tel" placeholder="ex: 06 12 34 56 78"/>
+        </div>
+      </div>
+      <div class="crm-edit-row full">
+        <div class="crm-edit-fld">
+          <label>Notes</label>
+          <input class="crm-input" id="crm-c-notes" placeholder="Décisionnaire budgétaire, favorise les RDV jeudi matin…"/>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0 0;">
+        <input type="checkbox" id="crm-c-principal" style="width:16px;height:16px;accent-color:var(--c-teal);cursor:pointer;">
+        <label for="crm-c-principal" style="font-size:13px;font-weight:600;color:var(--c-navy);cursor:pointer;">Contact principal</label>
+      </div>
+    </div>
+    <div class="crm-modal-footer">
+      <button class="crm-modal-btn-sec" onclick="closeContactModal()">Annuler</button>
+      <button class="crm-modal-btn-main" onclick="saveContactModal()">✓ Enregistrer</button>
+    </div>
   </div>
 </div>
 
