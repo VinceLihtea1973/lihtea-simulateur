@@ -5802,7 +5802,120 @@ async function syncSimulationToSupabase(simData, options = {}) {
 }
 
 // --- Sync proposition (PDF/Excel export) to Supabase ---
-async function syncPropositionToSupabase(propData) {
+// --- Upload PDF vers Supabase Storage bucket "propositions" ---
+async function uploadPropositionToStorage(blob, prospectId, nomFichier) {
+  try {
+    const token = localStorage.getItem('gef_auth_token');
+    if (!token || !blob || !prospectId) return null;
+    const safeName = nomFichier.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storagePath = currentTenantId + '/' + prospectId + '/' + safeName;
+    const storageUrl = SUPABASE_URL + '/storage/v1/object/propositions/' + storagePath;
+    const res = await fetch(storageUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/pdf',
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.warn('[Storage] Upload failed:', err);
+      return null;
+    }
+    console.log('[Storage] PDF uploaded:', storagePath);
+    return storagePath;
+  } catch(e) {
+    console.warn('[Storage] Upload error:', e);
+    return null;
+  }
+}
+
+// --- Modal envoi email depuis le dossier client ---
+function sendDocByEmail(docId, defaultEmail, clientNom) {
+  // Supprimer un éventuel modal précédent
+  document.getElementById('send-email-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'send-email-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,43,70,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--c-bg,#fff);border-radius:14px;padding:28px 32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:inherit;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--c-navy,#0f2b46);">✉ Envoyer la proposition</div>
+          <div style="font-size:12px;color:var(--c-text-3,#6b7280);margin-top:2px;">${clientNom || ''}</div>
+        </div>
+        <button onclick="document.getElementById('send-email-modal').remove()" style="width:30px;height:30px;border:none;background:var(--c-surface,#f1f5f9);border-radius:6px;cursor:pointer;font-size:16px;line-height:1;">×</button>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3,#6b7280);margin-bottom:5px;">Email destinataire *</label>
+        <input id="send-email-to" type="email" value="${defaultEmail||''}" placeholder="client@entreprise.fr"
+          style="width:100%;padding:10px 12px;border:1px solid var(--c-border,#e1e7ef);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;background:var(--c-bg,#fff);color:var(--c-navy,#0f2b46);">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3,#6b7280);margin-bottom:5px;">Objet</label>
+        <input id="send-email-subject" type="text" value="Votre proposition de financement — ${(clientNom||'').replace(/"/g,'')}"
+          style="width:100%;padding:10px 12px;border:1px solid var(--c-border,#e1e7ef);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;background:var(--c-bg,#fff);color:var(--c-navy,#0f2b46);">
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3,#6b7280);margin-bottom:5px;">Message personnalisé</label>
+        <textarea id="send-email-message" rows="3" placeholder="Laissez vide pour utiliser le message par défaut…"
+          style="width:100%;padding:10px 12px;border:1px solid var(--c-border,#e1e7ef);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;background:var(--c-bg,#fff);color:var(--c-navy,#0f2b46);"></textarea>
+        <div style="font-size:11px;color:var(--c-text-3,#6b7280);margin-top:4px;">Le client recevra un lien sécurisé valable 7 jours pour télécharger son PDF.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('send-email-modal').remove()"
+          style="flex:1;padding:11px;border:1px solid var(--c-border,#e1e7ef);border-radius:8px;background:transparent;color:var(--c-text-2,#4a5568);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+          Annuler
+        </button>
+        <button id="send-email-btn" onclick="submitSendEmail('${docId}')"
+          style="flex:2;padding:11px;border:none;border-radius:8px;background:var(--c-teal,#0d9488);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+          ✉ Envoyer
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  // Focus email
+  setTimeout(() => document.getElementById('send-email-to')?.focus(), 50);
+}
+
+async function submitSendEmail(docId) {
+  const emailTo   = document.getElementById('send-email-to')?.value?.trim();
+  const subject   = document.getElementById('send-email-subject')?.value?.trim();
+  const message   = document.getElementById('send-email-message')?.value?.trim();
+  const btn       = document.getElementById('send-email-btn');
+
+  if (!emailTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo)) {
+    showToast('Adresse email invalide', 'error'); return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi…'; }
+
+  try {
+    const res = await fetch(ADMIN_API + '/documents/' + docId + '/send-email', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ email_to: emailTo, email_subject: subject || undefined, message: message || undefined })
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result?.error || 'Erreur serveur');
+    document.getElementById('send-email-modal')?.remove();
+    showToast('✓ Proposition envoyée à ' + emailTo, 'success');
+    // Rafraîchir le drawer si ouvert
+    if (_drawerClientId) openClientDrawer(_drawerClientId);
+  } catch(e) {
+    console.warn('[sendEmail]', e);
+    showToast('Erreur : ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✉ Envoyer'; }
+  }
+}
+
+async function syncPropositionToSupabase(propData, pdfBlob, nomFichier) {
   if (!localStorage.getItem('gef_auth_token')) { console.log('[Sync] No auth token, skip proposition sync'); return null; }
   // Résoudre l'ID interne si nécessaire (évite violation FK user_id)
   if (!localStorage.getItem('gef_internal_user_id')) {
@@ -5868,7 +5981,15 @@ async function syncPropositionToSupabase(propData) {
 
     // Enregistrer la proposition comme document (visible dans onglet Documents du drawer)
     if (prospectId) {
-      const docNom = 'Proposition_' + (propData.clientName || 'Client').replace(/\s+/g,'-') + '_' + new Date().toISOString().slice(0,10) + '.' + (propData.type || 'pdf');
+      const isPdf = propData.type !== 'excel';
+      const docNom = nomFichier || ('Proposition_' + (propData.clientName || 'Client').replace(/\s+/g,'-') + '_' + new Date().toISOString().slice(0,10) + '.' + (propData.type || 'pdf'));
+
+      // Upload PDF vers Supabase Storage si blob disponible
+      let storagePath = null;
+      if (isPdf && pdfBlob) {
+        storagePath = await uploadPropositionToStorage(pdfBlob, prospectId, docNom);
+      }
+
       fetch(ADMIN_API + '/documents', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -5879,9 +6000,10 @@ async function syncPropositionToSupabase(propData) {
           nom: docNom,
           type_document: 'devis',
           description: 'Proposition commerciale ' + (propData.type||'').toUpperCase() + ' — ' + Math.round(propData.investissement||0).toLocaleString('fr-FR') + ' € invest. / ' + Math.round(propData.totalAides||0).toLocaleString('fr-FR') + ' € d\'aides',
-          statut: 'envoye',
+          statut: 'genere',
           date_document: new Date().toISOString().slice(0,10),
-          mime_type: propData.type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf'
+          mime_type: isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          storage_path: storagePath || null
         })
       }).catch(e => console.warn('[Sync] Document creation error:', e));
     }
@@ -8291,6 +8413,12 @@ function renderDrawerContent(p) {
               title="Regénérer / Télécharger"
               style="width:28px;height:28px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;"
               onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">⬇</button>
+            ${doc.mime_type === 'application/pdf' ? `<button
+              onclick="sendDocByEmail('${doc.id}','${(p.contact_email||'').replace(/'/g,"\\'")}','${(p.raison_sociale||'').replace(/'/g,"\\'")}')"
+              title="${doc.storage_path ? 'Envoyer par email' : 'Regénérez la proposition depuis le simulateur pour activer l\'envoi email'}"
+              style="width:28px;height:28px;border:1px solid ${doc.storage_path ? 'var(--c-border)' : 'var(--c-border)'};border-radius:6px;background:var(--c-bg);cursor:${doc.storage_path ? 'pointer' : 'not-allowed'};font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s;opacity:${doc.storage_path ? '1' : '0.35'};"
+              ${doc.storage_path ? '' : 'disabled'}
+              onmouseover="this.style.borderColor='var(--c-teal)'" onmouseout="this.style.borderColor='var(--c-border)'">✉</button>` : ''}
           </div>
         </div>
         `).join('')}
@@ -9559,8 +9687,11 @@ async function exporterPDF(previewOnly = false) {
       return doc.output('bloburl');
     }
 
+    // Récupérer le blob AVANT le save (jsPDF ne permet pas de relire après)
+    const _pdfBlobForStorage = doc.output('blob');
+
     // Sauvegarder la proposition dans l'historique AVANT le téléchargement
-    sauvegarderProposition(d.nomClient || 'Sans nom', d.inv, d.totalAides, d.coutNet, 'pdf');
+    sauvegarderProposition(d.nomClient || 'Sans nom', d.inv, d.totalAides, d.coutNet, 'pdf', _pdfBlobForStorage, nomFichier);
 
     doc.save(nomFichier);
 
@@ -10666,7 +10797,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 var _skipSaveProposition = false;
 
-function sauvegarderProposition(clientName, investissement, totalAides, coutNet, type) {
+function sauvegarderProposition(clientName, investissement, totalAides, coutNet, type, pdfBlob, nomFichier) {
   if (_skipSaveProposition) return; // Skip when regenerating from Propositions
   const propositions = JSON.parse(localStorage.getItem('gef_propositions') || '[]');
 
@@ -10708,9 +10839,9 @@ function sauvegarderProposition(clientName, investissement, totalAides, coutNet,
   // Rafraîchir si la page Propositions est visible
   if (pageCourante === 'propositions') renderPropositions();
 
-  // Sync to Supabase (non-blocking)
+  // Sync to Supabase (non-blocking) — pdfBlob passé pour upload Storage
   const lastProp = propositions[propositions.length - 1];
-  syncPropositionToSupabase(lastProp).catch(e => console.warn('[Sync] Proposition async error:', e));
+  syncPropositionToSupabase(lastProp, pdfBlob, nomFichier).catch(e => console.warn('[Sync] Proposition async error:', e));
 }
 
 // ─── RE-GENERATE PDF/EXCEL FROM STORED PROPOSITION ───
