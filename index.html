@@ -3892,24 +3892,11 @@
         <div class="header-actions">
           <button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="Mode sombre"></button>
           <span class="theme-icon" id="theme-icon">☀️</span>
-          <button class="pitch-toggle" id="pitch-toggle-btn" onclick="togglePitchMode()" title="Mode présentation client" style="font-size:11px;padding:5px 12px;">
-            <span class="toggle-dot"></span>
-            Pitch
-          </button>
         </div>
       </div>
       <div id="breadcrumb" class="breadcrumb-bar" style="display:none;"></div>
     </div>
 
-    <!-- ─── BANDEAU DE CONTEXTE ─── -->
-    <div id="context-band">
-      <span id="cb-client" class="cb-chip">—</span>
-      <span class="cb-sep">·</span>
-      <span id="cb-invest" style="color:rgba(255,255,255,0.6);font-size:11px;">—</span>
-      <span class="cb-sep">·</span>
-      <span id="cb-aides" style="color:#2dd4bf;font-size:11px;">—</span>
-      <button class="cb-edit-btn" onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))">⚙ Modifier les paramètres</button>
-    </div>
 
     <!-- ════════════════════════════════════════════════════════════
          PAGES
@@ -7453,7 +7440,7 @@ let pitchMode = false;
 function togglePitchMode() {
   pitchMode = !pitchMode;
   document.body.classList.toggle('pitch-mode', pitchMode);
-  document.getElementById('pitch-toggle-btn').classList.toggle('active', pitchMode);
+  // pitch-toggle-btn supprimé du dashboard
   recalculer();
 }
 
@@ -7884,23 +7871,7 @@ setTimeout(updateSavedBadge, 100);
 // ═══════════════════════════════════════════════════════════════════
 // CONTEXT BAND — Bandeau de simulation active sur pages full-width
 // ═══════════════════════════════════════════════════════════════════
-function updateContextBand(show) {
-  const band = document.getElementById('context-band');
-  if (!band) return;
-  const nomClient = document.getElementById('nom-client')?.value?.trim();
-  const inv = parseFloat(document.getElementById('inv')?.value) || 0;
-  const hasContext = nomClient && nomClient !== '' && inv > 0;
-  if (show && hasContext) {
-    band.classList.add('visible');
-    const fek = n => n>=1e6?(n/1e6).toFixed(1)+'M€':n>=1000?Math.round(n/1000)+'k€':Math.round(n)+'€';
-    document.getElementById('cb-client').textContent = nomClient;
-    document.getElementById('cb-invest').textContent = fek(inv) + ' d\'investissement';
-    // Récupérer les aides du dernier recalcul (valeur numérique brute, pas le DOM formaté)
-    document.getElementById('cb-aides').textContent = _lastTotalAides > 0 ? fek(_lastTotalAides) + ' d\'aides' : 'Aides à calculer';
-  } else {
-    band.classList.remove('visible');
-  }
-}
+function updateContextBand() { /* bandeau contexte supprimé */ }
 
 // ═══════════════════════════════════════════════════════════════════
 // SCORE ICP — Algorithme de scoring client (adapté du CRM V3)
