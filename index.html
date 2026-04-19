@@ -8212,6 +8212,7 @@ async function _kbMarkContacted(prospectId) {
     // Enregistrer l'activité dans la table activites
     const actBody = {
       prospect_id:   prospectId,
+      tenant_id:     currentTenantId || localStorage.getItem('gef_tenant_id') || null,
       type:          'call',
       titre:         'Appel téléphonique — Contact marqué',
       description:   note || null,
@@ -8473,8 +8474,10 @@ async function logActivity(prospectId) {
   // statut DB = état de réalisation de l'activité (valeurs autorisées : planifiee|realisee|annulee|reportee)
   const statutDB = datePlanifiee && !description ? 'planifiee' : 'realisee';
 
+  const tenantId = currentTenantId || localStorage.getItem('gef_tenant_id') || null;
   const body = {
     prospect_id:    prospectId,
+    tenant_id:      tenantId,
     type,
     titre,
     description:    description || null,
