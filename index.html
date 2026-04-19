@@ -10640,10 +10640,23 @@ function escCopilot(t) {
 // ═══════════════════════════════════════════════════════════
 //  GLOBAL DASHBOARD — V3 CRM
 // ═══════════════════════════════════════════════════════════
-const DASH_SECT_COLORS = ['#0d9488','#2563eb','#7c3aed','#d97706','#dc2626','#059669','#ea580c','#0891b2','#6366f1','#f43f5e'];
+// Liste fixe et ordonnée de tous les secteurs (toujours affichés)
+const ALL_SECTORS = [
+  { label: 'Industrie',       c: '#2563eb', naf: ['2','3'] },
+  { label: 'Agroalimentaire', c: '#0d9488', naf: ['1']     },
+  { label: 'BTP / Construction', c: '#7c3aed', naf: ['5']  },
+  { label: 'Transport',       c: '#d97706', naf: ['7']     },
+  { label: 'Énergie',         c: '#dc2626', naf: ['4']     },
+  { label: 'Commerce',        c: '#059669', naf: ['6']     },
+  { label: 'Finance',         c: '#ea580c', naf: ['8']     },
+  { label: 'Services',        c: '#0891b2', naf: ['9']     },
+  { label: 'Autre',           c: '#6366f1', naf: []        },
+];
+const DASH_SECT_COLORS = ALL_SECTORS.map(s => s.c);
 function dashGetSector(naf) {
-  const map = {'1':'Agroalimentaire','2':'Industrie','3':'Industrie','4':'Énergie','5':'Construction','6':'Commerce','7':'Transport','8':'Finance','9':'Services'};
-  return map[(naf||'').charAt(0)] || 'Autre';
+  const ch = (naf||'').charAt(0);
+  const found = ALL_SECTORS.find(s => s.naf.includes(ch));
+  return found ? found.label : 'Autre';
 }
 function dashFmtK(n) {
   if (!n) return '0 €';
@@ -10664,67 +10677,74 @@ function dashDonut(data, svgId, legendId) {
   const svg = document.getElementById(svgId);
   const leg = document.getElementById(legendId);
   if (!svg || !leg) return;
-  const total = data.reduce((s,d) => s + d.v, 0);
-  if (total === 0) {
-    svg.innerHTML = '';
-    leg.innerHTML = '<div style="color:var(--c-text-3);font-size:12px;">Aucune donnée</div>';
-    return;
-  }
+
+  // Segments actifs pour le donut (v > 0 seulement)
+  const activeData = (data||[]).filter(d => d.v > 0);
+  const total      = activeData.reduce((s,d) => s + d.v, 0);
 
   // ── SVG donut ──────────────────────────────────────────────────────
   const cx = 95, cy = 95, R = 78, r = 50;
-  const GAP_DEG = 2.5; // gap entre segments en degrés
-  const GAP_RAD = GAP_DEG * Math.PI / 180;
+  const GAP_RAD = 2.5 * Math.PI / 180;
   let angle = -Math.PI / 2;
   let paths = '';
 
-  data.forEach(d => {
-    const sweep = (d.v / total) * 2 * Math.PI - GAP_RAD;
-    if (sweep <= 0) return;
-    const x1  = cx + R * Math.cos(angle),           y1  = cy + R * Math.sin(angle);
-    const x2  = cx + R * Math.cos(angle + sweep),   y2  = cy + R * Math.sin(angle + sweep);
-    const xi1 = cx + r * Math.cos(angle + sweep),   yi1 = cy + r * Math.sin(angle + sweep);
-    const xi2 = cx + r * Math.cos(angle),            yi2 = cy + r * Math.sin(angle);
-    const lg  = sweep > Math.PI ? 1 : 0;
-    paths += '<path d="M'+x1+','+y1+' A'+R+','+R+' 0 '+lg+',1 '+x2+','+y2
-           +       ' L'+xi1+','+yi1+' A'+r+','+r+' 0 '+lg+',0 '+xi2+','+yi2+' Z"'
-           +   ' fill="'+d.c+'" opacity="0.88">'
-           +   '<title>'+d.label+' : '+d.v+' prospect'+(d.v>1?'s':'')+'</title>'
-           + '</path>';
-    angle += sweep + GAP_RAD;
-  });
-
-  // Centre : grand chiffre + label
-  paths += '<text x="'+cx+'" y="'+(cy-10)+'" text-anchor="middle"'
-         + ' font-size="28" font-weight="800" font-family="var(--font-mono,monospace)"'
-         + ' fill="var(--c-navy,#0f2b46)">' + total + '</text>';
-  paths += '<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle"'
-         + ' font-size="9.5" font-weight="700" letter-spacing="0.08em" text-transform="uppercase"'
-         + ' fill="var(--c-text-3,#94a3b8)">PROSPECTS</text>';
-
+  if (total === 0) {
+    // Anneau vide avec tiret central
+    paths = '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="var(--c-border)" stroke-width="'+(R-r)+'"/>';
+    paths += '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="22" font-weight="800" font-family="var(--font-mono,monospace)" fill="var(--c-text-3,#94a3b8)">—</text>';
+    paths += '<text x="'+cx+'" y="'+(cy+12)+'" text-anchor="middle" font-size="9" font-weight="700" fill="var(--c-text-3,#94a3b8)" letter-spacing="0.08em">PROSPECTS</text>';
+  } else {
+    activeData.forEach(d => {
+      const sweep = (d.v / total) * 2 * Math.PI - GAP_RAD;
+      if (sweep <= 0) return;
+      const x1  = cx + R * Math.cos(angle),          y1  = cy + R * Math.sin(angle);
+      const x2  = cx + R * Math.cos(angle + sweep),  y2  = cy + R * Math.sin(angle + sweep);
+      const xi1 = cx + r * Math.cos(angle + sweep),  yi1 = cy + r * Math.sin(angle + sweep);
+      const xi2 = cx + r * Math.cos(angle),           yi2 = cy + r * Math.sin(angle);
+      const lg  = sweep > Math.PI ? 1 : 0;
+      paths += '<path d="M'+x1+','+y1+' A'+R+','+R+' 0 '+lg+',1 '+x2+','+y2
+             +       ' L'+xi1+','+yi1+' A'+r+','+r+' 0 '+lg+',0 '+xi2+','+yi2+' Z"'
+             +   ' fill="'+d.c+'" opacity="0.88">'
+             +   '<title>'+d.label+' : '+d.v+' prospect'+(d.v>1?'s':'')+'</title>'
+             + '</path>';
+      angle += sweep + GAP_RAD;
+    });
+    paths += '<text x="'+cx+'" y="'+(cy-10)+'" text-anchor="middle" font-size="28" font-weight="800" font-family="var(--font-mono,monospace)" fill="var(--c-navy,#0f2b46)">'+total+'</text>';
+    paths += '<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--c-text-3,#94a3b8)" letter-spacing="0.08em">PROSPECTS</text>';
+  }
   svg.innerHTML = paths;
 
-  // ── Légende richement détaillée ────────────────────────────────────
-  const maxCount = Math.max(...data.map(d => d.v), 1);
-  leg.innerHTML = data.map(d => {
-    const pct    = Math.round(d.v / total * 100);
+  // ── Légende : TOUTES les catégories, actives ou non ─────────────────
+  const maxCount = Math.max(...(data||[]).map(d => d.v), 1);
+  leg.innerHTML = (data||[]).map((d, i) => {
+    const pct    = total > 0 ? Math.round(d.v / total * 100) : 0;
     const barPct = Math.round(d.v / maxCount * 100);
-    return '<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--c-border);">'
-         // Dot carré coloré
-         + '<span style="width:10px;height:10px;border-radius:3px;background:'+d.c+';flex-shrink:0;box-shadow:0 1px 4px '+d.c+'55;"></span>'
-         // Nom + mini-barre
+    const empty  = d.v === 0;
+    const isLast = i === data.length - 1;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;'
+         + (!isLast ? 'border-bottom:1px solid var(--c-border);' : '') + '">'
+         // carré coloré (grisé si vide)
+         + '<span style="width:9px;height:9px;border-radius:2px;flex-shrink:0;'
+         +   'background:'+d.c+';opacity:'+(empty?'.25':'1')+';'
+         +   (empty ? '' : 'box-shadow:0 1px 3px '+d.c+'44;')
+         + '"></span>'
+         // nom + mini-barre
          + '<div style="flex:1;min-width:0;">'
-         +   '<div style="font-size:11px;font-weight:600;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">'
+         +   '<div style="font-size:11px;font-weight:'+(empty?'500':'600')+';'
+         +     'color:'+(empty?'var(--c-text-3)':'var(--c-navy)')+';'
+         +     'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">'
          +     d.label
          +   '</div>'
-         +   '<div style="height:4px;background:var(--c-bg);border-radius:2px;overflow:hidden;">'
-         +     '<div style="height:4px;border-radius:2px;background:'+d.c+';width:'+barPct+'%;transition:width .4s;opacity:.7;"></div>'
+         +   '<div style="height:3px;background:var(--c-bg);border-radius:2px;overflow:hidden;">'
+         +     '<div style="height:3px;border-radius:2px;background:'+d.c+';width:'+barPct+'%;'
+         +       'opacity:'+(empty?'0':'0.65')+';transition:width .4s;"></div>'
          +   '</div>'
          + '</div>'
-         // Count badge + %
-         + '<div style="text-align:right;flex-shrink:0;">'
-         +   '<div style="font-size:13px;font-weight:800;color:'+d.c+';font-family:var(--font-mono);line-height:1;">' + d.v + '</div>'
-         +   '<div style="font-size:9px;color:var(--c-text-3);margin-top:1px;">' + pct + '%</div>'
+         // count + %
+         + '<div style="text-align:right;flex-shrink:0;min-width:32px;">'
+         +   '<div style="font-size:12px;font-weight:'+(empty?'500':'800')+';font-family:var(--font-mono);line-height:1;'
+         +     'color:'+(empty?'var(--c-text-3)':d.c)+';">'+(empty?'—':d.v)+'</div>'
+         +   '<div style="font-size:9px;color:var(--c-text-3);margin-top:1px;">'+(empty?'0%':pct+'%')+'</div>'
          + '</div>'
          + '</div>';
   }).join('');
@@ -10921,20 +10941,19 @@ async function renderGlobalDashboard() {
       subEl.textContent = activeCount + ' prospect' + (activeCount > 1 ? 's' : '') + ' en cours · ' + dashFmtK(pipeVal) + ' pipeline actif';
     }
 
-    // ── Sector donut
-    const sectorMap = {};
-    clients.forEach((c, i) => {
-      const sect = dashGetSector(c.code_naf);
-      if (!sectorMap[sect]) sectorMap[sect] = { count:0, c: DASH_SECT_COLORS[Object.keys(sectorMap).length % DASH_SECT_COLORS.length] };
-      sectorMap[sect].count++;
-    });
-    const sectorData = Object.entries(sectorMap)
-      .sort((a,b) => b[1].count - a[1].count)
-      .slice(0, 8)
-      .map(([label, d]) => ({ label, v: d.count, count: d.count, c: d.c }));
+    // ── Sector donut — toutes catégories toujours présentes
+    const sectorCounts = {};
+    clients.forEach(c => { sectorCounts[dashGetSector(c.code_naf)] = (sectorCounts[dashGetSector(c.code_naf)]||0) + 1; });
+    // Toujours toutes les catégories, triées par count desc puis ordre fixe
+    const sectorData = ALL_SECTORS.map(s => ({
+      label: s.label, c: s.c,
+      v: sectorCounts[s.label] || 0,
+      count: sectorCounts[s.label] || 0
+    })).sort((a,b) => b.v - a.v);
     dashDonut(sectorData, 'dash-donut-svg', 'dash-sector-legend');
     const sectSubEl = document.getElementById('dash-sector-subtitle');
-    if (sectSubEl) sectSubEl.textContent = sectorData.length + ' secteur' + (sectorData.length > 1 ? 's' : '') + ' · ' + total + ' prospect' + (total > 1 ? 's' : '');
+    const activeSectors = sectorData.filter(s => s.v > 0).length;
+    if (sectSubEl) sectSubEl.textContent = activeSectors + ' secteur' + (activeSectors > 1 ? 's' : '') + ' actif' + (activeSectors > 1 ? 's' : '') + ' · ' + total + ' prospect' + (total > 1 ? 's' : '');
 
     // ── Top 5 Prospects
     const top5El = document.getElementById('dash-top5');
