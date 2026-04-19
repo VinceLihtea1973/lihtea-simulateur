@@ -8213,7 +8213,7 @@ async function _kbMarkContacted(prospectId) {
     const actBody = {
       prospect_id:   prospectId,
       tenant_id:     currentTenantId || localStorage.getItem('gef_tenant_id') || null,
-      type:          'call',
+      type:          'appel',
       titre:         'Appel téléphonique — Contact marqué',
       description:   note || null,
       statut:        'realisee',
@@ -8227,8 +8227,17 @@ async function _kbMarkContacted(prospectId) {
       method: 'PUT', headers: getAuthHeaders(),
       body: JSON.stringify({ updated_at: new Date().toISOString() }),
     });
-    showToast('✓ Contact enregistré — J+X réinitialisé', 'success');
+    showToast('✓ Contact enregistré — relance clôturée', 'success');
+    // Refresh drawer (activities tab) + pipeline + dashboard
     setTimeout(() => {
+      if (typeof openClientDrawer === 'function') {
+        openClientDrawer(prospectId).then(() => {
+          setTimeout(() => {
+            const btn = document.querySelector('.drawer-tab-btn[onclick*="activites"]');
+            if (btn) btn.click();
+          }, 150);
+        });
+      }
       if (typeof renderPipelinePage === 'function') renderPipelinePage();
       if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
     }, 400);
@@ -8261,7 +8270,7 @@ function _kbScenarios(prospectId) { _kbOpenDrawerTab(prospectId, 'simulations');
 // ═══════════════════════════════════════════════════════════════════
 
 const ACT_TYPES = [
-  { id: 'call',  label: 'Appel téléphonique', icon: '📞' },
+  { id: 'appel', label: 'Appel téléphonique', icon: '📞' },
   { id: 'email', label: 'Email',               icon: '📧' },
   { id: 'rdv',   label: 'Rendez-vous',         icon: '🤝' },
   { id: 'note',  label: 'Note interne',        icon: '📝' },
