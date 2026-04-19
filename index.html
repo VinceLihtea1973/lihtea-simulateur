@@ -8215,7 +8215,7 @@ async function _kbMarkContacted(prospectId) {
       type:          'call',
       titre:         'Appel téléphonique — Contact marqué',
       description:   note || null,
-      statut:        'realise',
+      statut:        'realisee',
       date_realisee: new Date().toISOString(),
     };
     await fetch(ADMIN_API + '/activites', {
@@ -8430,7 +8430,12 @@ function _renderActivitesTab(p) {
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
                 <span style="font-size:12px;font-weight:700;color:var(--c-text);">${h.titre || h.description || '—'}</span>
-                ${h.statut ? resultBadge(h.statut) : ''}
+                ${(() => {
+                  // Déterminer badge statut DB (planifiee/realisee/annulee/reportee)
+                  const sMap = { realisee:{l:'Réalisé',c:'#059669'}, planifiee:{l:'Planifié',c:'#f59e0b'}, annulee:{l:'Annulé',c:'#dc2626'}, reportee:{l:'Reporté',c:'#64748b'} };
+                  const s = sMap[h.statut];
+                  return s ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:${s.c}18;color:${s.c};border:1px solid ${s.c}30;">${s.l}</span>` : '';
+                })()}
               </div>
               ${h.description ? `<div style="font-size:11px;color:var(--c-text-2);margin-bottom:4px;line-height:1.4;font-style:italic;">"${h.description}"</div>` : ''}
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -8453,24 +8458,27 @@ async function logActivity(prospectId) {
   const notesEl  = document.getElementById(`act-notes-${prospectId}`);
   const relanceEl= document.getElementById(`act-relance-${prospectId}`);
 
-  const type        = typeEl?.value || 'note';
-  const statut      = resultEl?.value || null;   // → colonne `statut` dans activites
-  const description = notesEl?.value?.trim() || null;  // → colonne `description`
-  const datePlanifiee = relanceEl?.value        // → colonne `date_planifiee`
+  const type          = typeEl?.value || 'note';
+  const resultatId    = resultEl?.value || null;
+  const description   = notesEl?.value?.trim() || null;
+  const datePlanifiee = relanceEl?.value
     ? new Date(relanceEl.value).toISOString()
     : null;
 
-  const typeLabel   = ACT_TYPES.find(t => t.id === type)?.label || type;
-  const statutLabel = ACT_RESULTS.find(r => r.id === statut)?.label || '';
-  const titre       = typeLabel + (statutLabel ? ' — ' + statutLabel : '');
+  const typeLabel    = ACT_TYPES.find(t => t.id === type)?.label || type;
+  const resultatLabel= ACT_RESULTS.find(r => r.id === resultatId)?.label || '';
+  // Le résultat commercial va dans le titre (pas dans statut — contrainte DB)
+  const titre        = typeLabel + (resultatLabel ? ' — ' + resultatLabel : '');
 
-  // Corps conforme au schéma de la table `activites`
+  // statut DB = état de réalisation de l'activité (valeurs autorisées : planifiee|realisee|annulee|reportee)
+  const statutDB = datePlanifiee && !description ? 'planifiee' : 'realisee';
+
   const body = {
     prospect_id:    prospectId,
     type,
     titre,
     description:    description || null,
-    statut:         statut || null,
+    statut:         statutDB,
     date_planifiee: datePlanifiee || null,
     date_realisee:  new Date().toISOString(),
   };
