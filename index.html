@@ -2785,7 +2785,7 @@
       pointer-events: auto;
     }
     .modal-card {
-      background: white;
+      background: var(--c-surface);
       border-radius: 16px;
       box-shadow: 0 24px 80px rgba(15, 43, 70, 0.25), 0 0 0 1px rgba(15, 43, 70, 0.06);
       width: 420px;
@@ -2926,7 +2926,7 @@
       pointer-events: auto;
     }
     .prop-preview-card {
-      background: white;
+      background: var(--c-surface);
       border-radius: 20px;
       box-shadow: 0 32px 100px rgba(10,30,55,0.35), 0 0 0 1px rgba(10,30,55,0.08);
       width: 520px;
@@ -2979,7 +2979,7 @@
     .auth-gate.visible { display: flex; }
     .auth-gate.hidden { opacity: 0; pointer-events: none; }
     .auth-card {
-      background: white;
+      background: var(--c-surface);
       border-radius: 20px;
       box-shadow: 0 32px 100px rgba(0,0,0,0.3);
       width: 400px;
@@ -3916,7 +3916,7 @@
             <span style="width:7px;height:7px;border-radius:4px;background:#dc2626;display:inline-block;flex-shrink:0;"></span>
             <span id="dash-alerte-txt">0 en retard</span>
           </span>
-          <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" style="padding:8px 14px;background:white;color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">⚡ Simulation</button>
+          <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" style="padding:8px 14px;background:var(--c-bg);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">⚡ Simulation</button>
           <button onclick="switchPage('clients',document.querySelector('[data-page=&quot;clients&quot;]'));setTimeout(openNewClientModal,350);" style="padding:8px 16px;background:var(--c-teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">+ Nouveau client</button>
         </div>
       </div>
@@ -3935,7 +3935,7 @@
             <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:10px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-body);">Voir le kanban →</button>
           </div>
           <!-- Tableau de pondération par étape -->
-          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:14px;border:1px solid var(--c-border);">
+          <div style="background:var(--c-surface);border-radius:8px;padding:10px 12px;margin-bottom:14px;border:1px solid var(--c-border);">
             <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:8px;">Pondération par étape (probabilité de closing)</div>
             <div id="dash-prob-table" style="display:flex;flex-direction:column;gap:0;"></div>
           </div>
@@ -3972,7 +3972,7 @@
             <span style="font-size:15px;flex-shrink:0;margin-top:1px;">💡</span>
             <div style="font-size:11px;color:#0f766e;">
               <strong style="font-weight:700;display:block;margin-bottom:3px;">Règle de version</strong>
-              Seule la simulation <code style="font-size:10px;background:white;padding:1px 4px;border-radius:3px;font-family:var(--font-mono);">is_reference_etude = true</code> remonte dans les KPIs. Le commercial contrôle ça via "Enregistrer l'étude".
+              Seule la simulation <code style="font-size:10px;background:var(--c-surface);padding:1px 4px;border-radius:3px;font-family:var(--font-mono);">is_reference_etude = true</code> remonte dans les KPIs. Le commercial contrôle ça via "Enregistrer l'étude".
             </div>
           </div>
         </div>
@@ -8135,7 +8135,7 @@ function _kbPhone(prospectId, triggerEl) {
 
   const pop = document.createElement('div');
   pop.id = '_kb-phone-pop';
-  pop.style.cssText = `position:fixed;z-index:9999;width:260px;background:#fff;border:1px solid var(--c-border);
+  pop.style.cssText = `position:fixed;z-index:9999;width:260px;background:var(--c-surface);border:1px solid var(--c-border);
     border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);padding:16px;font-family:var(--font-body);`;
 
   // Position near trigger button
@@ -8646,7 +8646,7 @@ function renderDrawerContent(p) {
             {l:'Aides totales',v:fek(reAides)},
             {l:'Loyer mensuel net',v:fek(reMens)+'/mois'},
             {l:'Économies/an',v:fek(reEco)+'/an'},
-          ].map(k=>`<div style="padding:8px 10px;background:#fff;border:1px solid var(--c-teal-border,#99f6e4);border-radius:7px;">
+          ].map(k=>`<div style="padding:8px 10px;background:var(--c-surface);border:1px solid var(--c-teal-border,#99f6e4);border-radius:7px;">
             <div style="font-size:9px;color:var(--c-teal);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:2px;">${k.l}</div>
             <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
           </div>`).join('')}
@@ -8655,7 +8655,7 @@ function renderDrawerContent(p) {
           <button onclick="startSimForClient('${raisonEsc}','${sirenEsc}',window._drawerSimParams['${reParamsKey}'])" style="flex:1;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
             ↩ Reprendre
           </button>
-          <button onclick="genererPropositionDepuisDrawer('${reParamsKey}','${raisonEsc}','${sirenEsc}')" style="flex:1;padding:9px;border:1px solid var(--c-teal);border-radius:7px;background:#fff;color:var(--c-teal);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+          <button onclick="genererPropositionDepuisDrawer('${reParamsKey}','${raisonEsc}','${sirenEsc}')" style="flex:1;padding:9px;border:1px solid var(--c-teal);border-radius:7px;background:var(--c-bg);color:var(--c-teal);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
             📄 Générer la proposition
           </button>
         </div>
@@ -10919,7 +10919,7 @@ function dashFmtK(n) {
 }
 function dashKpiCard(icon, value, label, sub, color, trend, breakdown) {
   const stripe = color || 'var(--c-navy)';
-  return '<div style="padding:18px 20px;border-radius:14px;background:white;border:1px solid var(--c-border);cursor:default;position:relative;overflow:hidden;">'
+  return '<div style="padding:18px 20px;border-radius:14px;background:var(--c-surface);border:1px solid var(--c-border);cursor:default;position:relative;overflow:hidden;">'
     // Bande colorée top
     + '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + stripe + ';border-radius:14px 14px 0 0;"></div>'
     // Badge trend (top-right)
@@ -11307,7 +11307,7 @@ async function renderGlobalDashboard() {
               '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>' +
               '<div style="font-size:10px;color:#dc2626;font-weight:600;">' + c.daysInactive + 'j de retard · Relancer pour prise de contact</div>' +
             '</div>' +
-            '<button data-prospect-id="' + c.id + '" onclick="openProspectFromDash(this.dataset.prospectId)" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:white;cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
+            '<button data-prospect-id="' + c.id + '" onclick="openProspectFromDash(this.dataset.prospectId)" style="font-size:10px;padding:3px 8px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);cursor:pointer;color:var(--c-text-2);transition:border-color .15s;" onmouseover="this.style.borderColor=\'var(--c-teal)\';this.style.color=\'var(--c-teal)\'" onmouseout="this.style.borderColor=\'var(--c-border)\';this.style.color=\'var(--c-text-2)\'">Voir →</button>' +
           '</div>'
         ).join('');
       }
@@ -11777,7 +11777,7 @@ function previewProposition(id) {
 
       <!-- Grille 3 chiffres clés -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
-        <div style="padding:14px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:center;">
+        <div style="padding:14px;border-radius:12px;background:var(--c-surface);border:1px solid var(--c-border);text-align:center;">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px;">Investissement</div>
           <div style="font-size:18px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);">${fe(p.investissement)}</div>
           <div style="font-size:9px;color:#94a3b8;margin-top:3px;">HT total</div>
@@ -11787,7 +11787,7 @@ function previewProposition(id) {
           <div style="font-size:18px;font-weight:800;color:var(--c-teal);font-family:var(--font-mono);">−${fe(p.totalAides)}</div>
           <div style="font-size:9px;color:var(--c-teal);margin-top:3px;">${aidesPct}% couvert</div>
         </div>
-        <div style="padding:14px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:center;">
+        <div style="padding:14px;border-radius:12px;background:var(--c-surface);border:1px solid var(--c-border);text-align:center;">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px;">Capital financé</div>
           <div style="font-size:18px;font-weight:800;color:var(--c-navy);font-family:var(--font-mono);">${fe(coutNet)}</div>
           <div style="font-size:9px;color:#94a3b8;margin-top:3px;">net après aides</div>
@@ -11831,8 +11831,8 @@ function previewProposition(id) {
           ${p.type === 'pdf' ? '📕 Télécharger PDF' : '📗 Télécharger Excel'}
         </button>` : ''}
         <button onclick="closePropPreview()"
-          style="flex:1;padding:10px 16px;border-radius:8px;border:1px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
-          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+          style="flex:1;padding:10px 16px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);color:var(--c-text-2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
+          onmouseover="this.style.background='var(--c-surface)'" onmouseout="this.style.background='var(--c-bg)'">
           Fermer
         </button>
       </div>
@@ -11945,7 +11945,7 @@ function makeFieldValuesEditable() {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = currentVal;
-      input.style.cssText = 'width:80px;padding:2px 6px;font-size:12px;font-family:var(--font-mono);border:1px solid var(--c-teal);border-radius:4px;background:white;color:var(--c-navy);text-align:right;outline:none;';
+      input.style.cssText = 'width:80px;padding:2px 6px;font-size:12px;font-family:var(--font-mono);border:1px solid var(--c-teal);border-radius:4px;background:var(--c-bg);color:var(--c-text);text-align:right;outline:none;';
 
       displayEl.textContent = '';
       displayEl.appendChild(input);
