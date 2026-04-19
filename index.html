@@ -8040,30 +8040,47 @@ function _renderPipelineBoard() {
       </div>`;
   }
 
-  // Action buttons in footer
+  // Action buttons in footer — stage-specific
   function actionBtns(c) {
-    const btn = (icon, fn, title) =>
-      `<button title="${title}" onclick="event.stopPropagation();${fn}"
+    const btn = (icon, fn, title, color) => {
+      const base = color ? `background:${color}1a;border-color:${color}44;` : '';
+      return `<button title="${title}" data-kb-id="${c.id}" onclick="event.stopPropagation();${fn}"
         style="width:28px;height:28px;border-radius:7px;border:1px solid var(--c-border);
-               background:var(--c-surface);cursor:pointer;font-size:13px;display:flex;
+               ${base}cursor:pointer;font-size:13px;display:flex;
                align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;"
-        onmouseover="this.style.borderColor='var(--c-teal)';this.style.background='var(--c-teal-bg,#f0fdfa)'"
-        onmouseout="this.style.borderColor='var(--c-border)';this.style.background='var(--c-surface)'">${icon}</button>`;
+        onmouseover="this.style.borderColor='var(--c-teal)';this.style.background='rgba(13,148,136,.1)'"
+        onmouseout="this.style.borderColor='var(--c-border)';this.style.background='${color ? color+'1a' : 'transparent'}'">${icon}</button>`;
+    };
+    const rEsc = (c.raison_sociale||'').replace(/'/g,"\\'");
+    const sEsc = (c.siren||'').replace(/'/g,"\\'");
+    const st   = c.statut;
     let btns = '';
-    // Quick sim button (all active stages)
-    if (!['gagne','perdu'].includes(c.statut)) {
-      const rEsc = (c.raison_sociale||'').replace(/'/g,"\\'");
-      const sEsc = (c.siren||'').replace(/'/g,"\\'");
-      btns += btn('⚡', `startSimForClient('${rEsc}','${sEsc}')`, 'Lancer une simulation');
+
+    // ⚡ Simulateur — tous les stades actifs (sauf gagné/perdu)
+    if (!['gagne','perdu'].includes(st)) {
+      btns += btn('⚡', `startSimForClient('${rEsc}','${sEsc}')`, 'Audit Flash — ouvrir le simulateur', '#f59e0b');
     }
-    // Phone button if phone exists
-    if (c.telephone) {
-      btns += btn('📞', `window.open('tel:${c.telephone}')`, 'Appeler');
+
+    // 📞 Téléphone — stades de qualification / contact
+    if (['nouveau','qualifie','en_discussion'].includes(st)) {
+      btns += btn('📞', `_kbPhone('${c.id}',this)`, 'Contact rapide — fiche décideur + note', '#0ea5e9');
     }
-    // View last sim if exists
-    if (c.nb_sims > 0) {
-      btns += btn('🔗', `openClientDrawer('${c.id}')`, 'Voir la fiche');
+
+    // ⚖️ Comparaison scénarios — phases avant proposition finale
+    if (['en_discussion','proposition','negociation'].includes(st)) {
+      btns += btn('⚖️', `_kbScenarios('${c.id}')`, 'Comparer les scénarios techniques', '#8b5cf6');
     }
+
+    // 📄 Document / Proposition — stades de closing
+    if (['proposition','negociation','dossier_depose','gagne','perdu'].includes(st)) {
+      btns += btn('📄', `_kbDoc('${c.id}')`, 'Dernière proposition — PDF + détails financement', '#0d9488');
+    }
+
+    // 📁 Dossier administratif — stades finaux
+    if (['dossier_depose','gagne'].includes(st)) {
+      btns += btn('📁', `_kbDossier('${c.id}')`, 'Suivi administratif — CEE/ADEME, pièces', '#dc2626');
+    }
+
     return btns;
   }
 
@@ -8131,6 +8148,111 @@ function _renderPipelineBoard() {
 
 function _pipelineDragStart(id) { _pipelineDragId = id; setTimeout(() => { document.querySelector(`[ondragstart="_pipelineDragStart('${id}')"]`)?.classList.add('dragging'); }, 0); }
 function _pipelineDragEnd() { document.querySelectorAll('.pipeline-kanban-card').forEach(c => c.classList.remove('dragging')); _pipelineDragId = null; }
+
+// ─── Kanban quick-action handlers ─────────────────────────────────────────────
+
+// 📞 Phone popover — contact info + quick note + reset J+X
+function _kbPhone(prospectId, triggerEl) {
+  // Remove any existing popover
+  document.getElementById('_kb-phone-pop')?.remove();
+  const c = (_pipelineClients || []).find(p => p.id === prospectId);
+  if (!c) return;
+
+  const contactName = [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') || '—';
+  const phone       = c.contact_telephone || c.telephone || null;
+  const email       = c.contact_email || null;
+
+  const pop = document.createElement('div');
+  pop.id = '_kb-phone-pop';
+  pop.style.cssText = `position:fixed;z-index:9999;width:260px;background:#fff;border:1px solid var(--c-border);
+    border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);padding:16px;font-family:var(--font-body);`;
+
+  // Position near trigger button
+  if (triggerEl) {
+    const r = triggerEl.getBoundingClientRect();
+    pop.style.top  = (r.bottom + 8) + 'px';
+    pop.style.left = Math.min(r.left, window.innerWidth - 276) + 'px';
+  } else {
+    pop.style.top = '50%'; pop.style.left = '50%';
+    pop.style.transform = 'translate(-50%,-50%)';
+  }
+
+  pop.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:11px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;">📞 Contact rapide</span>
+      <button onclick="document.getElementById('_kb-phone-pop').remove()" style="border:none;background:none;cursor:pointer;font-size:16px;color:var(--c-text-3);line-height:1;">×</button>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">${c.raison_sociale||'—'}</div>
+    <div style="font-size:12px;color:var(--c-text-2);margin-bottom:10px;">${contactName}</div>
+    ${phone ? `<a href="tel:${phone}" style="display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:8px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);text-decoration:none;margin-bottom:8px;">
+      <span style="font-size:15px;">📞</span>
+      <span style="font-size:13px;font-weight:700;color:#0ea5e9;">${phone}</span>
+    </a>` : `<div style="font-size:11px;color:var(--c-text-3);margin-bottom:8px;padding:6px;background:var(--c-surface);border-radius:6px;">Aucun téléphone enregistré</div>`}
+    ${email ? `<a href="mailto:${email}" style="display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;background:var(--c-surface);border:1px solid var(--c-border);text-decoration:none;margin-bottom:10px;">
+      <span style="font-size:13px;">✉️</span>
+      <span style="font-size:11px;color:var(--c-teal);font-weight:500;">${email}</span>
+    </a>` : ''}
+    <textarea id="_kb-note" placeholder="Note rapide (ex: Intéressé, demande simulation…)" rows="2"
+      style="width:100%;box-sizing:border-box;border:1px solid var(--c-border);border-radius:7px;padding:7px 9px;
+             font-size:11px;font-family:var(--font-body);resize:none;outline:none;color:var(--c-text);"></textarea>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <button onclick="_kbMarkContacted('${prospectId}')"
+        style="flex:1;padding:7px;border-radius:7px;border:none;background:var(--c-teal);color:#fff;
+               font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);">
+        ✓ Marquer contacté — réinit. J+X
+      </button>
+    </div>`;
+
+  document.body.appendChild(pop);
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function _close(e) {
+      if (!pop.contains(e.target)) { pop.remove(); document.removeEventListener('click', _close); }
+    });
+  }, 50);
+}
+
+// Reset J+X after a contact action (updates updated_at + saves note)
+async function _kbMarkContacted(prospectId) {
+  const note = document.getElementById('_kb-note')?.value?.trim() || '';
+  document.getElementById('_kb-phone-pop')?.remove();
+  try {
+    const body = { updated_at: new Date().toISOString() };
+    // Append note to notes field if provided
+    const existing = (_pipelineClients||[]).find(p => p.id === prospectId);
+    if (note && existing) body.notes = (existing.notes ? existing.notes + '\n' : '') + new Date().toLocaleDateString('fr-FR') + ' — ' + note;
+    const res = await fetch(ADMIN_API + '/prospects/' + prospectId, {
+      method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('PUT ' + res.status);
+    showToast('✓ Contact enregistré — J+X réinitialisé', 'success');
+    setTimeout(() => {
+      if (typeof renderPipelinePage === 'function') renderPipelinePage();
+    }, 400);
+  } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
+}
+
+// Helper: ouvre le drawer puis switch l'onglet après rendu
+function _kbOpenDrawerTab(prospectId, tabName) {
+  openClientDrawer(prospectId).then(() => {
+    setTimeout(() => {
+      const btn = document.querySelector(`.drawer-tab-btn[onclick*="${tabName}"]`);
+      if (btn) switchDrawerTab(tabName, btn);
+    }, 150);
+  });
+}
+
+// 📄 Document / Proposition — ouvre le drawer sur l'onglet Documents
+function _kbDoc(prospectId) { _kbOpenDrawerTab(prospectId, 'documents'); }
+
+// 📁 Dossier administratif — ouvre le drawer sur l'onglet Documents (pièces CEE/ADEME)
+function _kbDossier(prospectId) { _kbOpenDrawerTab(prospectId, 'documents'); }
+
+// ⚖️ Comparaison scénarios — ouvre le drawer sur l'onglet Simulations
+function _kbScenarios(prospectId) { _kbOpenDrawerTab(prospectId, 'simulations'); }
+
+// ─── End kanban quick-action handlers ─────────────────────────────────────────
+
 async function _pipelineDrop(newStatut) {
   if (!_pipelineDragId) return;
   const client = _pipelineClients.find(c => c.id === _pipelineDragId);
