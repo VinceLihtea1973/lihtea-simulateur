@@ -14902,11 +14902,14 @@ async function _saveDrawerCrmContactsToApi() {
       headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error('HTTP ' + res.status + (err.error ? ' — ' + err.error : ''));
+    }
     if (_drawerCrmData) Object.assign(_drawerCrmData, payload);
     if (typeof showToast === 'function') showToast('Contact sauvegardé ✓', 'success');
   } catch(e) {
-    if (typeof showToast === 'function') showToast('Erreur sauvegarde contact', 'error');
+    if (typeof showToast === 'function') showToast('Erreur contact : ' + e.message, 'error');
   }
 }
 </script>
