@@ -8415,7 +8415,7 @@ async function _kbMarkContacted(prospectId, activityId) {
 
     // 3. Réinitialiser J+X sur le prospect
     await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PATCH', headers: hdrs,
+      method: 'PUT', headers: hdrs,
       body: JSON.stringify({ updated_at: now }),
     });
 
@@ -8788,7 +8788,7 @@ async function logActivity(prospectId) {
 
     // Mettre à jour updated_at sur le prospect
     await fetch(ADMIN_API + '/prospects/' + prospectId, {
-      method: 'PATCH', headers: hdrs,
+      method: 'PUT', headers: hdrs,
       body: JSON.stringify({ updated_at: new Date().toISOString() }),
     });
 
@@ -14770,7 +14770,7 @@ async function saveDrawerCrmEntEdit() {
   };
   try {
     const res = await fetch(ADMIN_API + '/prospects/' + id, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
       body: JSON.stringify(payload)
     });
@@ -14898,7 +14898,7 @@ async function _saveDrawerCrmContactsToApi() {
   };
   try {
     const res = await fetch(ADMIN_API + '/prospects/' + id, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
       body: JSON.stringify(payload)
     });
