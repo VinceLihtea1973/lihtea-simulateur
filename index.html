@@ -14843,7 +14843,7 @@ function openDrawerCrmContactModal(idx) {
   document.getElementById('crm-c-notes').value    = c.notes    || '';
   const chk = document.getElementById('crm-c-principal');
   if (chk) chk.checked = (idxVal === '') ? !_drawerCrmContacts.length : (c.principal||false);
-  modal.style.display = 'flex';
+  modal.classList.add('open');
 }
 
 /* ── Dispatcher modal save selon contexte ── */
