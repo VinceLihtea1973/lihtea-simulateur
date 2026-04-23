@@ -8584,7 +8584,10 @@ const ACT_RESULTS = [
 // Récupère la prochaine relance planifiée depuis les activités
 // Champ DB : date_planifiee (table activites)
 function getNextRelance(prospect) {
-  const acts = (prospect.activites || []).filter(a => a.date_planifiee);
+  // Ignorer les activités déjà réalisées ou annulées — seul statut 'planifiee' compte
+  const acts = (prospect.activites || []).filter(
+    a => a.date_planifiee && a.statut !== 'realisee' && a.statut !== 'annulee'
+  );
   if (!acts.length) return null;
   acts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   return acts[0].date_planifiee.split('T')[0]; // YYYY-MM-DD
@@ -8665,7 +8668,7 @@ function _renderActivitesTab(p) {
         timelineHtml += `<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);padding:12px 0 6px;${i>0?'margin-top:4px;':''}">${grp}</div>`;
       }
       // Date de planification (si future)
-      const relDate = h.date_planifiee ? h.date_planifiee.split('T')[0] : null;
+      const relDate = (h.date_planifiee && h.statut === 'planifiee') ? h.date_planifiee.split('T')[0] : null;
       const relOverdue = relDate && relDate <= today;
       const relBadge = relDate ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;
         background:${relOverdue?'#fee2e2':'#fef3c7'};color:${relOverdue?'#dc2626':'#b45309'};">
