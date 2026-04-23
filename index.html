@@ -5654,6 +5654,10 @@ async function lookupClientSiren() {
     if (d && (d.raison_sociale || d.siren)) {
       currentClientSiret = siren;
       currentClientData  = d;
+      // Mettre en cache les données dirigeant
+      if (d.dirigeant_prenom || d.dirigeant_nom) {
+        _dirigeantCache[siren] = { prenom: d.dirigeant_prenom||'', nom: d.dirigeant_nom||'', qualite: d.dirigeant_qualite||'' };
+      }
       // Pré-remplir le nom client
       const nomInput = document.getElementById('nom-client');
       if (nomInput && d.raison_sociale) { nomInput.value = d.raison_sociale; recalculer(); }
@@ -5761,6 +5765,10 @@ async function ncSirenLookup() {
 
     if (d && (d.raison_sociale || d.siren)) {
       _ncSirenData = d;
+      // Mettre en cache les données dirigeant
+      if (d.dirigeant_prenom || d.dirigeant_nom) {
+        _dirigeantCache[siren] = { prenom: d.dirigeant_prenom||'', nom: d.dirigeant_nom||'', qualite: d.dirigeant_qualite||'' };
+      }
       // Pré-remplir le nom
       const nomEl = document.getElementById('nc-nom');
       if (nomEl && d.raison_sociale) nomEl.value = d.raison_sociale;
@@ -14774,6 +14782,7 @@ document.addEventListener('DOMContentLoaded', function() {
    ───────────────────────────────────────────────────────────── */
 let _drawerCrmData     = null;   // prospect data en cours dans le tiroir
 let _drawerCrmContacts = [];     // tableau contacts éditables
+let _dirigeantCache    = {};     // { [siren]: { prenom, nom, qualite } } — données dirigeant mises en cache
 
 /* ── Render ENTREPRISE (mode lecture) ── */
 function renderDrawerCrmEntreprise() {
@@ -14923,7 +14932,7 @@ function renderDrawerCrmContacts() {
 }
 
 /* ── Ouvrir modal contact (contexte tiroir) ── */
-function openDrawerCrmContactModal(idx) {
+async function openDrawerCrmContactModal(idx) {
   window._crmModalCtx = 'drawer';
   const modal = document.getElementById('crm-contact-modal');
   if (!modal) return;
@@ -14931,10 +14940,37 @@ function openDrawerCrmContactModal(idx) {
   const idxVal = (idx !== null && idx !== undefined) ? String(idx) : '';
   document.getElementById('crm-contact-idx').value = idxVal;
   const titleEl = document.getElementById('crm-modal-title');
-  if (titleEl) titleEl.textContent = idxVal !== '' ? 'Modifier le contact' : 'Ajouter un contact';
-  document.getElementById('crm-c-prenom').value   = c.prenom   || '';
-  document.getElementById('crm-c-nom').value      = c.nom      || '';
-  document.getElementById('crm-c-fonction').value = c.fonction || '';
+  if (titleEl) titleEl.textContent = idxVal !== '' ? 'Modifier le contact' : 'Nouveau contact';
+
+  // Pour un nouveau contact, auto-remplir depuis le dirigeant (SIREN API)
+  let autoPrenom = '', autoNom = '', autoFonction = '';
+  if (idxVal === '') {
+    const siren = _drawerCrmData?.siren;
+    if (siren) {
+      if (_dirigeantCache[siren]) {
+        autoPrenom   = _dirigeantCache[siren].prenom  || '';
+        autoNom      = _dirigeantCache[siren].nom     || '';
+        autoFonction = _dirigeantCache[siren].qualite || '';
+      } else {
+        // Fetch depuis l'API SIREN et mise en cache
+        try {
+          const r = await fetch(CONNECTORS_API + '/siret?siret=' + siren, { headers: getAuthHeaders() });
+          const j = await r.json();
+          const d = j?.data;
+          if (d && (d.dirigeant_prenom || d.dirigeant_nom)) {
+            _dirigeantCache[siren] = { prenom: d.dirigeant_prenom||'', nom: d.dirigeant_nom||'', qualite: d.dirigeant_qualite||'' };
+            autoPrenom   = d.dirigeant_prenom  || '';
+            autoNom      = d.dirigeant_nom     || '';
+            autoFonction = d.dirigeant_qualite || '';
+          }
+        } catch(e) { console.warn('[Contact] Dirigeant pré-remplissage erreur:', e); }
+      }
+    }
+  }
+
+  document.getElementById('crm-c-prenom').value   = c.prenom   || autoPrenom;
+  document.getElementById('crm-c-nom').value      = c.nom      || autoNom;
+  document.getElementById('crm-c-fonction').value = c.fonction || autoFonction;
   document.getElementById('crm-c-service').value  = c.service  || '';
   document.getElementById('crm-c-email').value    = c.email    || '';
   document.getElementById('crm-c-tel').value      = c.tel      || '';
