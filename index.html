@@ -3074,6 +3074,33 @@
     /* ─── FLOATING SIMULATOR BUTTON (default hidden) ─── */
     .mobile-sim-fab { display: none; }
 
+    /* ── Sim mobile tab toggle ── */
+    .sim-mobile-tabs {
+      display: none; /* caché sur desktop */
+    }
+    .sim-tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      border: none;
+      background: transparent;
+      color: var(--c-text-3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .sim-tab-btn.active {
+      color: var(--c-teal);
+      border-bottom-color: var(--c-teal);
+      background: var(--c-teal-bg);
+    }
+
     /* ═══════════════════════════════════════════════════════════
        COMPREHENSIVE MOBILE-FIRST RESPONSIVE SYSTEM (3 BREAKPOINTS)
        Mobile: <768px | Tablet: 768px-1024px | Desktop: >1024px
@@ -3141,7 +3168,7 @@
       .proj-kpi-row { flex-direction: column; }
       .proj-kpi { min-width: 100%; }
 
-      /* ─── SPLIT VIEW: On mobile, no grid — stack and hide sim ─── */
+      /* ─── SPLIT VIEW: On mobile, no grid — show only sim panel ─── */
       .split-container {
         display: block !important;
         grid-template-columns: unset !important;
@@ -3150,23 +3177,28 @@
         overflow: hidden;
       }
 
-      .main-content.split-view .split-container #page-simulateur {
+      /* Sur mobile, page-resultats est cachée dans split-container (on affiche sim seul) */
+      .main-content.split-view .split-container #page-resultats {
         display: none !important;
+      }
+
+      .main-content.split-view .split-container #page-simulateur {
+        display: block !important;
         max-height: none !important;
         position: static !important;
         border-right: none !important;
         overflow: visible !important;
       }
 
-      /* Show simulateur page ONLY when toggled via mobile button */
-      .main-content.split-view .split-container #page-simulateur.mobile-show,
-      #page-simulateur.mobile-show {
-        display: block !important;
-        border-right: none;
+      /* Tab toggle mobile — visible */
+      .sim-mobile-tabs {
+        display: flex;
+        background: var(--c-surface);
         border-bottom: 1px solid var(--c-border);
-        max-height: none;
-        position: static;
-        overflow: visible;
+        border-radius: 10px 10px 0 0;
+        overflow: hidden;
+        margin-bottom: 12px;
+        box-shadow: var(--shadow);
       }
 
       /* ─── PAGES: Full width, proper padding, no overflow ─── */
@@ -3569,11 +3601,10 @@
         width: 64px;
       }
 
-      .sidebar .sidebar-logo-text {
-        display: none;
-      }
-
-      .sidebar .sidebar-item span:not(.sidebar-icon) {
+      .sidebar .sidebar-logo-text,
+      .sidebar .sidebar-section-title,
+      .sidebar-item-label,
+      .sidebar-item-badge {
         display: none;
       }
 
@@ -3586,15 +3617,17 @@
         margin-left: 64px;
       }
 
-      .split-container {
-        grid-template-columns: 1fr;
+      /* ── Split-view 2 colonnes adaptées ── */
+      .main-content.split-view .split-container {
+        grid-template-columns: min(380px, 42%) 1fr;
       }
 
       .main-content.split-view .split-container #page-simulateur {
-        border-right: none;
-        border-bottom: 1px solid var(--c-border);
-        max-height: auto;
-        position: static;
+        border-right: 1px solid var(--c-border);
+        max-height: calc(100vh - 90px);
+        position: sticky;
+        top: 0;
+        overflow-y: auto;
       }
 
       .metrics-grid {
@@ -3603,11 +3636,11 @@
 
       .main-content > .header,
       .page {
-        padding: 20px 16px;
+        padding: 16px;
       }
 
       .dashboard-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
 
       .scenarios-table {
@@ -3617,6 +3650,11 @@
       .scenarios-table th,
       .scenarios-table td {
         padding: 7px 10px;
+      }
+
+      /* Export bar sur tablet */
+      .export-bar-sticky {
+        left: 64px;
       }
     }
 
@@ -3966,8 +4004,8 @@
     </a>
   </nav>
 
-  <!-- FLOATING SIMULATOR ACCESS BUTTON (mobile only) -->
-  <button class="mobile-sim-fab" id="mobile-sim-fab" onclick="toggleMobileSimulator()" style="display:none;">
+  <!-- FLOATING SIMULATOR ACCESS BUTTON (mobile only — kept for JS compat, visually hidden) -->
+  <button class="mobile-sim-fab" id="mobile-sim-fab" onclick="toggleMobileSimulator()" style="display:none!important;visibility:hidden;pointer-events:none;">
     ⚙ Simulateur
   </button>
 
@@ -4085,10 +4123,10 @@
       </div>
 
       <!-- 4 KPI cards (rempli par JS) -->
-      <div id="dash-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+      <div id="dash-kpi-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;"></div>
 
       <!-- Charts -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px;">
         <div class="card" style="padding:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div>
@@ -4119,7 +4157,7 @@
       </div>
 
       <!-- Top 5 + Urgentes -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
         <div class="card" style="padding:20px;">
           <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:14px;">Top 5 Prospects <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">Score ICP</span></div>
           <div id="dash-top5"></div>
@@ -4157,7 +4195,19 @@
     <!-- PAGE: SIMULATEUR -->
     <div class="page" id="page-simulateur">
 
-    <div>
+    <!-- ── Tab toggle mobile (visible uniquement sur mobile) ── -->
+    <div class="sim-mobile-tabs" id="sim-mobile-tabs">
+      <button class="sim-tab-btn active" id="sim-tab-params" onclick="switchSimMobileTab('params')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>
+        Paramètres
+      </button>
+      <button class="sim-tab-btn" id="sim-tab-results" onclick="switchSimMobileTab('results')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Résultats
+      </button>
+    </div>
+
+    <div id="sim-params-panel">
       <!-- ── Bloc client (hero card) ── -->
       <div class="card" style="padding:16px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--c-navy) 0%,#1e3a5f 100%);border-color:var(--c-navy);box-shadow:0 4px 16px rgba(15,43,70,0.18);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -4367,16 +4417,18 @@
       </div>
 
       <!-- ── CEE avancés ── -->
-      <div class="card expert-only" style="margin-bottom:14px;">
-        <div class="sim-card-header">
+      <div class="card expert-only" style="margin-bottom:14px;" id="cee-card">
+        <div class="sim-card-header" onclick="toggleCeeCard()" style="cursor:pointer;user-select:none;">
           <div class="sim-card-icon" style="background:linear-gradient(135deg,#92400e,#b45309);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div class="sim-card-title">Paramètres CEE avancés</div>
             <div class="sim-card-sub">Certificats d'Économies d'Énergie</div>
           </div>
+          <div id="cee-toggle-icon" style="font-size:11px;color:var(--c-text-3);font-weight:600;padding:2px 8px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);transition:transform 0.2s;">▲ Réduire</div>
         </div>
+        <div id="cee-card-body">
 
         <div class="field">
           <div class="field-header">
@@ -4400,12 +4452,17 @@
         </div>
       </div>
 
+        </div><!-- fin cee-card-body -->
+
       <!-- Auto-save indicator -->
       <div style="display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 0 4px;opacity:0.5;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--c-teal);"><polyline points="20 6 9 17 4 12"/></svg>
         <span style="font-size:11px;color:var(--c-text-3);font-weight:500;">Résultats mis à jour en temps réel</span>
       </div>
-    </div>
+    </div><!-- fin sim-params-panel -->
+
+    <!-- Résultats inline mobile (cloned via JS) -->
+    <div id="sim-results-mobile" style="display:none;"></div>
 
     </div>
     <!-- FIN PAGE SIMULATEUR -->
@@ -6472,6 +6529,46 @@ function updateMobileNav(pageName) {
     item.classList.toggle('active', item.dataset.page === pageName);
   });
   closeMobileSidebar();
+}
+
+/* ── Tab toggle mobile simulateur ── */
+function switchSimMobileTab(tab) {
+  const paramsPanel  = document.getElementById('sim-params-panel');
+  const mobileResults = document.getElementById('sim-results-mobile');
+  const btnParams    = document.getElementById('sim-tab-params');
+  const btnResults   = document.getElementById('sim-tab-results');
+  if (!paramsPanel) return;
+
+  if (tab === 'params') {
+    paramsPanel.style.display = '';
+    if (mobileResults) mobileResults.style.display = 'none';
+    btnParams?.classList.add('active');
+    btnResults?.classList.remove('active');
+  } else {
+    paramsPanel.style.display = 'none';
+    // Afficher les résultats en clonant le contenu de page-resultats
+    if (mobileResults) {
+      const src = document.getElementById('page-resultats');
+      if (src && !mobileResults.dataset.loaded) {
+        mobileResults.innerHTML = src.innerHTML;
+        mobileResults.dataset.loaded = '1';
+      }
+      mobileResults.style.display = '';
+    }
+    btnParams?.classList.remove('active');
+    btnResults?.classList.add('active');
+  }
+}
+
+/* ── Toggle section CEE avancés ── */
+let _ceeOpen = true;
+function toggleCeeCard() {
+  _ceeOpen = !_ceeOpen;
+  const body = document.getElementById('cee-card-body');
+  const icon = document.getElementById('cee-toggle-icon');
+  if (!body) return;
+  body.style.display = _ceeOpen ? '' : 'none';
+  if (icon) icon.textContent = _ceeOpen ? '▲ Réduire' : '▼ Développer';
 }
 
 function toggleMobileSimulator() {
