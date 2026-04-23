@@ -6030,7 +6030,7 @@ async function syncSimulationToSupabase(simData, options = {}) {
       montant_aides_total: simData.results?.totalAides || 0,
       montant_loyer_mensuel: simData.results?.mensNette || 0,
       gain_net_annuel: simData.results?.ecoAn || 0,
-      roi_mois: simData.results?.roiNet ? Math.round(simData.results.roiNet) : null,
+      roi_mois: simData.results?.paybackMois || null,
       notes: simData.name || ''
     };
 
@@ -6366,7 +6366,7 @@ function autoSaveBrouillon() {
         },
         results: {
           totalAides: d.totalAides, coutNet: d.coutNet, mensNette: d.mensNette,
-          ecoAn: d.ecoAn, roiNet: d.roi, pctCouvert: d.pctCouvert
+          ecoAn: d.ecoAn, roiNet: d.roi, paybackMois: d.paybackMois, pctCouvert: d.pctCouvert
         },
         aides: { ...aidesActives },
         name: 'Brouillon auto'
@@ -6399,7 +6399,7 @@ async function enregistrerEtude() {
       },
       results: {
         totalAides: d.totalAides, coutNet: d.coutNet, mensNette: d.mensNette,
-        ecoAn: d.ecoAn, roiNet: d.roi, pctCouvert: d.pctCouvert
+        ecoAn: d.ecoAn, roiNet: d.roi, paybackMois: d.paybackMois, pctCouvert: d.pctCouvert
       },
       aides: { ...aidesActives },
       name: 'Étude — ' + d.nomClient
@@ -9159,7 +9159,22 @@ function renderDrawerContent(p) {
     || p.simulations?.find(s => s.statut !== 'brouillon');
   const _kpiInv   = _kpiSim ? (Number(_kpiSim.parametres?.investissement)||0) : 0;
   const _kpiAides = _kpiSim ? (_kpiSim.montant_aides_total||0) : 0;
-  const _kpiRoi   = _kpiSim ? (_kpiSim.roi_mois||0) : 0;
+  // Recalculer payback depuis parametres (roi_mois en DB peut stocker des € au lieu des mois)
+  const _kpiPayback = (() => {
+    if (!_kpiSim) return 0;
+    const p_ = _kpiSim.parametres || {};
+    const conso_ = Number(p_.consommation)||0;
+    const gain_  = Number(p_.gain_energetique)||0;
+    const prix_  = Number(p_.prix_energie)||0;
+    const duree_ = Number(p_.duree_ans)||0;
+    const mens_  = _kpiSim.montant_loyer_mensuel||0;
+    const ecoAn_ = (conso_ > 0 && gain_ > 0 && prix_ > 0) ? conso_ * gain_ / 100 * prix_ : 0;
+    const loyers_= mens_ * duree_ * 12;
+    if (ecoAn_ > 0 && loyers_ > 0) return Math.round(loyers_ / (ecoAn_ / 12));
+    const stored = _kpiSim.roi_mois||0;
+    return (stored > 0 && stored < 600) ? stored : 0; // fiable seulement si <600 mois
+  })();
+  const _kpiRoi = _kpiPayback;
   const score = calcScoreICP({ ...p, nb_sims: p.simulations?.length||0, totalInvest: _kpiInv||0, daysInactive: Math.floor((Date.now()-new Date(p.updated_at||p.created_at).getTime())/86400000) });
 
   // ── Header
@@ -9307,13 +9322,27 @@ function renderDrawerContent(p) {
     const refEtude = p.simulations?.find(s => s.is_reference_etude) || p.simulations?.find(s => s.statut === 'etudie');
     const refEtudeBlock = refEtude ? (() => {
       const re = refEtude;
-      const reInv = Number(re.parametres?.investissement)||0;
+      const reInv  = Number(re.parametres?.investissement)||0;
       const reAides = re.montant_aides_total||0;
-      const reMens = re.montant_loyer_mensuel||0;
-      const reEco = re.gain_net_annuel||0;
-      const reRoi = re.roi_mois ? (re.roi_mois < 12 ? re.roi_mois+'m' : Math.round(re.roi_mois/12)+'an') : '—';
-      const reDate = re.updated_at ? new Date(re.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const reMens  = re.montant_loyer_mensuel||0;
+      const reDate  = re.updated_at ? new Date(re.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
       const reParams = re.parametres || {};
+      // Recalculer économies/an depuis les parametres stockés (plus fiable que gain_net_annuel en DB)
+      const _conso = Number(reParams.consommation)||0;
+      const _gain  = Number(reParams.gain_energetique)||0;
+      const _prix  = Number(reParams.prix_energie)||0;
+      const reEco  = (_conso > 0 && _gain > 0 && _prix > 0)
+        ? _conso * _gain / 100 * _prix
+        : (re.gain_net_annuel || 0);
+      // Recalculer payback (mois) depuis parametres — roi_mois en DB peut être erroné (stockait €, pas mois)
+      const _duree = Number(reParams.duree_ans)||0;
+      const _totalLoyers = reMens * _duree * 12;
+      const _paybackMois = (reEco > 0 && _totalLoyers > 0)
+        ? Math.round(_totalLoyers / (reEco / 12))
+        : (re.roi_mois && re.roi_mois < 600 ? re.roi_mois : null); // roi_mois fiable seulement si < 600m
+      const reRoi = _paybackMois
+        ? (_paybackMois < 12 ? _paybackMois+'m' : Math.round(_paybackMois/12)+'an')
+        : '—';
       // Stocker les params dans un global pour éviter l'injection JSON dans onclick (double-quotes cassent l'attribut HTML)
       window._drawerSimParams = window._drawerSimParams || {};
       const reParamsKey = 'sim_' + (re.id || Date.now());
