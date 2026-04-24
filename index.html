@@ -421,7 +421,8 @@
     [data-theme="dark"] .tab-btn.active { background: var(--c-teal); color: white; }
     [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
     [data-theme="dark"] .scoring-aide { background: var(--c-surface); border-color: var(--c-border); }
-    [data-theme="dark"] .export-bar { background: rgba(19,32,53,0.95); border-top-color: var(--c-border); }
+    [data-theme="dark"] .export-bar,
+    [data-theme="dark"] .export-bar-sticky { background: rgba(19,32,53,0.97); border-top-color: var(--c-border); }
 
     /* ─── DARK MODE: element-level overrides ─── */
     /* Prospect/client table header — navy var becomes light blue in dark, use solid dark instead */
@@ -2645,7 +2646,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: #f5f6f8;
+      background: var(--c-bg);
     }
 
     .sidebar.collapsed ~ .main-content {
@@ -4538,7 +4539,7 @@
                  oninput="recalculer()">
         </div>
 
-        <div class="field" id="bareme-info-field" style="background:#f0fdfa;border-radius:10px;padding:12px 14px;border:1px solid #99f6e4;">
+        <div class="field" id="bareme-info-field" style="background:var(--c-teal-bg);border-radius:10px;padding:12px 14px;border:1px solid var(--c-teal-border);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
             <span class="field-label" style="color:#0d9488;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Conditions de financement</span>
             <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#8896a7;color:#fff;font-weight:700;transition:background 0.3s;">Chargement…</span>
@@ -5341,14 +5342,14 @@
 
 <!-- ─── POPUP GÉNÉRATION PROPOSITION ─── -->
 <div id="popup-proposition-overlay" onclick="if(event.target===this)fermerPopupProposition()" style="display:none;position:fixed;inset:0;background:rgba(15,43,70,0.55);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:32px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(15,43,70,0.25);position:relative;">
-    <button onclick="fermerPopupProposition()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;line-height:1;">×</button>
+  <div style="background:var(--c-surface);border-radius:16px;padding:32px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(15,43,70,0.25);position:relative;">
+    <button onclick="fermerPopupProposition()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;color:var(--c-text-3);cursor:pointer;line-height:1;">×</button>
     <div style="font-size:26px;margin-bottom:8px;">📤</div>
-    <div style="font-size:17px;font-weight:800;color:#0f2b46;margin-bottom:6px;">Générer la proposition commerciale</div>
-    <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Ce PDF sera archivé dans l'onglet <strong>Propositions</strong>. La génération fait automatiquement évoluer le statut du dossier dans le <strong>Pipeline</strong>.</p>
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
-      <div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:8px;">📋 Processus de génération</div>
-      <div style="font-size:12px;color:#047857;line-height:1.8;">
+    <div style="font-size:17px;font-weight:800;color:var(--c-navy);margin-bottom:6px;">Générer la proposition commerciale</div>
+    <p style="font-size:13px;color:var(--c-text-2);line-height:1.6;margin:0 0 16px;">Ce PDF sera archivé dans l'onglet <strong>Propositions</strong>. La génération fait automatiquement évoluer le statut du dossier dans le <strong>Pipeline</strong>.</p>
+    <div style="background:var(--c-green-bg);border:1px solid rgba(5,150,105,0.3);border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:var(--c-green);margin-bottom:8px;">📋 Processus de génération</div>
+      <div style="font-size:12px;color:var(--c-text-2);line-height:1.8;">
         <div>① La simulation actuelle est sauvegardée</div>
         <div>② Le PDF est généré avec vos données client</div>
         <div>③ La proposition est archivée dans <strong>Propositions</strong></div>
@@ -5356,7 +5357,7 @@
       </div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button onclick="fermerPopupProposition()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Annuler</button>
+      <button onclick="fermerPopupProposition()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);color:var(--c-text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Annuler</button>
       <button onclick="fermerPopupProposition();exporterPDF()" style="flex:2;padding:10px;border-radius:8px;border:none;background:#0f2b46;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Générer et télécharger
@@ -14925,11 +14926,11 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Preview résultat SIREN -->
-      <div id="nc-preview" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px;margin-bottom:14px;">
+      <div id="nc-preview" style="display:none;background:var(--c-blue-bg);border:1px solid rgba(37,99,235,0.25);border-radius:8px;padding:12px;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:4px;" id="nc-preview-name">—</div>
         <div style="font-size:11px;color:var(--c-text-3);display:flex;gap:12px;flex-wrap:wrap;" id="nc-preview-details"></div>
       </div>
-      <div id="nc-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:#dc2626;"></div>
+      <div id="nc-error" style="display:none;background:var(--c-red-bg);border:1px solid var(--c-red-border);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--c-red);"></div>
 
       <!-- Champs manuels (toujours visibles) -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
