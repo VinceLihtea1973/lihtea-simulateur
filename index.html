@@ -4127,28 +4127,28 @@
       <!-- 4 KPI cards (rempli par JS) -->
       <div id="dash-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;"></div>
 
-      <!-- Charts -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px;">
-        <div class="card" style="padding:20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <!-- Charts — 2 colonnes symétriques -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="card" style="padding:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition Pipeline <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">Pondération active</span></div>
-              <div id="dash-pipeline-subtitle" style="font-size:10px;color:var(--c-text-3);">Entonnoir commercial</div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Répartition Pipeline <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">Pondération active</span></div>
+              <div id="dash-pipeline-subtitle" style="font-size:12px;color:var(--c-text-3);">Entonnoir commercial</div>
             </div>
-            <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:10px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-body);">Voir le kanban →</button>
+            <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:11px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">Voir le kanban →</button>
           </div>
           <!-- Tableau de pondération par étape -->
-          <div style="background:var(--c-surface);border-radius:8px;padding:10px 12px;margin-bottom:14px;border:1px solid var(--c-border);">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:8px;">Pondération par étape (probabilité de closing)</div>
+          <div style="background:var(--c-surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--c-border);">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:10px;">Pondération par étape (probabilité de closing)</div>
             <div id="dash-prob-table" style="display:flex;flex-direction:column;gap:0;"></div>
           </div>
           <div id="dash-pipeline-chart"></div>
         </div>
-        <div class="card" style="padding:20px;">
+        <div class="card" style="padding:22px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:2px;">Répartition par secteur <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">SIREN → NAF</span></div>
-              <div id="dash-sector-subtitle" style="font-size:10px;color:var(--c-text-3);">Prospects par industrie</div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Répartition par secteur <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">SIREN → NAF</span></div>
+              <div id="dash-sector-subtitle" style="font-size:12px;color:var(--c-text-3);">Prospects par industrie</div>
             </div>
           </div>
           <div id="dash-sector-wrap" style="display:flex;align-items:center;gap:20px;">
@@ -4158,27 +4158,27 @@
         </div>
       </div>
 
-      <!-- Top 5 + Urgentes -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
-        <div class="card" style="padding:20px;">
-          <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:14px;">Top 5 Prospects <span style="display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;">Score ICP</span></div>
+      <!-- Top 5 + Urgentes — 2 colonnes symétriques -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="card" style="padding:22px;">
+          <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:16px;">Top 5 Prospects <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">Score ICP</span></div>
           <div id="dash-top5"></div>
         </div>
-        <div class="card" style="padding:20px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <div style="font-size:13px;font-weight:700;color:var(--c-navy);">Activités en retard</div>
-            <span id="dash-retard-count" style="font-size:12px;font-weight:700;color:#dc2626;"></span>
+        <div class="card" style="padding:22px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Activités en retard</div>
+            <span id="dash-retard-count" style="font-size:13px;font-weight:700;color:#dc2626;"></span>
           </div>
           <div id="dash-urgentes"></div>
         </div>
       </div>
 
       <!-- Relances du jour -->
-      <div class="card" style="padding:20px;margin-top:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="card" style="padding:22px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
           <div>
-            <div style="font-size:13px;font-weight:700;color:var(--c-navy);">Relances du jour 📅 <span id="dash-relance-badge" style="display:none;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
-            <div style="font-size:10px;color:var(--c-text-3);margin-top:2px;">Prospects à rappeler aujourd'hui ou en retard de relance</div>
+            <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Relances du jour 📅 <span id="dash-relance-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
+            <div style="font-size:12px;color:var(--c-text-3);margin-top:3px;">Prospects à rappeler aujourd'hui ou en retard de relance</div>
           </div>
         </div>
         <div id="dash-relances"></div>
@@ -11943,11 +11943,11 @@ async function renderGlobalDashboard() {
       probEl.innerHTML = funnelData.map(d => {
         const prob = PROB_MAP[d.key] || 0;
         return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--c-border);">'
-          + '<span style="flex:1;font-size:11px;font-weight:600;color:' + d.c + ';">' + d.label + '</span>'
+          + '<span style="flex:1;font-size:12px;font-weight:600;color:' + d.c + ';">' + d.label + '</span>'
           + '<div style="width:90px;height:5px;background:var(--c-bg);border-radius:3px;overflow:hidden;flex-shrink:0;">'
           +   '<div style="height:5px;border-radius:3px;background:' + d.c + ';width:' + prob + '%;transition:width .4s;"></div>'
           + '</div>'
-          + '<span style="font-family:var(--font-mono);font-weight:800;font-size:11px;color:' + d.c + ';width:35px;text-align:right;flex-shrink:0;">' + prob + ' %</span>'
+          + '<span style="font-family:var(--font-mono);font-weight:800;font-size:12px;color:' + d.c + ';width:35px;text-align:right;flex-shrink:0;">' + prob + ' %</span>'
           + '</div>';
       }).join('');
     }
@@ -11990,10 +11990,10 @@ async function renderGlobalDashboard() {
                + ' onclick="openProspectFromDash(this.dataset.prospectId)">'
                + '<div style="width:22px;height:22px;border-radius:50%;background:var(--c-bg);border:1px solid var(--c-border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--c-text-3);flex-shrink:0;">' + (i+1) + '</div>'
                + '<div style="flex:1;min-width:0;">'
-               +   '<div style="font-size:12px;font-weight:600;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
-               +   '<div style="font-size:10px;color:var(--c-text-3);margin-top:1px;">' + dashFmtK(c.totalInvest) + ' · ' + (SL[c.statut]||c.statut||'—') + '</div>'
+               +   '<div style="font-size:13px;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
+               +   '<div style="font-size:12px;color:var(--c-text-3);margin-top:2px;">' + dashFmtK(c.totalInvest) + ' · ' + (SL[c.statut]||c.statut||'—') + '</div>'
                + '</div>'
-               + '<div style="font-size:14px;font-weight:800;color:' + scoreColor + ';font-family:var(--font-mono);flex-shrink:0;min-width:28px;text-align:right;">' + Math.round(c.score) + '</div>'
+               + '<div style="font-size:16px;font-weight:800;color:' + scoreColor + ';font-family:var(--font-mono);flex-shrink:0;min-width:28px;text-align:right;">' + Math.round(c.score) + '</div>'
                + '</div>';
         }).join('');
       }
@@ -12027,10 +12027,10 @@ async function renderGlobalDashboard() {
               + ' onmouseout="this.style.boxShadow=\'none\'">'
               + '<div style="width:32px;height:32px;border-radius:8px;background:' + urgColor + '20;color:' + urgColor + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">' + initials + '</div>'
               + '<div style="flex:1;min-width:0;">'
-              +   '<div style="font-size:12px;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
-              +   '<div style="font-size:10px;color:' + urgColor + ';font-weight:600;margin-top:2px;">' + label + ' · ' + c.daysInactive + 'j sans contact</div>'
+              +   '<div style="font-size:13px;font-weight:700;color:var(--c-navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
+              +   '<div style="font-size:12px;color:' + urgColor + ';font-weight:600;margin-top:3px;">' + label + ' · ' + c.daysInactive + 'j sans contact</div>'
               + '</div>'
-              + '<div style="font-size:18px;font-weight:900;color:' + urgColor + ';flex-shrink:0;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;">' + c.daysInactive + '<span style="font-size:9px;font-weight:700;letter-spacing:.02em;">J</span></div>'
+              + '<div style="font-size:20px;font-weight:900;color:' + urgColor + ';flex-shrink:0;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;">' + c.daysInactive + '<span style="font-size:10px;font-weight:700;letter-spacing:.02em;">J</span></div>'
               + '</div>';
           }).join('')
           + '</div>';
@@ -12072,9 +12072,9 @@ async function renderGlobalDashboard() {
               + ' onclick="openProspectFromDash(\'' + c.id + '\')"'
               + ' onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.1)\'"'
               + ' onmouseout="this.style.boxShadow=\'none\'">'
-              + '<div style="font-size:12px;font-weight:700;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
-              + '<div style="font-size:10px;color:var(--c-text-3);margin-bottom:6px;">' + (c.ville||'—') + ' · <span style="color:' + stageColor + ';font-weight:600;">' + (PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.label || c.statut) + '</span></div>'
-              + '<div style="font-size:11px;font-weight:700;color:' + (isLate ? '#dc2626' : '#f59e0b') + ';">'
+              + '<div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
+              + '<div style="font-size:12px;color:var(--c-text-3);margin-bottom:6px;">' + (c.ville||'—') + ' · <span style="color:' + stageColor + ';font-weight:600;">' + (PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.label || c.statut) + '</span></div>'
+              + '<div style="font-size:12px;font-weight:700;color:' + (isLate ? '#dc2626' : '#f59e0b') + ';">'
               + (isLate ? '🔴 En retard — ' : '📅 ') + nrStr + '</div>'
               + '<button onclick="event.stopPropagation();_kbPhone(\'' + c.id + '\',this)" style="margin-top:8px;width:100%;padding:5px;border-radius:6px;border:1px solid var(--c-teal-border,#99f6e4);background:var(--c-teal-bg,#f0fdfa);color:var(--c-teal);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);">📞 Appeler maintenant</button>'
               + '</div>';
