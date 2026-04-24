@@ -13332,12 +13332,22 @@ async function handleAuth() {
       existing.email = email;
       // Update name from Supabase user_metadata if available
       if (meta.full_name) {
-        const parts = meta.full_name.split(' ');
+        const parts = meta.full_name.trim().split(' ');
         existing.prenom = parts[0] || existing.prenom || '';
         existing.nom = parts.slice(1).join(' ') || existing.nom || '';
       }
-      if (meta.prenom) existing.prenom = meta.prenom;
-      if (meta.nom) existing.nom = meta.nom;
+      // Only override prenom/nom from metadata if they don't duplicate full_name
+      if (meta.prenom) existing.prenom = meta.prenom.trim();
+      if (meta.nom) {
+        const nomVal = meta.nom.trim();
+        const prenomVal = (existing.prenom || '').trim();
+        // Guard: if meta.nom contains the full name (e.g. "Vincent Grzeziczak" in nom field), strip the prenom prefix
+        if (prenomVal && nomVal.toLowerCase().startsWith(prenomVal.toLowerCase() + ' ')) {
+          existing.nom = nomVal.slice(prenomVal.length + 1).trim();
+        } else {
+          existing.nom = nomVal;
+        }
+      }
       // If no name info at all, derive from email
       if (!existing.prenom && !existing.nom) {
         existing.prenom = email.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -13530,6 +13540,17 @@ async function validateToken() {
 
 function updateUserUI() {
   const profile = JSON.parse(localStorage.getItem('gef_user_profile') || '{}');
+
+  // Auto-fix: if nom starts with prenom + space, it contains the full name — strip the duplicate prefix
+  if (profile.prenom && profile.nom) {
+    const prenomLc = profile.prenom.trim().toLowerCase();
+    const nomLc    = profile.nom.trim().toLowerCase();
+    if (nomLc.startsWith(prenomLc + ' ')) {
+      profile.nom = profile.nom.trim().slice(profile.prenom.trim().length + 1).trim();
+      localStorage.setItem('gef_user_profile', JSON.stringify(profile));
+    }
+  }
+
   const avatarEl = document.getElementById('user-avatar-icon');
   const nameEl = document.getElementById('user-sidebar-name');
 
@@ -13538,7 +13559,8 @@ function updateUserUI() {
     avatarEl.textContent = initials.toUpperCase() || '?';
   }
   if (nameEl) {
-    nameEl.textContent = profile.prenom ? profile.prenom + ' ' + (profile.nom || '') : 'Mon compte';
+    const fullName = [profile.prenom, profile.nom].filter(Boolean).join(' ');
+    nameEl.textContent = fullName || 'Mon compte';
   }
 }
 
