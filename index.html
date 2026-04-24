@@ -66,8 +66,10 @@
       --c-blue-bg: #eff6ff;
       --c-amber: #d97706;
       --c-amber-bg: #fffbeb;
+      --c-amber-border: #fde68a;
       --c-red: #dc2626;
       --c-red-bg: #fef2f2;
+      --c-red-border: #fca5a5;
       --c-purple: #7c3aed;
       --c-purple-bg: #f5f3ff;
 
@@ -400,7 +402,9 @@
       --c-green-bg: rgba(5,150,105,0.12);
       --c-blue-bg: rgba(37,99,235,0.12);
       --c-amber-bg: rgba(217,119,6,0.12);
+      --c-amber-border: rgba(217,119,6,0.3);
       --c-red-bg: rgba(220,38,38,0.12);
+      --c-red-border: rgba(220,38,38,0.3);
       --c-purple-bg: rgba(124,58,237,0.12);
       --c-gold-light: rgba(212,168,67,0.12);
       --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
@@ -418,6 +422,31 @@
     [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
     [data-theme="dark"] .scoring-aide { background: var(--c-surface); border-color: var(--c-border); }
     [data-theme="dark"] .export-bar { background: rgba(19,32,53,0.95); border-top-color: var(--c-border); }
+
+    /* ─── DARK MODE: element-level overrides ─── */
+    /* Prospect/client table header — navy var becomes light blue in dark, use solid dark instead */
+    [data-theme="dark"] .prospect-table th { background: #1a2f4a; color: rgba(255,255,255,0.75); }
+    /* Client drawer cards */
+    [data-theme="dark"] .client-drawer-kpi-card { background: var(--c-surface); border-color: var(--c-border); }
+    [data-theme="dark"] .client-drawer-sim-row { background: var(--c-surface); border-color: var(--c-border); }
+    /* Dossier alerts */
+    [data-theme="dark"] .dossier-alert-critique { background: var(--c-red-bg); border-color: var(--c-red-border); border-left-color: #dc2626; color: #fca5a5; }
+    [data-theme="dark"] .dossier-alert-warn { background: var(--c-amber-bg); border-color: var(--c-amber-border); border-left-color: #d97706; color: #fde68a; }
+    [data-theme="dark"] .dossier-alert-info { background: rgba(13,148,136,0.12); border-color: rgba(20,184,166,0.25); border-left-color: var(--c-teal); color: #5eead4; }
+    /* Dossier tags */
+    [data-theme="dark"] .dossier-tag-critique { background: var(--c-red-bg); color: #fca5a5; }
+    [data-theme="dark"] .dossier-tl-alerte-tag { background: var(--c-red-bg); color: #fca5a5; }
+    /* Auth error box */
+    [data-theme="dark"] .auth-error { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
+    /* Admin danger buttons */
+    [data-theme="dark"] .admin-btn-danger { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
+    [data-theme="dark"] .admin-btn-danger:hover { background: rgba(220,38,38,0.2); }
+    [data-theme="dark"] .admin-btn-icon.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
+    [data-theme="dark"] .equip-btn-del:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
+    [data-theme="dark"] .saved-sim-btn.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
+    [data-theme="dark"] .contact-action-btn.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
+    [data-theme="dark"] .org-card-actions .btn-toggle-off { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
+    [data-theme="dark"] .org-card-actions .btn-del:hover { background: var(--c-red-bg); }
 
     /* ─── CONFIDENCE INDICATORS ─── */
     .confidence-badge {
@@ -2077,7 +2106,7 @@
       display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px;
     }
     .client-drawer-kpi-card {
-      padding: 12px; background: #fff; border: 1px solid var(--c-border,#e1e7ef);
+      padding: 12px; background: var(--c-surface); border: 1px solid var(--c-border,#e1e7ef);
       border-radius: 10px; text-align: center;
     }
     .client-drawer-section { margin-bottom: 20px; }
@@ -2086,7 +2115,7 @@
       letter-spacing: .06em; color: var(--c-text-3,#8896a7); margin-bottom: 8px;
     }
     .client-drawer-sim-row {
-      padding: 10px 12px; background: #fff; border: 1px solid var(--c-border,#e1e7ef);
+      padding: 10px 12px; background: var(--c-surface); border: 1px solid var(--c-border,#e1e7ef);
       border-radius: 8px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
       cursor: pointer; transition: box-shadow .15s;
     }
@@ -3044,7 +3073,7 @@
       margin-bottom: 20px;
     }
     /* ─── KPI CARDS — fintech premium — hauteur rigide garantie ─── */
-    .dash-kpi-card { background: #fff; border-radius: 12px; border: 1px solid var(--c-border); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: box-shadow 0.15s; display: flex; flex-direction: column; }
+    .dash-kpi-card { background: var(--c-surface); border-radius: 12px; border: 1px solid var(--c-border); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: box-shadow 0.15s; display: flex; flex-direction: column; }
     .dash-kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.09); }
     .dash-kpi-accent { height: 3px; flex-shrink: 0; }
     .dash-kpi-body { padding: 20px 22px; display: flex; flex-direction: column; flex: 1; min-height: 116px; }
@@ -7836,7 +7865,7 @@ function renderTimeline() {
     ].filter(a => a.always && a.text);
 
     alertsContainer.innerHTML = alerts.map(a => {
-      const colors = { critical: { bg:'#fef2f2', border:'#dc2626', text:'#991b1b', icon:'🚨' }, warn: { bg:'#fffbeb', border:'#d97706', text:'#92400e', icon:'⚠' }, info: { bg:'#f0fdfa', border:'var(--c-teal)', text:'#065f46', icon:'ℹ' } };
+      const colors = { critical: { bg:'var(--c-red-bg)', border:'#dc2626', text:'var(--c-red)', icon:'🚨' }, warn: { bg:'var(--c-amber-bg)', border:'#d97706', text:'var(--c-amber)', icon:'⚠' }, info: { bg:'rgba(13,148,136,0.08)', border:'var(--c-teal)', text:'var(--c-teal)', icon:'ℹ' } };
       const c = colors[a.level];
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:10px 14px;background:${c.bg};border:1px solid ${c.border}20;border-left:3px solid ${c.border};border-radius:6px;font-size:12px;color:${c.text};line-height:1.5;margin-bottom:8px;">
         <span style="font-size:14px;flex-shrink:0;">${c.icon}</span>
@@ -9195,7 +9224,7 @@ function renderDrawerContent(p) {
   const dp2Color = dp2.pct >= 100 ? '#059669' : dp2.pct >= 50 ? '#0d9488' : dp2.pct > 0 ? '#f59e0b' : '#94a3b8';
   const dp2Steps = DOSSIER_STEPS.map(s => {
     const isDone = dp2.doneSet.has(s.id);
-    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;">
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--c-border);">
       <div style="width:16px;height:16px;border-radius:4px;border:2px solid ${isDone?dp2Color:'#cbd5e1'};background:${isDone?dp2Color:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:#fff;font-weight:800;">${isDone?'✓':''}</div>
       <span style="font-size:11px;color:${isDone?'#94a3b8':'#334155'};${isDone?'text-decoration:line-through;':''}">${s.label}</span>
       ${s.critique?'<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;margin-left:auto;flex-shrink:0;">CRITIQUE</span>':''}
@@ -12015,8 +12044,8 @@ async function renderGlobalDashboard() {
           + overdue.slice(0, 5).map(c => {
             const isCritique = c.daysInactive > 30;
             const urgColor  = isCritique ? '#dc2626' : '#d97706';
-            const urgBg     = isCritique ? '#fff5f5' : '#fffbeb';
-            const urgBorder = isCritique ? '#fca5a5' : '#fde68a';
+            const urgBg     = isCritique ? 'var(--c-red-bg)' : 'var(--c-amber-bg)';
+            const urgBorder = isCritique ? 'var(--c-red-border)' : 'var(--c-amber-border)';
             const label     = isCritique ? 'Critique' : 'À relancer';
             const initials  = (c.raison_sociale||'?').slice(0,2).toUpperCase();
             return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:' + urgBg + ';border:1px solid ' + urgBorder + ';cursor:pointer;transition:box-shadow .15s;"'
@@ -12065,8 +12094,8 @@ async function renderGlobalDashboard() {
             const nrStr = nr.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
             const stageColor = PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.color || '#64748b';
             return '<div style="padding:12px 14px;border-radius:10px;border:1px solid '
-              + (isLate ? '#fca5a5' : 'var(--c-border)') + ';background:'
-              + (isLate ? '#fff5f5' : 'var(--c-surface)') + ';cursor:pointer;transition:box-shadow .15s;"'
+              + (isLate ? 'var(--c-red-border)' : 'var(--c-border)') + ';background:'
+              + (isLate ? 'var(--c-red-bg)' : 'var(--c-surface)') + ';cursor:pointer;transition:box-shadow .15s;"'
               + ' onclick="openProspectFromDash(\'' + c.id + '\')"'
               + ' onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.1)\'"'
               + ' onmouseout="this.style.boxShadow=\'none\'">'
@@ -12516,7 +12545,7 @@ function previewProposition(id) {
   })() : null;
   const aidesPct = p.investissement > 0 ? Math.round(p.totalAides / p.investissement * 100) : 0;
   const typeIcon = p.type === 'pdf' ? '📕' : '📗';
-  const typeBg = p.type === 'pdf' ? '#fef2f2' : '#ecfdf5';
+  const typeBg = p.type === 'pdf' ? 'var(--c-red-bg)' : 'var(--c-green-bg)';
   const typeColor = p.type === 'pdf' ? '#dc2626' : '#059669';
 
   const card = document.getElementById('prop-preview-card');
@@ -14967,7 +14996,7 @@ function renderDrawerCrmContacts() {
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px;">
         <button onclick="openDrawerCrmContactModal(${i})" title="Modifier" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-bg);cursor:pointer;font-size:12px;line-height:1;">✏</button>
-        <button onclick="deleteDrawerCrmContact(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid #fee2e2;background:#fff5f5;color:#dc2626;cursor:pointer;font-size:12px;line-height:1;">🗑</button>
+        <button onclick="deleteDrawerCrmContact(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--c-red-border);background:var(--c-red-bg);color:var(--c-red);cursor:pointer;font-size:12px;line-height:1;">🗑</button>
       </div>
     </div>`;
   }).join('');
