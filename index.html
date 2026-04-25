@@ -4080,32 +4080,34 @@
     #sim-desktop-main { display: none; }
 
     @media (min-width: 900px) {
-      /* ── Simulator desktop mode: fix container hierarchy ── */
-      /* Hide sticky header (our topbar replaces it) */
-      .main-content:has(#page-simulateur.active) .header-sticky {
-        display: none !important;
+      /* ═══════════════════════════════════════════════════════
+         SIMULATOR DESKTOP — position:fixed escapes all parents
+         (flex, padding, footer, header-sticky constraints)
+         ═══════════════════════════════════════════════════════ */
+      #page-simulateur.active {
+        position: fixed !important;
+        top: 0 !important;
+        left: 240px !important;   /* sidebar width */
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 200 !important;
+        display: grid !important;
+        grid-template-rows: 52px 1fr;
+        grid-template-columns: 280px 1fr;
+        height: auto !important;
+        max-height: none !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        animation: none !important;
+        background: var(--c-bg);
       }
-      /* Make main-content exactly 100vh tall, no overflow */
-      .main-content:has(#page-simulateur.active) {
-        height: 100vh;
-        overflow: hidden;
-        min-height: unset;
+      /* Collapsed sidebar → adjust left offset */
+      body:has(.sidebar.collapsed) #page-simulateur.active {
+        left: 64px !important;
       }
       /* Hide fixed bottom export bar (replaced by topbar buttons) */
       body:has(#page-simulateur.active) .export-bar-sticky {
         display: none !important;
-      }
-
-      /* Full-height page, no padding */
-      #page-simulateur.active {
-        display: grid !important;
-        grid-template-rows: 52px 1fr;
-        grid-template-columns: 280px 1fr;
-        height: 100%;
-        max-height: 100vh;
-        overflow: hidden;
-        padding: 0 !important;
-        animation: none;
       }
       /* Topbar: full width, row 1 */
       #sim-topbar-desktop {
