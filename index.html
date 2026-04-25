@@ -4093,7 +4093,7 @@
         z-index: 200 !important;
         display: grid !important;
         grid-template-rows: 52px 1fr;
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 220px 1fr;
         height: auto !important;
         max-height: none !important;
         overflow: hidden !important;
@@ -4116,12 +4116,13 @@
         grid-row: 1;
         align-items: center;
         justify-content: space-between;
-        padding: 0 20px;
+        padding: 0 16px;
         background: var(--c-surface);
         border-bottom: 1px solid var(--c-border);
-        gap: 12px;
+        gap: 8px;
         flex-shrink: 0;
         z-index: 10;
+        min-width: 0;
       }
       /* Params sidebar: col 1, row 2 */
       #sim-params-panel {
@@ -4131,7 +4132,7 @@
         overflow-x: hidden;
         border-right: 1px solid var(--c-border);
         background: var(--c-surface);
-        width: 280px !important;
+        width: 220px !important;
         padding: 0 !important;
       }
       /* Compact cards in sidebar */
@@ -4142,10 +4143,12 @@
         border-top: none !important;
         margin-bottom: 0 !important;
         box-shadow: none !important;
-        padding: 12px 14px !important;
+        padding: 10px 12px !important;
       }
-      #sim-params-panel .sim-card-header { padding: 0 0 8px 0; }
-      #sim-params-panel .field { margin-bottom: 10px; }
+      #sim-params-panel .sim-card-header { padding: 0 0 6px 0; }
+      #sim-params-panel .field { margin-bottom: 8px; }
+      #sim-params-panel .field-label { font-size: 11px; }
+      #sim-params-panel select, #sim-params-panel input[type="text"], #sim-params-panel input[type="number"] { font-size: 12px !important; }
       /* Hide mobile-only elements on desktop */
       #page-simulateur .sim-mobile-tabs { display: none !important; }
       #page-simulateur #sim-results-mobile { display: none !important; }
@@ -4157,18 +4160,19 @@
         grid-row: 2;
         overflow: hidden;
         background: var(--c-bg);
+        min-width: 0;
       }
       /* Tab bar */
       .sim-dtab-bar {
         display: flex;
         background: var(--c-surface);
         border-bottom: 1px solid var(--c-border);
-        padding: 0 20px;
+        padding: 0 16px;
         flex-shrink: 0;
         gap: 0;
       }
       .sim-dtab {
-        padding: 12px 18px;
+        padding: 11px 16px;
         font-size: 13px;
         font-weight: 600;
         color: var(--c-text-2);
@@ -4190,32 +4194,33 @@
         display: none;
         flex: 1;
         overflow-y: auto;
-        padding: 20px 24px;
+        padding: 16px 20px;
       }
       .sim-dtab-panel.active { display: block; }
       /* KPI grid in synthese tab */
       .sim-kpi-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-bottom: 16px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
       }
       .sim-kpi-card {
         background: var(--c-surface);
         border: 1px solid var(--c-border);
-        border-radius: 12px;
-        padding: 14px 16px;
+        border-radius: 10px;
+        padding: 12px 14px;
+        min-width: 0;
       }
       .sim-kpi-card.accent {
         border-color: var(--c-teal);
         background: var(--c-teal-bg, #f0fdfa);
       }
-      .sim-kpi-label { font-size: 10px; color: var(--c-text-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-      .sim-kpi-val { font-size: 22px; font-weight: 800; color: var(--c-navy); line-height: 1.1; }
+      .sim-kpi-label { font-size: 9px; color: var(--c-text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+      .sim-kpi-val { font-size: 20px; font-weight: 800; color: var(--c-navy); line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .sim-kpi-val.teal { color: var(--c-teal); }
-      .sim-kpi-sub { font-size: 11px; color: var(--c-text-3); margin-top: 3px; }
+      .sim-kpi-sub { font-size: 10px; color: var(--c-text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       /* Synthese 2-col */
-      .sim-synth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+      .sim-synth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
       /* Annual table */
       .sim-annual-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       .sim-annual-table th { text-align: right; padding: 8px 12px; color: var(--c-text-3); font-weight: 600; font-size: 11px; text-transform: uppercase; background: var(--c-navy); color: #fff; }
@@ -4238,11 +4243,13 @@
       .sim-tb-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--c-teal-bg,#f0fdfa); color: var(--c-teal); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
       .sim-tb-name { font-size: 14px; font-weight: 700; color: var(--c-navy); }
       .sim-tb-tag { font-size: 11px; color: var(--c-text-3); }
-      .sim-tb-actions { display: flex; gap: 6px; align-items: center; }
-      .sim-tb-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--c-border); background: var(--c-surface); color: var(--c-text); cursor: pointer; font-family: inherit; transition: background .15s; }
+      .sim-tb-actions { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+      .sim-tb-btn { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 7px; border: 1px solid var(--c-border); background: var(--c-surface); color: var(--c-text); cursor: pointer; font-family: inherit; transition: background .15s; white-space: nowrap; }
       .sim-tb-btn:hover { background: var(--c-bg); }
       .sim-tb-btn.primary { background: var(--c-teal); color: #fff; border-color: var(--c-teal); }
       .sim-tb-btn.primary:hover { opacity: .9; }
+      .sim-tb-client-chip { min-width: 0; overflow: hidden; }
+      .sim-tb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
       /* Insight in synthese tab */
       #sim-desktop-main .insight { margin: 0; }
       /* Charts in graphiques tab */
@@ -4565,7 +4572,7 @@
         <button class="sim-tb-btn" onclick="if(typeof captureScenario==='function')captureScenario()">⚖ Scénarios</button>
         <button class="sim-tb-btn" onclick="if(typeof exporterExcel==='function')exporterExcel()">Excel</button>
         <button class="sim-tb-btn" onclick="if(typeof genererProposition==='function')genererProposition()">PDF</button>
-        <button class="sim-tb-btn primary" onclick="if(typeof enregistrerEtude==='function')enregistrerEtude()">Enregistrer l'étude</button>
+        <button class="sim-tb-btn primary" onclick="if(typeof enregistrerEtude==='function')enregistrerEtude()">Enregistrer</button>
       </div>
     </div>
 
