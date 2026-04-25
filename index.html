@@ -6029,7 +6029,7 @@ async function createNewClient() {
       ...(_ncSirenData?.libelle_activite ? { activite: _ncSirenData.libelle_activite } : {}),
       ...(note ? { notes: note } : {}),
       ...(internalUserId ? { user_id: internalUserId } : {}),
-      ...(authUser?.tenant_id ? { tenant_id: authUser.tenant_id } : {}),
+      tenant_id: currentTenantId || localStorage.getItem('gef_tenant_id') || null,
     };
 
     const res = await fetch(ADMIN_API + '/prospects', {
