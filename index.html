@@ -9157,7 +9157,8 @@ async function renderClientsPage() {
     const prosp = await prospRes.json();
     const sims  = await simsRes.json();
     const allSims = sims?.data || [];
-    _clientsAll = (prosp?.data || []).filter(p => !(p.score_lead < 0)).map(p => {
+    const _delIds=(()=>{try{return JSON.parse(localStorage.getItem('gef_deleted_prospect_ids')||'[]')}catch{return[]}})();
+    _clientsAll = (prosp?.data || []).filter(p => !(p.score_lead < 0) && !_delIds.includes(p.id)).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
@@ -10002,7 +10003,8 @@ setTimeout(async () => {
     const data = await res.json();
     const prospects = data?.data || [];
     const now = Date.now();
-    const alerts = prospects.filter(p => !(p.score_lead < 0)).filter(p => {
+    const _delIds2=(()=>{try{return JSON.parse(localStorage.getItem('gef_deleted_prospect_ids')||'[]')}catch{return[]}})();
+    const alerts = prospects.filter(p => !(p.score_lead < 0) && !_delIds2.includes(p.id)).filter(p => {
       const d = Math.floor((now - new Date(p.updated_at||p.created_at).getTime()) / 86400000);
       return d > 15 && !['gagne','perdu','inactif'].includes(p.statut);
     }).length;
@@ -12054,8 +12056,9 @@ async function renderGlobalDashboard() {
     const allProspects = (await prospRes.json())?.data || [];
     const allSims      = (await simRes.json())?.data  || [];
 
-    // Enrich prospects (exclude soft-deleted — score_lead < 0)
-    const clients = allProspects.filter(p => !(p.score_lead < 0)).map(p => {
+    // Enrich prospects (exclude soft-deleted — score_lead<0 ou dans localStorage)
+    const _delIdsDash=(()=>{try{return JSON.parse(localStorage.getItem('gef_deleted_prospect_ids')||'[]')}catch{return[]}})();
+    const clients = allProspects.filter(p => !(p.score_lead < 0) && !_delIdsDash.includes(p.id)).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
