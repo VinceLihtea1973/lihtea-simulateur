@@ -5593,6 +5593,7 @@ let currentClientSiret = null; // SIREN validé lors du lookup
 let _lastTotalAides = 0; // Montant total des aides du dernier recalcul (valeur numérique brute)
 let _brouillonTimer = null;          // Debounce timer pour l'auto-save brouillon (Supabase)
 let _currentBrouillonId = null;     // ID du brouillon Supabase en cours
+let _currentSimId = null;           // ID de la simulation courante (tous statuts — évite doublons)
 let _userHasEdited = false;         // true uniquement si l'utilisateur a interagi manuellement (isTrusted)
 let _currentProspectId = null;      // ID du prospect courant (mis à jour par syncFindOrCreate)
 let _currentProspectStatut = 'nouveau'; // Statut prospect courant (pour transitions pipeline)
@@ -6199,8 +6200,9 @@ async function syncSimulationToSupabase(simData, options = {}) {
       notes: simData.name || ''
     };
 
-    // Upsert: si on a déjà un brouillon en cours, le mettre à jour (PUT) plutôt que créer un doublon (POST)
-    const existingId = (statut === 'brouillon' && _currentBrouillonId) ? _currentBrouillonId : null;
+    // Upsert: utiliser _currentSimId pour toutes les transitions de statut,
+    // et _currentBrouillonId en fallback pour les brouillons — évite les doublons
+    const existingId = _currentSimId || (statut === 'brouillon' ? _currentBrouillonId : null);
     const res = await fetch(
       existingId ? ADMIN_API + '/simulations/' + existingId : ADMIN_API + '/simulations',
       {
@@ -6211,7 +6213,8 @@ async function syncSimulationToSupabase(simData, options = {}) {
     );
     const result = await res.json();
     const simId = existingId || result?.data?.id || result?.data?.[0]?.id || null;
-    // Mémoriser l'ID du brouillon courant pour les prochains auto-saves
+    // Mémoriser l'ID pour toutes les transitions de statut (pas seulement brouillon)
+    if (simId) { _currentSimId = simId; }
     if (statut === 'brouillon' && simId) _currentBrouillonId = simId;
 
     // Transition pipeline : nouveau → qualifie quand une étude est enregistrée
@@ -6394,13 +6397,20 @@ async function syncPropositionToSupabase(propData, pdfBlob, nomFichier) {
       notes: 'Proposition ' + propData.type?.toUpperCase() + ' générée le ' + new Date().toLocaleDateString('fr-FR')
     };
 
-    const res = await fetch(ADMIN_API + '/simulations', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(payload)
-    });
+    // Upsert: si une simulation est déjà en cours (_currentSimId), la mettre à jour (PUT)
+    // plutôt que créer un doublon "envoyee" en parallèle de l'"etudie"
+    const _existPropId = _currentSimId || null;
+    const res = await fetch(
+      _existPropId ? ADMIN_API + '/simulations/' + _existPropId : ADMIN_API + '/simulations',
+      {
+        method: _existPropId ? 'PUT' : 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      }
+    );
     const result = await res.json();
-    const simId = result?.data?.id || result?.data?.[0]?.id || null;
+    const simId = _existPropId || result?.data?.id || result?.data?.[0]?.id || null;
+    if (simId) _currentSimId = simId;
 
     // Log activity: proposition generated
     if (simId || prospectId) {
@@ -6571,7 +6581,8 @@ async function enregistrerEtude() {
     };
     const simId = await syncSimulationToSupabase(simData, { statut: 'etudie', isReference: true, silent: false });
     if (simId) {
-      // Réinitialiser l'ID brouillon : le prochain auto-save créera un nouveau brouillon séparé
+      // On conserve _currentSimId pour que "Générer la proposition" mette à jour ce même enregistrement
+      // On reset seulement le brouillon — l'auto-save ne doit plus écraser l'étude enregistrée
       _currentBrouillonId = null;
       showToast('✓ Étude enregistrée — marquée comme référence', 'success');
     } else {
@@ -9358,7 +9369,9 @@ function renderDrawerContent(p) {
   // Compteurs onglets
   const dtSim = document.getElementById('dt-sim-count');
   const dtDoc = document.getElementById('dt-doc-count');
-  if (dtSim) dtSim.textContent = `(${p.simulations?.length||0})`;
+  // Compter uniquement les simulations visibles (hors brouillons)
+  const _simVisibleCount = (p.simulations||[]).filter(s=>s.statut!=='brouillon').length;
+  if (dtSim) dtSim.textContent = `(${_simVisibleCount||0})`;
   if (dtDoc) dtDoc.textContent = `(${p.documents?.length||0})`;
 
   // ── ONGLET 1 : Infos
@@ -9543,11 +9556,24 @@ function renderDrawerContent(p) {
 
     tabSims.innerHTML = `<div style="padding:16px 20px;">
       ${refEtudeBlock}
-      ${!p.simulations?.length?`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
-        <div style="font-size:28px;margin-bottom:8px;">▣</div><div>Aucune simulation liée</div>
-        <div style="font-size:12px;margin-top:4px;">Utilisez le Simulateur pour créer une simulation</div>
-      </div>`
-      :p.simulations.map(s=>{
+      ${(()=>{
+        // Filtrer les brouillons (auto-saves silencieux, sans valeur pour l'affichage)
+        // et dédupliquer les anciens enregistrements en double créés lors de transitions de statut :
+        // pour chaque groupe (même montant + même jour), on ne garde que le statut le plus avancé.
+        const statusPriority={brouillon:0,etudie:1,envoyee:2,en_cours:3,financee:4,abandonnee:5};
+        const visibleSims=(p.simulations||[]).filter(s=>s.statut!=='brouillon');
+        const deduped=Object.values(visibleSims.reduce((acc,s)=>{
+          const dayKey=(s.created_at||'').slice(0,10);
+          const invKey=String(Math.round(Number(s.parametres?.investissement)||0));
+          const k=dayKey+'_'+invKey;
+          if(!acc[k]||(statusPriority[s.statut]||0)>(statusPriority[acc[k].statut]||0))acc[k]=s;
+          return acc;
+        },{})).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+        if(!deduped.length)return`<div style="padding:32px;text-align:center;color:var(--c-text-3);">
+          <div style="font-size:28px;margin-bottom:8px;">▣</div><div>Aucune simulation liée</div>
+          <div style="font-size:12px;margin-top:4px;">Utilisez le Simulateur pour créer une simulation</div>
+        </div>`;
+        return deduped.map(s=>{
         const inv=Number(s.parametres?.investissement)||0;
         const c2=SC2[s.statut]||'#6b7280';
         const isRef = s.is_reference_etude ? ' 📌' : '';
@@ -9574,7 +9600,8 @@ function renderDrawerContent(p) {
             <span style="font-size:10px;font-weight:700;color:${c2};background:${c2}18;padding:2px 7px;border-radius:6px;">${SL2[s.statut]||s.statut}</span>
           </div>
         </div>`;
-      }).join('')}
+        }).join('');
+      })()}
       <button onclick="startSimForClient('${(p.raison_sociale||'').replace(/'/g,"\\'")}','${p.siren||''}')" style="width:100%;margin-top:10px;padding:10px;border:2px dashed var(--c-teal);border-radius:8px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nouvelle simulation pour ce client</button>
     </div>`;
   }
@@ -9815,9 +9842,10 @@ async function downloadDoc(simIdOrEl, nom, mimeType) {
 // Lance une simulation pré-remplie avec le client
 function startSimForClient(raison, siren, params) {
   closeClientDrawer();
-  // Nouveau client = nouveau contexte de brouillon ; l'auto-save ne se déclenchera
+  // Nouveau client = nouveau contexte de simulation ; l'auto-save ne se déclenchera
   // qu'après une vraie interaction utilisateur (pas les dispatches programmatiques des sliders)
   _currentBrouillonId = null;
+  _currentSimId = null;
   _userHasEdited = false;
   const nomInput = document.getElementById('nom-client');
   if (nomInput && raison) { nomInput.value = raison; }
@@ -14170,8 +14198,9 @@ function resetSimulateur() {
     if (toggle) toggle.classList.toggle('on', val);
   });
 
-  // Réinitialiser l'ID du brouillon courant pour éviter les mises à jour parasites
+  // Réinitialiser les IDs courants pour éviter les mises à jour parasites
   _currentBrouillonId = null;
+  _currentSimId = null;
   _userHasEdited = false;
   recalculer();
   showToast('Simulation réinitialisée', 'success');
