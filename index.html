@@ -4105,6 +4105,13 @@
       body:has(.sidebar.collapsed) #page-simulateur.active {
         left: 64px !important;
       }
+      /* Suppress page-level scrollbars — prevents scrollbar from stealing
+         space on the right side and misaligning position:fixed right:0 */
+      html:has(#page-simulateur.active),
+      body:has(#page-simulateur.active) {
+        overflow: hidden !important;
+        height: 100% !important;
+      }
       /* Hide fixed bottom export bar (replaced by topbar buttons) */
       body:has(#page-simulateur.active) .export-bar-sticky {
         display: none !important;
