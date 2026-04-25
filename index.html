@@ -14900,6 +14900,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ── Cross-tab sync: refresh clients list when admin deletes a prospect ──
+window.addEventListener('storage', function(e) {
+  if (e.key === 'gef_prospect_deleted') {
+    if (typeof renderClientsPage === 'function' && pageCourante === 'clients') {
+      renderClientsPage();
+    }
+  }
+});
+
 </script>
 <!-- ═══ MODAL NOUVEAU CLIENT ═══ -->
 <div id="modal-new-client" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeNewClientModal()">
