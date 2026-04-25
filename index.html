@@ -2064,10 +2064,10 @@
 
     /* ─── DRAWER 4 ONGLETS ─── */
     .drawer-tabs { display: flex; border-bottom: 2px solid var(--c-border); padding: 0 24px; background: var(--c-bg); flex-shrink: 0; }
-    .drawer-tab-btn { padding: 10px 14px; font-size: 12px; font-weight: 500; color: var(--c-text-3); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: var(--font-body); transition: color .15s; white-space: nowrap; }
+    .drawer-tab-btn { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--c-text-3); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: var(--font-body); transition: color .15s; white-space: nowrap; }
     .drawer-tab-btn:hover { color: var(--c-navy); }
-    .drawer-tab-btn.active { color: var(--c-teal); border-bottom-color: var(--c-teal); font-weight: 600; }
-    .drawer-tab-content { display: none; padding: 20px 24px; }
+    .drawer-tab-btn.active { color: var(--c-teal); border-bottom-color: var(--c-teal); font-weight: 700; }
+    .drawer-tab-content { display: none; padding: 0; }
     .drawer-tab-content.active { display: block; }
     .info-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
     .info-field .if-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); margin-bottom: 3px; }
@@ -2087,7 +2087,7 @@
     }
     .client-drawer-overlay.open { opacity: 1; pointer-events: all; }
     .client-drawer {
-      position: fixed; top: 0; right: -800px; width: 780px; max-width: 96vw;
+      position: fixed; top: 0; right: -900px; width: 860px; max-width: 97vw;
       height: 100vh; background: var(--c-surface, #fff); z-index: 151;
       box-shadow: -8px 0 40px rgba(0,0,0,0.18);
       display: flex; flex-direction: column;
@@ -2096,12 +2096,12 @@
     }
     .client-drawer.open { right: 0; }
     .client-drawer-header {
-      padding: 20px 24px 16px;
+      padding: 22px 28px 18px;
       background: linear-gradient(135deg, #0f2b46, #1a3d5c);
       color: #fff; flex-shrink: 0;
     }
     .client-drawer-body {
-      flex: 1; overflow-y: auto; padding: 20px 24px;
+      flex: 1; overflow-y: auto; padding: 0;
       background: var(--c-bg, #f6f8fb);
     }
     .client-drawer-kpi {
@@ -9378,97 +9378,97 @@ function renderDrawerContent(p) {
 
   if (tabInfos) tabInfos.innerHTML = `
     <!-- ── Avancement Dossier ── -->
-    <div style="padding:14px 20px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);">📋 Avancement du dossier</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:12px;font-weight:800;color:${dp2Color};">${dp2.pct}%</span>
-          <span style="font-size:11px;color:var(--c-text-3);">${dp2.done}/${dp2.total} étapes</span>
-          <button onclick="openDossierFromDrawer('${p.id}','${(p.raison_sociale||'').replace(/'/g,"\\'")}')" style="padding:4px 10px;background:var(--c-teal);border:none;border-radius:6px;color:#fff;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">Ouvrir →</button>
+    <div style="padding:16px 24px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);">📋 Avancement du dossier</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:14px;font-weight:800;color:${dp2Color};">${dp2.pct}%</span>
+          <span style="font-size:12px;color:var(--c-text-3);">${dp2.done}/${dp2.total} étapes</span>
+          <button onclick="openDossierFromDrawer('${p.id}','${(p.raison_sociale||'').replace(/'/g,"\\'")}')" style="padding:7px 14px;background:var(--c-teal);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Ouvrir →</button>
         </div>
       </div>
-      <div style="height:6px;background:var(--c-border);border-radius:3px;overflow:hidden;margin-bottom:${dp2.pct>0?'12px':'0'};">
-        <div style="height:100%;width:${dp2.pct}%;background:${dp2Color};border-radius:3px;transition:width .4s;"></div>
+      <div style="height:7px;background:var(--c-border);border-radius:4px;overflow:hidden;margin-bottom:${dp2.pct>0?'12px':'0'};">
+        <div style="height:100%;width:${dp2.pct}%;background:${dp2Color};border-radius:4px;transition:width .4s;"></div>
       </div>
       ${dp2.pct > 0 ? `
-      <details style="margin-top:2px;">
-        <summary style="font-size:11px;color:var(--c-teal);font-weight:600;cursor:pointer;list-style:none;display:flex;align-items:center;gap:4px;">
+      <details style="margin-top:4px;">
+        <summary style="font-size:12px;color:var(--c-teal);font-weight:600;cursor:pointer;list-style:none;display:flex;align-items:center;gap:4px;">
           <span>▸</span> Voir le détail des étapes
         </summary>
-        <div style="margin-top:8px;padding:10px 12px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;">
+        <div style="margin-top:10px;padding:12px 14px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;">
           ${dp2Steps}
         </div>
-      </details>` : `<div style="font-size:11px;color:var(--c-text-3);margin-top:4px;">Aucune étape commencée — <a href="#" onclick="openDossierFromDrawer('${p.id}','${(p.raison_sociale||'').replace(/'/g,"\\'")}');return false;" style="color:var(--c-teal);font-weight:600;text-decoration:none;">démarrer le dossier →</a></div>`}
+      </details>` : `<div style="font-size:12px;color:var(--c-text-3);margin-top:4px;">Aucune étape commencée — <a href="#" onclick="openDossierFromDrawer('${p.id}','${(p.raison_sociale||'').replace(/'/g,"\\'")}');return false;" style="color:var(--c-teal);font-weight:600;text-decoration:none;">démarrer le dossier →</a></div>`}
     </div>
     <!-- ── KPI cards ── -->
-    <div style="padding:16px 20px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0;">
+    <div style="padding:18px 24px;background:var(--c-surface);border-bottom:1px solid var(--c-border);">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
         ${[
           {i:'💰', v:_kpiInv>0?fek(_kpiInv):'—', l:'Investissement'},
           {i:'🎯', v:_kpiAides>0?fek(_kpiAides):'—', l:'Aides totales'},
           {i:'📈', v:_kpiRoi>0?Math.round(_kpiRoi)+'m':'—', l:'ROI'},
-        ].map(k=>`<div style="padding:10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;text-align:center;">
-          <div style="font-size:16px;margin-bottom:3px;">${k.i}</div>
-          <div style="font-size:14px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
-          <div style="font-size:9px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${k.l}</div>
+        ].map(k=>`<div style="padding:14px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:10px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:5px;">${k.i}</div>
+          <div style="font-size:17px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
+          <div style="font-size:10px;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;">${k.l}</div>
         </div>`).join('')}
       </div>
     </div>
-    <div style="padding:16px 20px;">
+    <div style="padding:20px 24px;">
 
       <!-- ── Section Entreprise CRM ── -->
-      <div style="margin-bottom:16px;">
-        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Entreprise
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="display:inline-block;width:16px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Entreprise
           </div>
           <div id="drawer-crm-ent-actions">
-            <button onclick="toggleDrawerCrmEntEdit(true)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>
+            <button onclick="toggleDrawerCrmEntEdit(true)" style="padding:6px 14px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>
           </div>
         </div>
-        <div id="drawer-crm-ent-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;"></div>
+        <div id="drawer-crm-ent-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;"></div>
       </div>
 
       <!-- ── Section Contacts CRM ── -->
-      <div style="margin-bottom:16px;">
-        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Contacts
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="display:inline-block;width:16px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Contacts
           </div>
-          <button onclick="openDrawerCrmContactModal(null)" style="padding:3px 10px;background:var(--c-teal);border:none;border-radius:6px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">+ Ajouter</button>
+          <button onclick="openDrawerCrmContactModal(null)" style="padding:6px 14px;background:var(--c-teal);border:none;border-radius:8px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">+ Ajouter</button>
         </div>
-        <div id="drawer-crm-contacts-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;"></div>
+        <div id="drawer-crm-contacts-body" style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;"></div>
       </div>
 
       <!-- ── Section Suivi ── -->
-      <div style="margin-bottom:4px;">
-        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          <span style="display:inline-block;width:14px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Suivi
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+          <span style="display:inline-block;width:16px;height:2px;background:var(--c-teal);border-radius:1px;"></span>Suivi
         </div>
-        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;">
+        <div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;">
           ${[
             {l:'Source',          v:p.source||'—'},
             {l:'Créé le',         v:fd(p.created_at)},
             {l:'Dernier contact',  v:p.date_dernier_contact ? fd(p.date_dernier_contact) : '—'},
             {l:'Montant potentiel',v:p.montant_potentiel>0 ? fek(p.montant_potentiel) : '—'},
           ].map((f,i,arr)=>`
-            <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
-              <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
-              <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
+            <div style="display:flex;align-items:center;padding:11px 18px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+              <div style="font-size:12px;color:var(--c-text-3);font-weight:600;min-width:130px;flex-shrink:0;">${f.l}</div>
+              <div style="font-size:13px;color:var(--c-navy);font-weight:500;flex:1;">${f.v}</div>
             </div>`).join('')}
         </div>
       </div>
 
       <div style="display:none"><!-- legacy info-grid-2 replaced --></div>
       <div>
-      ${p.next_action_label?`<div style="margin-top:14px;padding:12px;background:${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.06)':'rgba(13,148,136,.06)'};border:1px solid ${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.2)':'rgba(13,148,136,.2)'};border-radius:8px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-teal);font-weight:700;margin-bottom:4px;">Prochaine action</div>
-        <div style="font-size:13px;font-weight:600;">${p.prochaine_action||'—'}</div>
+      ${p.next_action_label?`<div style="margin-top:16px;padding:14px;background:${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.06)':'rgba(13,148,136,.06)'};border:1px solid ${(Date.now()>new Date(p.prochaine_action_date).getTime())?'rgba(220,38,38,.2)':'rgba(13,148,136,.2)'};border-radius:10px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-teal);font-weight:700;margin-bottom:5px;">Prochaine action</div>
+        <div style="font-size:14px;font-weight:600;">${p.prochaine_action||'—'}</div>
       </div>`:''}
-      ${p.notes?`<div style="margin-top:14px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);font-weight:700;margin-bottom:6px;">Notes</div>
-        <textarea id="drawer-notes" rows="3" placeholder="Ajouter une note…" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box;background:var(--c-surface);">${p.notes||''}</textarea>
-        <button onclick="saveDrawerNotes()" style="margin-top:6px;padding:7px 14px;background:var(--c-navy);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
+      ${p.notes?`<div style="margin-top:16px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-text-3);font-weight:700;margin-bottom:8px;">Notes</div>
+        <textarea id="drawer-notes" rows="3" placeholder="Ajouter une note…" style="width:100%;padding:11px 13px;border:1px solid var(--c-border);border-radius:10px;font-family:inherit;font-size:14px;resize:vertical;box-sizing:border-box;background:var(--c-surface);color:var(--c-text-1);">${p.notes||''}</textarea>
+        <button onclick="saveDrawerNotes()" style="margin-top:8px;padding:9px 18px;background:var(--c-navy);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Sauvegarder</button>
       </div>`:''}
     </div>`;
   // ── Init CRM tiroir
@@ -15043,9 +15043,9 @@ function renderDrawerCrmEntreprise() {
     { l:'Site web',       v: p.site_web ? `<a href="${eh(p.site_web)}" target="_blank" style="color:var(--c-teal);text-decoration:none;">${eh(p.site_web)}</a>` : '—', html:true },
   ];
   body.innerHTML = fields.map((f,i,arr) => `
-    <div style="display:flex;align-items:center;padding:8px 14px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
-      <div style="font-size:10px;color:var(--c-text-3);font-weight:600;min-width:110px;flex-shrink:0;">${f.l}</div>
-      <div style="font-size:12px;color:var(--c-navy);font-weight:500;flex:1;">${f.html ? f.v : (escHtml ? escHtml(String(f.v)) : f.v)}</div>
+    <div style="display:flex;align-items:center;padding:11px 18px;${i<arr.length-1?'border-bottom:1px solid var(--c-border);':''}">
+      <div style="font-size:12px;color:var(--c-text-3);font-weight:600;min-width:130px;flex-shrink:0;">${f.l}</div>
+      <div style="font-size:13px;color:var(--c-navy);font-weight:500;flex:1;">${f.html ? f.v : (escHtml ? escHtml(String(f.v)) : f.v)}</div>
     </div>`).join('');
 }
 
@@ -15058,17 +15058,17 @@ function toggleDrawerCrmEntEdit(on) {
     const p  = _drawerCrmData || {};
     const ev = v => (v||'').toString().replace(/"/g,'&quot;');
     acts.innerHTML = `
-      <button onclick="saveDrawerCrmEntEdit()" style="padding:3px 10px;background:var(--c-teal);border:none;border-radius:6px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;margin-right:4px;">💾 Enregistrer</button>
-      <button onclick="toggleDrawerCrmEntEdit(false)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-text-2);cursor:pointer;font-family:inherit;">Annuler</button>`;
+      <button onclick="saveDrawerCrmEntEdit()" style="padding:7px 16px;background:var(--c-teal);border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;margin-right:6px;">💾 Enregistrer</button>
+      <button onclick="toggleDrawerCrmEntEdit(false)" style="padding:7px 14px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:13px;font-weight:700;color:var(--c-text-2);cursor:pointer;font-family:inherit;">Annuler</button>`;
     const mkInput = (id, lbl, val, type, full) => `
-      <div style="display:flex;flex-direction:column;gap:4px;${full?'grid-column:1/-1;':''}">
-        <label style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
-        <input id="${id}" type="${type}" value="${ev(val)}" style="padding:7px 10px;border:1px solid var(--c-border);border-radius:7px;font-size:12px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);width:100%;box-sizing:border-box;">
+      <div style="display:flex;flex-direction:column;gap:5px;${full?'grid-column:1/-1;':''}">
+        <label style="font-size:11px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
+        <input id="${id}" type="${type}" value="${ev(val)}" style="padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);width:100%;box-sizing:border-box;outline:none;">
       </div>`;
     const mkSelect = (id, lbl, val, opts) => `
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:10px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
-        <select id="${id}" style="padding:7px 10px;border:1px solid var(--c-border);border-radius:7px;font-size:12px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);">
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:11px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;">${lbl}</label>
+        <select id="${id}" style="padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--c-bg);color:var(--c-navy);height:40px;">
           ${opts.map(o=>`<option value="${o[0]}"${val===o[0]?' selected':''}>${o[1]}</option>`).join('')}
         </select>
       </div>`;
@@ -15088,7 +15088,7 @@ function toggleDrawerCrmEntEdit(on) {
       ${mkInput('ent-site_web','Site web',p.site_web,'url',true)}
     </div>`;
   } else {
-    acts.innerHTML = `<button onclick="toggleDrawerCrmEntEdit(true)" style="padding:3px 10px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;font-size:10px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>`;
+    acts.innerHTML = `<button onclick="toggleDrawerCrmEntEdit(true)" style="padding:7px 14px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:700;color:var(--c-navy);cursor:pointer;font-family:inherit;">✏ Modifier</button>`;
     renderDrawerCrmEntreprise();
   }
 }
@@ -15097,15 +15097,15 @@ function toggleDrawerCrmEntEdit(on) {
 async function saveDrawerCrmEntEdit() {
   const id = _drawerClientId;
   if (!id) return;
-  const g = eid => (document.getElementById(eid)?.value||'').trim();
+  // Valeur string ou null (jamais empty string — évite les erreurs de type DB)
+  const g = eid => { const v = (document.getElementById(eid)?.value||'').trim(); return v || null; };
   const payload = {
     raison_sociale:  g('ent-raison_sociale'),
     siren:           g('ent-siren'),
     siret:           g('ent-siret'),
     forme_juridique: g('ent-forme_juridique'),
     code_naf:        g('ent-code_naf'),
-    taille:          g('ent-taille'),
-    effectifs:       g('ent-effectifs'),
+    taille:          g('ent-taille') || 'pme',
     adresse:         g('ent-adresse'),
     code_postal:     g('ent-code_postal'),
     ville:           g('ent-ville'),
@@ -15113,15 +15113,26 @@ async function saveDrawerCrmEntEdit() {
     email:           g('ent-email'),
     site_web:        g('ent-site_web'),
   };
+  // effectifs = entier ou null
+  const effVal = (document.getElementById('ent-effectifs')?.value||'').trim();
+  payload.effectifs = effVal ? (parseInt(effVal)||null) : null;
+  // Retirer les clés null pour ne pas écraser des données valides avec null si non modifié
+  const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([,v])=>v!==null||v===''));
+
+  const btn = document.querySelector('[onclick="saveDrawerCrmEntEdit()"]');
+  if (btn) { btn.textContent = '⏳ Enregistrement…'; btn.disabled = true; }
   try {
     const res = await fetch(ADMIN_API + '/prospects/' + id, {
       method: 'PUT',
       headers: { ...getAuthHeaders(), 'Content-Type':'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const resBody = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const detail = resBody?.error || resBody?.message || JSON.stringify(resBody);
+      throw new Error('HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+    }
     Object.assign(_drawerCrmData, payload);
-    // Mettre à jour le header du tiroir
     if (payload.raison_sociale) {
       const nomEl = document.getElementById('drawer-nom');
       if (nomEl) nomEl.textContent = payload.raison_sociale;
@@ -15129,7 +15140,10 @@ async function saveDrawerCrmEntEdit() {
     toggleDrawerCrmEntEdit(false);
     if (typeof showToast === 'function') showToast('Entreprise mise à jour ✓', 'success');
   } catch(e) {
+    console.error('[CRM] saveDrawerCrmEntEdit error:', e);
     if (typeof showToast === 'function') showToast('Erreur : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '💾 Enregistrer'; btn.disabled = false; }
   }
 }
 
@@ -15148,22 +15162,22 @@ function renderDrawerCrmContacts() {
     const initials = (typeof crmInitials==='function') ? crmInitials(c.prenom,c.nom) : ((c.prenom||'').charAt(0)+(c.nom||'').charAt(0)).toUpperCase()||'?';
     const color    = (typeof crmAvatarColor==='function') ? crmAvatarColor((c.prenom||'')+(c.nom||'')) : '#0d9488';
     return `
-    <div style="display:flex;align-items:center;padding:10px 14px;${i<_drawerCrmContacts.length-1?'border-bottom:1px solid var(--c-border);':''}">
-      <div style="width:32px;height:32px;border-radius:50%;background:${color};display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-right:10px;">${initials}</div>
+    <div style="display:flex;align-items:center;padding:14px 18px;${i<_drawerCrmContacts.length-1?'border-bottom:1px solid var(--c-border);':''}">
+      <div style="width:40px;height:40px;border-radius:50%;background:${color};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;margin-right:14px;">${initials}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:700;color:var(--c-navy);">
+        <div style="font-size:14px;font-weight:700;color:var(--c-navy);">
           ${eh(c.prenom)} ${eh(c.nom)}
-          ${c.principal?` <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--c-teal-bg);color:var(--c-teal);border:1px solid var(--c-teal-border,rgba(13,148,136,.3));margin-left:4px;">Principal</span>`:''}
+          ${c.principal?` <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--c-teal-bg);color:var(--c-teal);border:1px solid var(--c-teal-border,rgba(13,148,136,.3));margin-left:6px;">Principal</span>`:''}
         </div>
-        ${c.fonction?`<div style="font-size:10px;color:var(--c-text-3);margin-top:1px;">${eh(c.fonction)}${c.service?' · '+eh(c.service):''}</div>`:''}
-        <div style="display:flex;gap:10px;margin-top:3px;flex-wrap:wrap;">
-          ${c.email?`<a href="mailto:${c.email}" style="font-size:11px;color:var(--c-teal);text-decoration:none;">✉ ${eh(c.email)}</a>`:''}
-          ${c.tel?`<a href="tel:${c.tel}" style="font-size:11px;color:var(--c-teal);text-decoration:none;">📞 ${eh(c.tel)}</a>`:''}
+        ${c.fonction?`<div style="font-size:12px;color:var(--c-text-3);margin-top:2px;">${eh(c.fonction)}${c.service?' · '+eh(c.service):''}</div>`:''}
+        <div style="display:flex;gap:12px;margin-top:5px;flex-wrap:wrap;">
+          ${c.email?`<a href="mailto:${c.email}" style="font-size:12px;color:var(--c-teal);text-decoration:none;">✉ ${eh(c.email)}</a>`:''}
+          ${c.tel?`<a href="tel:${c.tel}" style="font-size:12px;color:var(--c-teal);text-decoration:none;">📞 ${eh(c.tel)}</a>`:''}
         </div>
       </div>
-      <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px;">
-        <button onclick="openDrawerCrmContactModal(${i})" title="Modifier" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-bg);cursor:pointer;font-size:12px;line-height:1;">✏</button>
-        <button onclick="deleteDrawerCrmContact(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--c-red-border);background:var(--c-red-bg);color:var(--c-red);cursor:pointer;font-size:12px;line-height:1;">🗑</button>
+      <div style="display:flex;gap:6px;flex-shrink:0;margin-left:10px;">
+        <button onclick="openDrawerCrmContactModal(${i})" title="Modifier" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--c-border);background:var(--c-bg);cursor:pointer;font-size:14px;line-height:1;">✏</button>
+        <button onclick="deleteDrawerCrmContact(${i})" title="Supprimer" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--c-red-border);background:var(--c-red-bg);color:var(--c-red);cursor:pointer;font-size:14px;line-height:1;">🗑</button>
       </div>
     </div>`;
   }).join('');
