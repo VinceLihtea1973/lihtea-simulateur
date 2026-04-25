@@ -4080,12 +4080,28 @@
     #sim-desktop-main { display: none; }
 
     @media (min-width: 900px) {
+      /* ── Simulator desktop mode: fix container hierarchy ── */
+      /* Hide sticky header (our topbar replaces it) */
+      .main-content:has(#page-simulateur.active) .header-sticky {
+        display: none !important;
+      }
+      /* Make main-content exactly 100vh tall, no overflow */
+      .main-content:has(#page-simulateur.active) {
+        height: 100vh;
+        overflow: hidden;
+        min-height: unset;
+      }
+      /* Hide fixed bottom export bar (replaced by topbar buttons) */
+      body:has(#page-simulateur.active) .export-bar-sticky {
+        display: none !important;
+      }
+
       /* Full-height page, no padding */
       #page-simulateur.active {
         display: grid !important;
         grid-template-rows: 52px 1fr;
         grid-template-columns: 280px 1fr;
-        height: 100vh;
+        height: 100%;
         max-height: 100vh;
         overflow: hidden;
         padding: 0 !important;
