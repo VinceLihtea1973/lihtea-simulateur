@@ -9157,7 +9157,7 @@ async function renderClientsPage() {
     const prosp = await prospRes.json();
     const sims  = await simsRes.json();
     const allSims = sims?.data || [];
-    _clientsAll = (prosp?.data || []).map(p => {
+    _clientsAll = (prosp?.data || []).filter(p => !(p.score_lead < 0)).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
@@ -10002,7 +10002,7 @@ setTimeout(async () => {
     const data = await res.json();
     const prospects = data?.data || [];
     const now = Date.now();
-    const alerts = prospects.filter(p => {
+    const alerts = prospects.filter(p => !(p.score_lead < 0)).filter(p => {
       const d = Math.floor((now - new Date(p.updated_at||p.created_at).getTime()) / 86400000);
       return d > 15 && !['gagne','perdu','inactif'].includes(p.statut);
     }).length;
@@ -12054,8 +12054,8 @@ async function renderGlobalDashboard() {
     const allProspects = (await prospRes.json())?.data || [];
     const allSims      = (await simRes.json())?.data  || [];
 
-    // Enrich prospects
-    const clients = allProspects.map(p => {
+    // Enrich prospects (exclude soft-deleted — score_lead < 0)
+    const clients = allProspects.filter(p => !(p.score_lead < 0)).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
