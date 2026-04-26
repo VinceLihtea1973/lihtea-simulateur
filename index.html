@@ -4261,10 +4261,11 @@
       .synth-hero-body { font-size:13px; color:var(--c-navy); line-height:1.5; flex:1; }
       .synth-hero-aside { flex-shrink:0; text-align:right; }
       .synth-hero-val-sm { font-size:18px; font-weight:800; color:var(--c-navy); }
-      .synth-3col { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
-      .synth-col { padding:14px 16px !important; }
+      .synth-3col { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:12px; align-items:stretch; }
+      .synth-col { display:flex; flex-direction:column; padding:14px 16px !important; margin-bottom:0 !important; }
       .synth-col-title { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--c-text-3); margin-bottom:10px; }
-      .synth-sep { height:1px; background:var(--c-border); margin:10px 0; }
+      .synth-sep { height:1px; background:var(--c-border); margin:10px 0; flex-shrink:0; }
+      .synth-spacer { flex:1; min-height:8px; }
       .synth-kv { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:5px; }
       .synth-k { font-size:11px; color:var(--c-text-3); font-weight:500; white-space:nowrap; }
       .synth-v { font-size:13px; font-weight:700; color:var(--c-navy); white-space:nowrap; }
@@ -4921,7 +4922,7 @@
             <div class="synth-hero-val-sm" id="sh-gaintotal">—</div>
           </div>
         </div>
-        <!-- Grille 3 colonnes égales -->
+        <!-- Grille 3 colonnes symétriques -->
         <div class="synth-3col">
           <!-- Col 1 : Coût du projet -->
           <div class="card synth-col">
@@ -4929,6 +4930,7 @@
             <div class="synth-sep"></div>
             <div class="synth-kv"><span class="synth-k">Coût brut</span><span id="sh-coutbrut" class="synth-v">—</span></div>
             <div class="synth-kv"><span class="synth-k">Aides directes</span><span id="sh-aides" class="synth-v" style="color:var(--c-teal);">—</span></div>
+            <div class="synth-spacer"></div>
             <div class="synth-sep"></div>
             <div class="synth-k">Coût net</div>
             <div id="sh-coutnet" class="synth-big" style="margin:3px 0 10px;">—</div>
@@ -4941,8 +4943,9 @@
             <div class="synth-sep"></div>
             <div class="synth-k">Économies énergie/an</div>
             <div id="sh-eco" class="synth-big teal" style="margin:3px 0 2px;">—</div>
-            <div class="synth-sub" id="sh-eco-sub" style="margin-bottom:10px;"></div>
-            <div class="synth-kv"><span class="synth-k">Payback brut</span><span id="sh-payback" class="synth-v">—</span></div>
+            <div class="synth-sub" id="sh-eco-sub"></div>
+            <div class="synth-spacer"></div>
+            <div class="synth-kv" style="margin-top:4px;"><span class="synth-k">Payback brut</span><span id="sh-payback" class="synth-v">—</span></div>
             <div class="synth-sep"></div>
             <div class="synth-kv"><span class="synth-k">Économies/mois</span><span id="sh-ecomens" class="synth-v" style="color:var(--c-teal);">—</span></div>
           </div>
@@ -4952,6 +4955,7 @@
             <div class="synth-sep"></div>
             <div class="synth-kv"><span class="synth-k">Cash-flow positif</span><span id="sh-cfdate" class="synth-v" style="color:var(--c-teal);">—</span></div>
             <div class="synth-kv"><span class="synth-k">Après fin loyers (<span id="sh-duree">7</span> ans)</span><span id="sh-postcontrat" class="synth-v">—</span></div>
+            <div class="synth-spacer"></div>
             <div class="synth-sep"></div>
             <div class="synth-kv"><span class="synth-k">Horizon <span id="sh-horizon2">12</span> ans</span><span id="sh-roi-badge" class="synth-v">—</span></div>
             <div class="synth-k" style="margin-top:8px;">Gain net total</div>
