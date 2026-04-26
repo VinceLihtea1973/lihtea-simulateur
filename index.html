@@ -4199,7 +4199,7 @@
         z-index: 200 !important;
         display: grid !important;
         grid-template-rows: 52px 1fr;
-        grid-template-columns: 380px 1fr; /* panneau params | résultats */
+        grid-template-columns: 460px 1fr; /* panneau params | résultats */
         overflow: hidden !important;
         padding: 0 !important;
         animation: none !important;
@@ -7295,12 +7295,12 @@ function switchPage(pageName, navItem) {
     const pageEl = document.getElementById('page-' + targetId);
     if (pageEl) {
       pageEl.classList.add('active');
-      // Recalculer la position JS + restaurer préférence params-hidden
+      // Panneau paramètres : toujours visible à l'ouverture (on réinitialise la préférence)
       if (targetId === 'simulateur') {
-        const paramsHidden = localStorage.getItem('sim-params-hidden') === 'true';
-        pageEl.classList.toggle('params-hidden', paramsHidden);
+        localStorage.removeItem('sim-params-hidden');
+        pageEl.classList.remove('params-hidden');
         const btn = document.getElementById('btn-toggle-params');
-        if (btn) btn.textContent = paramsHidden ? '▶' : '◀';
+        if (btn) btn.textContent = '◀';
         requestAnimationFrame(() => _updateSimulatorPosition());
       }
     }
