@@ -4107,11 +4107,27 @@
         background: var(--c-bg);
         box-sizing: border-box !important;
       }
-      /* Collapsed sidebar → adjust left offset + recalcul width */
+      /* Collapsed sidebar → fallback CSS via :has() (override JS si disponible) */
       body:has(.sidebar.collapsed) #page-simulateur.active {
         left: 64px !important;
         width: calc(100vw - 64px) !important;
         max-width: calc(100vw - 64px) !important;
+      }
+      /* Params panel caché — l'utilisateur peut basculer via le bouton ◀/▶ */
+      #page-simulateur.active.params-hidden {
+        grid-template-columns: 0 1fr !important;
+      }
+      #page-simulateur.active.params-hidden #sim-params-panel {
+        width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        border-right: none !important;
+        padding: 0 !important;
+      }
+      #btn-toggle-params {
+        min-width: 32px;
+        font-size: 13px;
+        padding: 5px 8px;
       }
       /* Suppress page-level scrollbars — prevents scrollbar from stealing
          space on the right side and misaligning position:fixed right:0 */
@@ -4608,6 +4624,7 @@
         </div>
       </div>
       <div class="sim-tb-actions">
+        <button class="sim-tb-btn" id="btn-toggle-params" onclick="toggleSimParams()" title="Masquer / afficher les paramètres">◀</button>
         <button class="sim-tb-btn" onclick="if(typeof captureScenario==='function')captureScenario()">⚖ Scénarios</button>
         <button class="sim-tb-btn" onclick="if(typeof exporterExcel==='function')exporterExcel()">Excel</button>
         <button class="sim-tb-btn" onclick="if(typeof genererProposition==='function')genererProposition()">PDF</button>
@@ -7194,7 +7211,17 @@ function switchPage(pageName, navItem) {
     // directement dans main-content (plus de split-container qui contraignait la largeur)
     const targetId = pageName === 'resultats' ? 'simulateur' : pageName;
     const pageEl = document.getElementById('page-' + targetId);
-    if (pageEl) pageEl.classList.add('active');
+    if (pageEl) {
+      pageEl.classList.add('active');
+      // Recalculer la position JS + restaurer préférence params-hidden
+      if (targetId === 'simulateur') {
+        const paramsHidden = localStorage.getItem('sim-params-hidden') === 'true';
+        pageEl.classList.toggle('params-hidden', paramsHidden);
+        const btn = document.getElementById('btn-toggle-params');
+        if (btn) btn.textContent = paramsHidden ? '▶' : '◀';
+        requestAnimationFrame(() => _updateSimulatorPosition());
+      }
+    }
   } else {
     // ─── DESKTOP: Split-view mode — simulator + content ───
     mainContent.classList.add('split-view');
@@ -12913,7 +12940,33 @@ function toggleSidebar() {
     const isCollapsed = sidebar.classList.contains('collapsed');
     localStorage.setItem('sidebar-collapsed', isCollapsed ? 'true' : 'false');
     document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '64px' : '240px');
+    // Mettre à jour la position du simulateur immédiatement (sans attendre :has() CSS)
+    _updateSimulatorPosition(isCollapsed);
   }
+}
+
+// Met à jour left/width du simulateur en JS — plus fiable que :has() sur tous les navigateurs
+function _updateSimulatorPosition(sidebarCollapsed) {
+  const sim = document.getElementById('page-simulateur');
+  if (!sim || !sim.classList.contains('active')) return;
+  const w = window.innerWidth;
+  if (w < 900) return; // mobile: position non fixed, inutile
+  const collapsed = sidebarCollapsed !== undefined
+    ? sidebarCollapsed
+    : (document.getElementById('sidebar')?.classList.contains('collapsed') ?? false);
+  const left = collapsed ? 64 : 240;
+  sim.style.left = left + 'px';
+  sim.style.width = 'calc(100vw - ' + left + 'px)';
+  sim.style.maxWidth = 'calc(100vw - ' + left + 'px)';
+}
+
+// Toggle masquage du panneau paramètres — libère la largeur pour les résultats
+function toggleSimParams() {
+  const page = document.getElementById('page-simulateur');
+  const btn = document.getElementById('btn-toggle-params');
+  const isHidden = page.classList.toggle('params-hidden');
+  if (btn) btn.textContent = isHidden ? '▶' : '◀';
+  localStorage.setItem('sim-params-hidden', isHidden ? 'true' : 'false');
 }
 
 function initSidebar() {
@@ -12923,6 +12976,8 @@ function initSidebar() {
     sidebar.classList.add('collapsed');
     document.documentElement.style.setProperty('--sidebar-width', '64px');
   }
+  // Appliquer position correcte dès le chargement (si simulateur déjà actif)
+  requestAnimationFrame(() => _updateSimulatorPosition(collapsed));
 }
 
 // ═══════════════════════════════════════════════════════════════════
