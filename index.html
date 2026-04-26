@@ -4087,31 +4087,26 @@
       #page-simulateur.active {
         position: fixed !important;
         top: 0 !important;
-        left: 240px !important;   /* sidebar width */
+        left: 0 !important;           /* TOUJOURS full viewport — sidebar overlay dessus */
         right: 0 !important;
         bottom: 0 !important;
-        /* calc(100vw - 240px): force explicite la largeur relative au viewport.
-           Plus fiable que width:auto car 100vw est toujours viewport-relative,
-           quelle que soit l'histoire du containing block (split-container, etc.) */
-        width: calc(100vw - 240px) !important;
-        max-width: calc(100vw - 240px) !important;
+        width: 100vw !important;      /* 100% du viewport, toujours */
+        max-width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        padding-left: 240px !important; /* décalage sidebar via padding */
+        box-sizing: border-box !important; /* padding inclus dans 100vw */
         z-index: 200 !important;
         display: grid !important;
         grid-template-rows: 52px 1fr;
-        grid-template-columns: 280px 1fr;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        grid-template-columns: 240px 1fr; /* panneau params + zone résultats */
         overflow: hidden !important;
-        padding: 0 !important;
         animation: none !important;
         background: var(--c-bg);
-        box-sizing: border-box !important;
       }
-      /* Collapsed sidebar → fallback CSS via :has() (override JS si disponible) */
+      /* Collapsed sidebar — uniquement padding change */
       body:has(.sidebar.collapsed) #page-simulateur.active {
-        left: 64px !important;
-        width: calc(100vw - 64px) !important;
-        max-width: calc(100vw - 64px) !important;
+        padding-left: 64px !important;
       }
       /* Params panel caché — l'utilisateur peut basculer via le bouton ◀/▶ */
       #page-simulateur.active.params-hidden {
@@ -12955,9 +12950,11 @@ function _updateSimulatorPosition(sidebarCollapsed) {
     ? sidebarCollapsed
     : (document.getElementById('sidebar')?.classList.contains('collapsed') ?? false);
   const left = collapsed ? 64 : 240;
-  sim.style.left = left + 'px';
-  sim.style.width = 'calc(100vw - ' + left + 'px)';
-  sim.style.maxWidth = 'calc(100vw - ' + left + 'px)';
+  // Utilise setProperty avec 'important' pour surpasser le CSS !important
+  sim.style.setProperty('left', '0', 'important');
+  sim.style.setProperty('width', '100vw', 'important');
+  sim.style.setProperty('max-width', '100vw', 'important');
+  sim.style.setProperty('padding-left', left + 'px', 'important');
 }
 
 // Toggle masquage du panneau paramètres — libère la largeur pour les résultats
