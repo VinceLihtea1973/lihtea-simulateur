@@ -4248,41 +4248,32 @@
         padding: 16px 20px;
       }
       .sim-dtab-panel.active { display: block; }
-      /* KPI grid in synthese tab */
-      .sim-kpi-row {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-      .sim-kpi-card {
-        background: var(--c-surface);
-        border: 1px solid var(--c-border);
-        border-radius: 10px;
-        padding: 12px 14px;
-        min-width: 0;
-      }
-      .sim-kpi-card.accent {
-        border-color: var(--c-teal);
-        background: var(--c-teal-bg, #f0fdfa);
-      }
-      .sim-kpi-label { font-size: 9px; color: var(--c-text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
-      .sim-kpi-val { font-size: 20px; font-weight: 800; color: var(--c-navy); line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .sim-kpi-val.teal { color: var(--c-teal); }
-      .sim-kpi-sub { font-size: 10px; color: var(--c-text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      /* Synthese 2-col — cash-flow compact (1/3) + insight large (2/3) */
-      .sim-synth-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 12px; margin-bottom: 12px; }
-      /* Cash-flow compact widget */
-      .cf-widget { display: flex; flex-direction: column; gap: 12px; }
-      .cf-row { display: flex; flex-direction: column; gap: 5px; }
-      .cf-row-header { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
-      .cf-row-label { font-size: 10px; font-weight: 600; color: var(--c-text-3); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-      .cf-row-val { font-size: 14px; font-weight: 800; white-space: nowrap; }
-      .cf-bar-track { height: 8px; background: var(--c-border); border-radius: 4px; overflow: hidden; }
-      .cf-bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
-      .cf-solde { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 8px; background: var(--c-bg); border: 1px solid var(--c-border); margin-top: 2px; }
-      .cf-solde-label { font-size: 11px; color: var(--c-text-3); font-weight: 500; }
-      .cf-solde-val { font-size: 15px; font-weight: 800; }
+      /* ── Synthèse Option A — Hero + 3 colonnes ── */
+      .synth-hero { display:flex; align-items:center; gap:16px; background:var(--c-teal-bg,#f0fdfa); border:1px solid var(--c-teal-border,#99f6e4); border-radius:10px; padding:14px 20px; margin-bottom:12px; }
+      .synth-hero.warn { background:var(--c-amber-bg,#fffbeb); border-color:#fde68a; }
+      .synth-hero-main { flex-shrink:0; min-width:90px; }
+      .synth-hero-label { font-size:9px; text-transform:uppercase; letter-spacing:.07em; color:var(--c-teal); font-weight:700; margin-bottom:2px; }
+      .synth-hero.warn .synth-hero-label { color:var(--c-amber,#d97706); }
+      .synth-hero-val { font-size:26px; font-weight:800; color:var(--c-teal); white-space:nowrap; line-height:1.1; }
+      .synth-hero.warn .synth-hero-val { color:var(--c-amber,#d97706); }
+      .synth-hero-sep { width:1px; height:44px; background:var(--c-teal-border,#5DCAA5); flex-shrink:0; }
+      .synth-hero.warn .synth-hero-sep { background:#fde68a; }
+      .synth-hero-body { font-size:13px; color:var(--c-navy); line-height:1.5; flex:1; }
+      .synth-hero-aside { flex-shrink:0; text-align:right; }
+      .synth-hero-val-sm { font-size:18px; font-weight:800; color:var(--c-navy); }
+      .synth-3col { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+      .synth-col { padding:14px 16px !important; }
+      .synth-col-title { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--c-text-3); margin-bottom:10px; }
+      .synth-sep { height:1px; background:var(--c-border); margin:10px 0; }
+      .synth-kv { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:5px; }
+      .synth-k { font-size:11px; color:var(--c-text-3); font-weight:500; white-space:nowrap; }
+      .synth-v { font-size:13px; font-weight:700; color:var(--c-navy); white-space:nowrap; }
+      .synth-big { font-size:20px; font-weight:800; color:var(--c-navy); }
+      .synth-big.teal { color:var(--c-teal); }
+      .synth-sub { font-size:10px; color:var(--c-text-3); }
+      .synth-narrative { background:var(--c-surface); border:1px solid var(--c-border); border-radius:10px; padding:14px 18px; }
+      .synth-narrative-title { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--c-text-3); margin-bottom:8px; }
+      .synth-narrative-body { font-size:12px; color:var(--c-navy); line-height:1.7; }
       /* Annual table */
       .sim-annual-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       .sim-annual-table th { text-align: right; padding: 8px 12px; color: var(--c-text-3); font-weight: 600; font-size: 11px; text-transform: uppercase; background: var(--c-navy); color: #fff; }
@@ -4312,10 +4303,6 @@
       .sim-tb-btn.primary:hover { opacity: .9; }
       .sim-tb-client-chip { min-width: 0; overflow: hidden; }
       .sim-tb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
-      /* Insight in synthese tab */
-      #sim-desktop-main .insight { margin: 0; border-radius: 10px; }
-      /* Dans le panel synthèse, l'insight est direct enfant du grid — reset padding */
-      #sim-dtab-synthese > .sim-synth-grid > #insight-box { padding: 16px 18px; }
       /* Charts in graphiques tab */
       #sim-desktop-main .dashboard-grid { margin-bottom: 16px; }
       #sim-desktop-main .projection-section { margin-bottom: 0; }
@@ -4327,12 +4314,11 @@
 
     /* ── Simulator laptop responsive (900-1400px) ── */
     @media (min-width: 900px) and (max-width: 1400px) {
-      /* Synth grid stacks vertically — les deux blocs en colonne */
-      .sim-synth-grid { grid-template-columns: 1fr !important; }
+      /* synth-3col → 2 colonnes sur écrans intermédiaires */
+      .synth-3col { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
     }
     @media (min-width: 900px) and (max-width: 1100px) {
-      /* Très petit desktop: KPI en 2×2 */
-      .sim-kpi-row { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+      .synth-hero-body { font-size: 12px; }
     }
 
   </style>
@@ -4920,39 +4906,69 @@
         <button class="sim-dtab" id="sim-dtab-btn-scenarios" onclick="switchSimDTab('scenarios',this)">⚖ Scénarios</button>
       </div>
 
-      <!-- TAB: Synthèse -->
+      <!-- TAB: Synthèse (Option A — décision d'abord) -->
       <div class="sim-dtab-panel active" id="sim-dtab-synthese">
-        <!-- KPI Cards (moved from page-resultats) -->
-        <div class="sim-kpi-row">
-          <div class="sim-kpi-card">
-            <div class="sim-kpi-label">Coût net après aides</div>
-            <div class="sim-kpi-val" id="r-cout-net">—</div>
-            <div class="sim-kpi-sub" id="r-pct-aide">0% couvert</div>
+        <!-- Hero pleine largeur -->
+        <div class="synth-hero" id="synth-hero">
+          <div class="synth-hero-main">
+            <div class="synth-hero-label" id="sh-hero-label">Cash-flow net</div>
+            <div class="synth-hero-val" id="sh-cashflow">—</div>
           </div>
-          <div class="sim-kpi-card">
-            <div class="sim-kpi-label">Mensualité nette</div>
-            <div class="sim-kpi-val" id="r-mensualite">—</div>
-            <div class="sim-kpi-sub" id="r-mens-sub">vs — brut</div>
-          </div>
-          <div class="sim-kpi-card accent">
-            <div class="sim-kpi-label">Économie énergie/an</div>
-            <div class="sim-kpi-val teal" id="r-eco">—</div>
-            <div class="sim-kpi-sub" id="r-eco-sub">0 MWh</div>
-          </div>
-          <div class="sim-kpi-card accent">
-            <div class="sim-kpi-label">Rentabilité atteinte</div>
-            <div class="sim-kpi-val teal" id="r-roi">—</div>
-            <div class="sim-kpi-sub" id="r-roi-sub">flux cumulés positifs</div>
+          <div class="synth-hero-sep"></div>
+          <div class="synth-hero-body" id="sh-herotext">—</div>
+          <div class="synth-hero-aside">
+            <div class="synth-hero-label">Gain net <span id="sh-horizon">12</span> ans</div>
+            <div class="synth-hero-val-sm" id="sh-gaintotal">—</div>
           </div>
         </div>
-        <!-- Loyer vs Économies + Insight -->
-        <div class="sim-synth-grid">
-          <div class="card" style="padding:16px 18px;">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:14px;">Cash-flow mensuel</div>
-            <div id="dash-loyer-eco"></div>
-            <div id="loyer-eco-line" style="display:none;"></div>
+        <!-- Grille 3 colonnes égales -->
+        <div class="synth-3col">
+          <!-- Col 1 : Coût du projet -->
+          <div class="card synth-col">
+            <div class="synth-col-title">Coût du projet</div>
+            <div class="synth-sep"></div>
+            <div class="synth-kv"><span class="synth-k">Coût brut</span><span id="sh-coutbrut" class="synth-v">—</span></div>
+            <div class="synth-kv"><span class="synth-k">Aides directes</span><span id="sh-aides" class="synth-v" style="color:var(--c-teal);">—</span></div>
+            <div class="synth-sep"></div>
+            <div class="synth-k">Coût net</div>
+            <div id="sh-coutnet" class="synth-big" style="margin:3px 0 10px;">—</div>
+            <div class="synth-kv"><span class="synth-k">Mensualité nette</span><span id="sh-mens" class="synth-v">—</span></div>
+            <div class="synth-sub" id="sh-mens-sub"></div>
           </div>
-          <div id="insight-box" class="insight" style="margin-top:0;"></div>
+          <!-- Col 2 : Ce que ça rapporte -->
+          <div class="card synth-col">
+            <div class="synth-col-title">Ce que ça rapporte</div>
+            <div class="synth-sep"></div>
+            <div class="synth-k">Économies énergie/an</div>
+            <div id="sh-eco" class="synth-big teal" style="margin:3px 0 2px;">—</div>
+            <div class="synth-sub" id="sh-eco-sub" style="margin-bottom:10px;"></div>
+            <div class="synth-kv"><span class="synth-k">Payback brut</span><span id="sh-payback" class="synth-v">—</span></div>
+            <div class="synth-sep"></div>
+            <div class="synth-kv"><span class="synth-k">Économies/mois</span><span id="sh-ecomens" class="synth-v" style="color:var(--c-teal);">—</span></div>
+          </div>
+          <!-- Col 3 : Rentabilité long terme -->
+          <div class="card synth-col">
+            <div class="synth-col-title">Rentabilité long terme</div>
+            <div class="synth-sep"></div>
+            <div class="synth-kv"><span class="synth-k">Cash-flow positif</span><span id="sh-cfdate" class="synth-v" style="color:var(--c-teal);">—</span></div>
+            <div class="synth-kv"><span class="synth-k">Après fin loyers (<span id="sh-duree">7</span> ans)</span><span id="sh-postcontrat" class="synth-v">—</span></div>
+            <div class="synth-sep"></div>
+            <div class="synth-kv"><span class="synth-k">Horizon <span id="sh-horizon2">12</span> ans</span><span id="sh-roi-badge" class="synth-v">—</span></div>
+            <div class="synth-k" style="margin-top:8px;">Gain net total</div>
+            <div id="sh-gaintotal2" class="synth-big" style="margin-top:3px;">—</div>
+          </div>
+        </div>
+        <!-- Résumé narratif (fond léger, pas navy) -->
+        <div class="synth-narrative" id="synth-narrative"></div>
+        <!-- Éléments cachés pour compatibilité JS existant -->
+        <div style="display:none;">
+          <div id="r-cout-net"></div><div id="r-pct-aide"></div>
+          <div id="r-mensualite"></div><div id="r-mens-sub"></div>
+          <div id="r-eco"></div><div id="r-eco-sub"></div>
+          <div id="r-roi"></div><div id="r-roi-sub"></div>
+          <div id="dash-loyer-eco"></div>
+          <div id="insight-box" class="insight"></div>
+          <div id="loyer-eco-line"></div>
         </div>
       </div>
 
@@ -7699,6 +7715,9 @@ function recalculer() {
   const roiSubEl = document.getElementById('r-roi-sub');
   if (roiSubEl) roiSubEl.textContent = pbFinIdx >= 0 ? `flux cumulés positifs dès l'an ${pbFinIdx + 1}` : 'au-delà de l\'horizon d\'analyse';
 
+  // ── Synthèse Option A ──
+  renderSynthTab(inv, a, ecoAn, duree, HORIZON, paybackBrutAns, pbFinIdx, pbFinAff, pbBrutAff, gainTotal, gainPhase2, isKwh, mwhEco);
+
   const insightEl = document.getElementById('insight-box');
   const isPositive = soldeNet >= 0;
   insightEl.className = isPositive ? 'insight' : 'insight warn';
@@ -7811,6 +7830,86 @@ function renderDashLoyerEco(a, ecoAn) {
         <span class="cf-solde-val" style="color:${soldeColor};">${soldeTxt}</span>
       </div>
     </div>`;
+}
+
+// ── Synthèse Option A — Hero + 3 colonnes + narrative ──
+function renderSynthTab(inv, a, ecoAn, duree, HORIZON, paybackBrutAns, pbFinIdx, pbFinAff, pbBrutAff, gainTotal, gainPhase2, isKwh, mwhEco) {
+  const fk = n => { const v=Math.abs(Math.round(n)); if(v>=1e6) return (v/1e6).toFixed(1).replace('.',',')+' M€'; if(v>=1e3) return Math.round(v/1e3)+' k€'; return v.toLocaleString('fr-FR')+' €'; };
+  const fks = n => (n>=0?'+':'-') + fk(Math.abs(n));
+  const mensNet = Math.round(a.mensNette);
+  const ecoMens = Math.round(ecoAn / 12);
+  const solde = ecoMens - mensNet;
+  const isPositive = solde >= 0;
+  const margePct = ecoMens > 0 ? Math.round(solde / ecoMens * 100) : 0;
+  const anneesPostContrat = HORIZON > duree ? HORIZON - duree : 0;
+  const gainPostContrat = Math.round(ecoAn * anneesPostContrat);
+
+  // Hero
+  const heroEl = document.getElementById('synth-hero');
+  const labelEl = document.getElementById('sh-hero-label');
+  const cfEl = document.getElementById('sh-cashflow');
+  const htEl = document.getElementById('sh-herotext');
+  if (heroEl) {
+    heroEl.className = isPositive ? 'synth-hero' : 'synth-hero warn';
+    if (labelEl) labelEl.textContent = isPositive ? 'Cash-flow net' : 'Effort mensuel net';
+    if (cfEl) { cfEl.textContent = (isPositive ? '+' : '−') + Math.abs(solde).toLocaleString('fr-FR') + ' €/mois'; }
+    if (htEl) {
+      htEl.innerHTML = isPositive
+        ? 'Le projet <strong>couvre ses loyers dès le 1er mois</strong> — les économies (' + ecoMens.toLocaleString('fr-FR') + ' €/mois) dépassent le loyer (' + mensNet.toLocaleString('fr-FR') + ' €/mois), marge ' + margePct + '%.'
+        : 'Effort net de ' + Math.abs(solde).toLocaleString('fr-FR') + ' €/mois pendant ' + duree + ' ans — payback financé ' + pbFinAff + '.';
+    }
+  }
+  const hEl = document.getElementById('sh-horizon');
+  const hEl2 = document.getElementById('sh-horizon2');
+  const dEl = document.getElementById('sh-duree');
+  if (hEl) hEl.textContent = HORIZON;
+  if (hEl2) hEl2.textContent = HORIZON;
+  if (dEl) dEl.textContent = duree;
+  const gtEl = document.getElementById('sh-gaintotal');
+  if (gtEl) { gtEl.textContent = fks(gainTotal); gtEl.style.color = gainTotal >= 0 ? 'var(--c-navy)' : 'var(--c-amber,#d97706)'; }
+
+  // Col 1 : Coût
+  const s = n => document.getElementById(n);
+  if (s('sh-coutbrut')) s('sh-coutbrut').textContent = fk(inv);
+  if (s('sh-aides')) s('sh-aides').textContent = '−' + fk(a.totalSubventions) + ' (' + a.pctCouvert + '%)';
+  if (s('sh-coutnet')) s('sh-coutnet').textContent = fk(a.coutNet);
+  if (s('sh-mens')) s('sh-mens').textContent = mensNet.toLocaleString('fr-FR') + ' €/mois';
+  if (s('sh-mens-sub')) s('sh-mens-sub').textContent = 'vs ' + Math.round(a.mensBrute).toLocaleString('fr-FR') + ' € brut';
+
+  // Col 2 : Gains
+  if (s('sh-eco')) s('sh-eco').textContent = fk(ecoAn) + '/an';
+  if (s('sh-eco-sub')) {
+    s('sh-eco-sub').textContent = isKwh
+      ? Math.round(mwhEco * 1000).toLocaleString('fr-FR') + ' kWh économisés/an'
+      : Math.round(mwhEco) + ' MWh économisés/an';
+  }
+  if (s('sh-payback')) s('sh-payback').textContent = pbBrutAff;
+  if (s('sh-ecomens')) s('sh-ecomens').textContent = ecoMens.toLocaleString('fr-FR') + ' €/mois';
+
+  // Col 3 : Rentabilité
+  if (s('sh-cfdate')) {
+    s('sh-cfdate').textContent = isPositive ? 'Dès le 1er mois' : pbFinAff;
+    s('sh-cfdate').style.color = isPositive ? 'var(--c-teal)' : 'var(--c-amber,#d97706)';
+  }
+  if (s('sh-postcontrat')) s('sh-postcontrat').textContent = '+' + fk(ecoAn) + '/an pur';
+  if (s('sh-roi-badge')) {
+    s('sh-roi-badge').textContent = pbFinAff;
+    s('sh-roi-badge').style.color = pbFinIdx >= 0 ? 'var(--c-teal)' : 'var(--c-amber,#d97706)';
+  }
+  if (s('sh-gaintotal2')) {
+    s('sh-gaintotal2').textContent = fks(gainTotal);
+    s('sh-gaintotal2').style.color = gainTotal >= 0 ? 'var(--c-navy)' : 'var(--c-amber,#d97706)';
+  }
+
+  // Narrative
+  const narEl = document.getElementById('synth-narrative');
+  if (narEl) {
+    narEl.innerHTML = `<div class="synth-narrative-title">L'essentiel pour la direction</div>
+    <div class="synth-narrative-body">${isPositive
+      ? `Projet à <strong>${fk(a.coutNet)}</strong> net après ${fk(a.totalSubventions)} d'aides directes (${a.pctCouvert}%) — loyers couverts dès le départ grâce aux <strong>${fk(ecoAn)}/an</strong> d'économies énergie. Effort réel : <strong>+${solde.toLocaleString('fr-FR')} €/mois</strong>. Payback brut : ${pbBrutAff}. Après ${duree} ans, l'entreprise capte <strong>+${fk(ecoAn)}/an</strong> en économies pures. Gain net total sur ${HORIZON} ans : <strong>${fks(gainTotal)}</strong>.`
+      : `Projet à <strong>${fk(a.coutNet)}</strong> net (${a.pctCouvert}% d'aides) — effort mensuel <strong>${Math.abs(solde).toLocaleString('fr-FR')} €/mois</strong> pendant ${duree} ans. Économies énergie : <strong>${fk(ecoAn)}/an</strong>. Payback brut : ${pbBrutAff} — payback financé : ${pbFinAff}. Après le contrat : <strong>+${fk(ecoAn)}/an</strong> de gain pur. Gain net total sur ${HORIZON} ans : <strong>${fks(gainTotal)}</strong>.`
+    }</div>`;
+  }
 }
 
 // ── Donut : répartition financement ──
