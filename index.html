@@ -4090,24 +4090,28 @@
         left: 240px !important;   /* sidebar width */
         right: 0 !important;
         bottom: 0 !important;
-        /* width:auto is CRITICAL — without it, .page{width:100%} sets width=100vw,
-           which overrides right:0 (over-constrained → right ignored in LTR),
-           pushing content 240px off the right edge of the viewport */
-        width: auto !important;
+        /* calc(100vw - 240px): force explicite la largeur relative au viewport.
+           Plus fiable que width:auto car 100vw est toujours viewport-relative,
+           quelle que soit l'histoire du containing block (split-container, etc.) */
+        width: calc(100vw - 240px) !important;
+        max-width: calc(100vw - 240px) !important;
         z-index: 200 !important;
         display: grid !important;
         grid-template-rows: 52px 1fr;
-        grid-template-columns: 220px 1fr;
-        height: auto !important;
-        max-height: none !important;
+        grid-template-columns: 280px 1fr;
+        height: 100vh !important;
+        max-height: 100vh !important;
         overflow: hidden !important;
         padding: 0 !important;
         animation: none !important;
         background: var(--c-bg);
+        box-sizing: border-box !important;
       }
-      /* Collapsed sidebar → adjust left offset */
+      /* Collapsed sidebar → adjust left offset + recalcul width */
       body:has(.sidebar.collapsed) #page-simulateur.active {
         left: 64px !important;
+        width: calc(100vw - 64px) !important;
+        max-width: calc(100vw - 64px) !important;
       }
       /* Suppress page-level scrollbars — prevents scrollbar from stealing
          space on the right side and misaligning position:fixed right:0 */
@@ -4143,7 +4147,8 @@
         overflow-x: hidden;
         border-right: 1px solid var(--c-border);
         background: var(--c-surface);
-        width: 220px !important;
+        width: 280px !important;
+        min-width: 280px !important;
         padding: 0 !important;
       }
       /* Compact cards in sidebar */
@@ -4285,11 +4290,13 @@
       #sim-desktop-main { display: none !important; }
     }
 
-    /* ── Simulator laptop responsive (1025-1280px) ── */
-    @media (min-width: 900px) and (max-width: 1280px) {
-      /* Synth grid stacks vertically on smaller desktops */
+    /* ── Simulator laptop responsive (900-1400px) ── */
+    @media (min-width: 900px) and (max-width: 1400px) {
+      /* Synth grid stacks vertically — les deux blocs en colonne */
       .sim-synth-grid { grid-template-columns: 1fr !important; }
-      /* KPI: 2 colonnes au lieu de 4 */
+    }
+    @media (min-width: 900px) and (max-width: 1100px) {
+      /* Très petit desktop: KPI en 2×2 */
       .sim-kpi-row { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
     }
 
