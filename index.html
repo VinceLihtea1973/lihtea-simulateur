@@ -9271,13 +9271,15 @@ const ACT_RESULTS = [
 
 // Récupère la prochaine relance planifiée depuis les activités
 // Champ DB : date_planifiee (table activites)
+// Note : on inclut les activités 'realisee' ayant une date_planifiee — cas normal
+// quand l'utilisateur log un contact (realisee) et fixe une relance (date_planifiee).
 function getNextRelance(prospect) {
-  // Ignorer les activités déjà réalisées ou annulées — seul statut 'planifiee' compte
   const acts = (prospect.activites || []).filter(
-    a => a.date_planifiee && a.statut !== 'realisee' && a.statut !== 'annulee'
+    a => a.date_planifiee && a.statut !== 'annulee'
   );
   if (!acts.length) return null;
-  acts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  // Trier par date_planifiee ASC → retourner la prochaine relance la plus proche
+  acts.sort((a, b) => new Date(a.date_planifiee) - new Date(b.date_planifiee));
   return acts[0].date_planifiee.split('T')[0]; // YYYY-MM-DD
 }
 
@@ -9588,9 +9590,9 @@ async function logActivity(prospectId) {
     const createdAct = actData?.data || { ...body, id: '_opt_' + Date.now(), created_at: new Date().toISOString() };
 
     // ── Mise à jour optimiste du cache dashboard ──────────────────────────────
-    // On injecte l'activité directement dans le cache sans attendre GET /activites
-    // (qui peut ne pas exister). Ainsi getNextRelance() trouve immédiatement la
-    // date_planifiee et "Relances du jour" s'affiche sans re-fetch.
+    // Injection directe dans le cache — pas besoin de GET /activites.
+    // Si le cache est absent, on le reconstruit après le POST pour que
+    // "Relances du jour" apparaisse immédiatement au prochain render.
     if (_dashCache) {
       const pidx = _dashCache.prospects.findIndex(p => p.id === prospectId);
       if (pidx >= 0) {
@@ -9605,6 +9607,9 @@ async function logActivity(prospectId) {
           ..._dashCache.prospects.slice(pidx + 1),
         ];
       }
+    } else {
+      // Cache absent — forcer un fetch frais pour que le dashboard soit à jour
+      _fetchDashData().catch(() => {});
     }
 
     // Mettre à jour updated_at sur le prospect
