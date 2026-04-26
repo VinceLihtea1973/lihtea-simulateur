@@ -2432,6 +2432,16 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .dash-skeleton {
+      background: linear-gradient(90deg, var(--c-border) 25%, var(--c-surface) 50%, var(--c-border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px;
+    }
     .card { animation: fadeInUp 0.4s var(--ease-out) both; }
     .card:nth-child(1) { animation-delay: 0.05s; }
     .card:nth-child(2) { animation-delay: 0.1s; }
@@ -8442,7 +8452,7 @@ function saveCurrentSimulation() {
   saveSims(sims);
   renderSavedSimulations();
   // Refresh dashboard if it has been rendered
-  if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+  if (typeof renderGlobalDashboard === 'function') { invalidateDashCache(); renderGlobalDashboard(); }
 
   // Sync to Supabase (non-blocking)
   syncSimulationToSupabase({
@@ -9052,7 +9062,7 @@ async function _kbMarkContacted(prospectId, activityId) {
     }, 150);
 
     if (typeof renderPipelinePage   === 'function') renderPipelinePage();
-    if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+    if (typeof renderGlobalDashboard === 'function') { invalidateDashCache(); renderGlobalDashboard(); }
   } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
 }
 
@@ -9429,7 +9439,7 @@ async function logActivity(prospectId) {
 
     setTimeout(() => {
       if (typeof renderPipelinePage   === 'function' && pageCourante === 'pipeline') renderPipelinePage();
-      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+      if (typeof renderGlobalDashboard === 'function') { invalidateDashCache(); renderGlobalDashboard(); }
     }, 600);
   } catch(e) {
     showToast('⚠️ ' + e.message, 'error');
@@ -12368,6 +12378,48 @@ function openProspectFromDash(id) {
   setTimeout(function() { openClientDrawer(id); }, 400);
 }
 
+// ── Dashboard data cache (stale-while-revalidate) ──────────────────────────
+let _dashCache = null; // { prospects, simulations, ts }
+const _DASH_TTL = 60000; // 60s avant refresh automatique
+let _dashFetching = false;
+
+async function _fetchDashData() {
+  if (_dashFetching) return;
+  _dashFetching = true;
+  try {
+    const [prospRes, simRes] = await Promise.all([
+      fetch(ADMIN_API + '/prospects',   { headers: getAuthHeaders() }),
+      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
+    ]);
+    const allProspects = (await prospRes.json())?.data || [];
+    const allSims      = (await simRes.json())?.data  || [];
+    _dashCache = { prospects: allProspects, simulations: allSims, ts: Date.now() };
+    return _dashCache;
+  } finally {
+    _dashFetching = false;
+  }
+}
+
+// Appelé au login — lance le fetch en arrière-plan sans bloquer
+function prefetchDashData() {
+  if (!_dashCache) _fetchDashData().catch(() => {});
+}
+
+// Invalider le cache (après création/suppression prospect, etc.)
+function invalidateDashCache() { _dashCache = null; }
+
+function _dashSkeletonKpi() {
+  return Array(4).fill(0).map(() =>
+    '<div class="dash-kpi-card">'
+    + '<div class="dash-kpi-accent dash-skeleton"></div>'
+    + '<div class="dash-kpi-body">'
+    + '<div style="display:flex;justify-content:space-between;margin-bottom:14px;"><div class="dash-skeleton" style="height:11px;width:55%;border-radius:4px;"></div><div class="dash-skeleton" style="width:34px;height:34px;border-radius:9px;"></div></div>'
+    + '<div class="dash-skeleton" style="height:30px;width:70%;border-radius:6px;margin-bottom:10px;"></div>'
+    + '<div class="dash-skeleton" style="height:11px;width:80%;border-radius:4px;"></div>'
+    + '</div></div>'
+  ).join('');
+}
+
 async function renderGlobalDashboard() {
   // ── Welcome header
   const welcomeEl = document.getElementById('dash-welcome-title');
@@ -12383,17 +12435,36 @@ async function renderGlobalDashboard() {
     dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
   }
 
-  // ── Loading state
+  // ── Cache check
   const kpiRow = document.getElementById('dash-kpi-row');
-  if (kpiRow) kpiRow.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">Chargement…</div>';
+  const cacheAge = _dashCache ? Date.now() - _dashCache.ts : Infinity;
+  const hasFreshCache = _dashCache && cacheAge < _DASH_TTL;
+  const hasStaleCache = _dashCache && !hasFreshCache;
+
+  if (!_dashCache) {
+    // Aucun cache — squelettes pendant le fetch
+    if (kpiRow) kpiRow.innerHTML = _dashSkeletonKpi();
+  }
 
   try {
-    const [prospRes, simRes] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
-    ]);
-    const allProspects = (await prospRes.json())?.data || [];
-    const allSims      = (await simRes.json())?.data  || [];
+    let allProspects, allSims;
+    if (_dashCache) {
+      // Données disponibles — affichage immédiat
+      allProspects = _dashCache.prospects;
+      allSims      = _dashCache.simulations;
+      // Si stale → refresh silencieux en arrière-plan
+      if (hasStaleCache) {
+        _fetchDashData().then(() => {
+          // Re-render silencieux une fois les nouvelles données là
+          if (ongletCourant === 'dashboard') renderGlobalDashboard();
+        }).catch(() => {});
+      }
+    } else {
+      // Fetch bloquant (premier chargement)
+      const data = await _fetchDashData();
+      allProspects = data.prospects;
+      allSims      = data.simulations;
+    }
 
     // Enrich prospects (exclude soft-deleted — score_lead<0 ou dans localStorage)
     const _delIdsDash=(()=>{try{return JSON.parse(localStorage.getItem('gef_deleted_prospect_ids')||'[]')}catch{return[]}})();
@@ -13854,6 +13925,9 @@ function onAuthSuccess() {
   }
   updateUserUI();
   initApp();
+
+  // Prefetch dashboard data immédiatement — le dashboard sera instantané
+  if (typeof prefetchDashData === 'function') prefetchDashData();
 
   // Post-auth syncs — only run once authenticated
   startEquipSync();
