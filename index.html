@@ -4090,6 +4090,10 @@
         left: 240px !important;   /* sidebar width */
         right: 0 !important;
         bottom: 0 !important;
+        /* width:auto is CRITICAL — without it, .page{width:100%} sets width=100vw,
+           which overrides right:0 (over-constrained → right ignored in LTR),
+           pushing content 240px off the right edge of the viewport */
+        width: auto !important;
         z-index: 200 !important;
         display: grid !important;
         grid-template-rows: 52px 1fr;
