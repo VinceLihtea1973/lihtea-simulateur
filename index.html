@@ -5718,41 +5718,6 @@
   </div>
 </div>
 
-<!-- ─── COPILOT IA ─── -->
-<button class="copilot-fab" id="copilot-fab" onclick="toggleCopilot()" title="Lihtea Copilot — Assistant IA Subventions">
-  <span id="copilot-fab-icon">L</span>
-  <div class="copilot-fab-badge" id="copilot-fab-badge"></div>
-</button>
-
-<div class="copilot-panel" id="copilot-panel">
-  <div class="copilot-header">
-    <div class="copilot-header-logo">L</div>
-    <div class="copilot-header-text">
-      <div class="copilot-header-title">Lihtea Copilot</div>
-      <div class="copilot-header-sub">Assistant IA · Subventions & Financement</div>
-    </div>
-    <span style="font-size:10px;padding:3px 8px;border-radius:10px;background:rgba(13,148,136,0.2);color:var(--c-teal-bright);font-weight:600;">CLAUDE</span>
-  </div>
-  <div class="copilot-messages" id="copilot-messages">
-    <!-- Welcome -->
-    <div style="text-align:center;padding:20px 10px;">
-      <div style="width:40px;height:40px;border-radius:12px;background:var(--c-navy);display:inline-flex;align-items:center;justify-content:center;color:var(--c-gold);font-size:18px;font-weight:800;margin-bottom:10px;box-shadow:0 4px 12px rgba(15,43,70,0.2);">L</div>
-      <div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:4px;">Bienvenue sur Lihtea Copilot</div>
-      <div style="font-size:11px;color:var(--c-text-3);line-height:1.5;">Décrivez le projet de votre client et je vous aiderai à monter le dossier subventions.</div>
-    </div>
-  </div>
-  <div class="copilot-suggestions" id="copilot-suggestions">
-    <button class="copilot-suggestion" onclick="copilotSend('Mon client PME veut remplacer son compresseur, budget 180k€')">🏭 Compresseur PME 180k€</button>
-    <button class="copilot-suggestion" onclick="copilotSend('Étapes pour monter un dossier CEE industrie ?')">📋 Dossier CEE</button>
-    <button class="copilot-suggestion" onclick="copilotSend('Projet récupération chaleur fatale ETI 500k€')">♨️ Chaleur fatale</button>
-    <button class="copilot-suggestion" onclick="copilotSend('Compare Fonds Chaleur vs Tremplin PME pour 90k€')">💰 Fonds Chaleur vs Tremplin</button>
-  </div>
-  <div class="copilot-input-area">
-    <textarea class="copilot-input" id="copilot-input" placeholder="Décrivez le projet client..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();copilotSendInput();}"></textarea>
-    <button class="copilot-send" id="copilot-send-btn" onclick="copilotSendInput()">➤</button>
-  </div>
-  <div class="copilot-footer">Lihtea Copilot · Estimations indicatives · Dossier à valider avec un délégataire agréé</div>
-</div>
 
 <!-- Admin géré depuis admin.lihtea.com -->
 
