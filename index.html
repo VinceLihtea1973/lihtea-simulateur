@@ -7071,7 +7071,9 @@ function toggleMobileSimulator() {
 // ─── NAVIGATION ───
 // All pages show the simulator panel in split-view
 // Pages en mode SPLIT-VIEW (panneau simulateur visible)
-const SPLIT_VIEW_PAGES = new Set(['resultats', 'scenarios']);
+// 'resultats' retiré du split-view — le simulateur utilise position:fixed
+// et n'a plus besoin d'un split-container (qui contraignait sa largeur)
+const SPLIT_VIEW_PAGES = new Set(['scenarios']);
 
 // Pages en mode FULL-WIDTH (100% largeur, bandeau contexte visible)
 const FULL_WIDTH_PAGES = new Set(['dashboard', 'clients', 'pipeline', 'ressources', 'dossier', 'aides', 'eligibilite', 'organismes']);
@@ -7174,14 +7176,17 @@ function switchPage(pageName, navItem) {
       if (pageEl) pageEl.classList.add('active');
     }
   } else if (isFullWidth) {
-    // ─── DESKTOP: Full-width mode (dashboard) ───
+    // ─── DESKTOP: Full-width mode ───
     mainContent.classList.remove('split-view');
     let container = document.getElementById('split-container');
     if (container) {
       while (container.firstChild) mainContent.insertBefore(container.firstChild, container);
       container.remove();
     }
-    const pageEl = document.getElementById('page-' + pageName);
+    // 'resultats' est l'alias de navigation du simulateur → montre #page-simulateur
+    // directement dans main-content (plus de split-container qui contraignait la largeur)
+    const targetId = pageName === 'resultats' ? 'simulateur' : pageName;
+    const pageEl = document.getElementById('page-' + targetId);
     if (pageEl) pageEl.classList.add('active');
   } else {
     // ─── DESKTOP: Split-view mode — simulator + content ───
