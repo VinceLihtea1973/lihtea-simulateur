@@ -4088,10 +4088,10 @@
       #page-simulateur.active {
         position: fixed !important;
         top: 0 !important;
-        left: var(--sidebar-width) !important; /* suit la variable CSS, maintenue par toggleSidebar() */
+        left: var(--sidebar-width) !important; /* mis à jour par toggleSidebar() / initSidebar() */
         right: 0 !important;
         bottom: 0 !important;
-        /* PAS de width — left+right définissent la largeur automatiquement */
+        width: auto !important;       /* annule .page{width:100%} — la largeur est calculée par left+right */
         height: 100vh !important;
         max-height: 100vh !important;
         z-index: 200 !important;
