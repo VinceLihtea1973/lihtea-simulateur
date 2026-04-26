@@ -9779,6 +9779,62 @@ function renderDrawerContent(p) {
         </div>`).join('')}
       </div>
     </div>
+    ${(() => {
+      // ── Snapshot "Dernière étude" dans l'onglet Infos ──
+      const refE = p.simulations?.find(s => s.is_reference_etude)
+                || p.simulations?.find(s => s.statut === 'etudie')
+                || p.simulations?.find(s => s.statut !== 'brouillon');
+      if (!refE) return '';
+      const reInv   = Number(refE.parametres?.investissement) || 0;
+      const reAides = refE.montant_aides_total || 0;
+      const reMens  = refE.montant_loyer_mensuel || 0;
+      const reDate  = refE.updated_at
+        ? new Date(refE.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})
+        : '—';
+      const reP   = refE.parametres || {};
+      const _cn   = Number(reP.consommation) || 0;
+      const _gn   = Number(reP.gain_energetique) || 0;
+      const _pn   = Number(reP.prix_energie) || 0;
+      const reEco = (_cn > 0 && _gn > 0 && _pn > 0)
+        ? _cn * _gn / 100 * _pn
+        : (refE.gain_net_annuel || 0);
+      const equipLabel = reP.equipement_label || '';
+      window._drawerSimParams = window._drawerSimParams || {};
+      const infoParamsKey = 'info_sim_' + (refE.id || Date.now());
+      window._drawerSimParams[infoParamsKey] = reP;
+      const rEsc = (p.raison_sociale || '').replace(/'/g, "\\'");
+      const sEsc = (p.siren || '');
+      return `<div style="padding:14px 24px;background:var(--c-teal-bg,#f0fdfa);border-bottom:1px solid var(--c-teal-border,#99f6e4);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--c-teal);">📌 Dernière étude</span>
+            ${equipLabel ? `<span style="font-size:10px;color:var(--c-teal);background:rgba(13,148,136,.12);padding:2px 7px;border-radius:5px;font-weight:600;">${equipLabel}</span>` : ''}
+          </div>
+          <span style="font-size:10px;color:var(--c-text-3);">${reDate}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+          ${[
+            {l:'Inv. net',    v: fek(reInv - reAides)},
+            {l:'Aides',       v: fek(reAides)},
+            {l:'Loyer/mois',  v: fek(reMens)},
+            {l:'Éco/an',      v: reEco > 0 ? fek(reEco) : '—'},
+          ].map(k => `<div style="padding:8px 10px;background:var(--c-surface);border:1px solid var(--c-teal-border,#99f6e4);border-radius:8px;text-align:center;">
+            <div style="font-size:9px;color:var(--c-teal);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:2px;">${k.l}</div>
+            <div style="font-size:13px;font-weight:800;color:var(--c-navy);font-family:monospace;">${k.v}</div>
+          </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="startSimForClient('${rEsc}','${sEsc}',window._drawerSimParams['${infoParamsKey}'])"
+            style="flex:1;padding:8px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+            ↩ Reprendre
+          </button>
+          <button onclick="genererPropositionDepuisDrawer('${infoParamsKey}','${rEsc}','${sEsc}')"
+            style="flex:1;padding:8px;border:1px solid var(--c-teal);border-radius:7px;background:transparent;color:var(--c-teal);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+            📄 Proposition
+          </button>
+        </div>
+      </div>`;
+    })()}
     <div style="padding:20px 24px;">
 
       <!-- ── Section Entreprise CRM ── -->
