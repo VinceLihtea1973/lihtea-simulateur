@@ -35,7 +35,7 @@
   <style>
     /* ─── VARIABLES DE DESIGN — LIHTEA BRAND ─── */
     :root {
-      --sidebar-width: 240px; /* mis à jour par JS via toggleSidebar() */
+      --sidebar-width: 68px; /* Slack-style — fixe */
       /* Palette Lihtea — Navy / Teal / Gold */
       --c-navy: #0f2b46;
       --c-navy-light: #1a3d5c;
@@ -879,7 +879,7 @@
     .export-bar-sticky {
       position: fixed;
       bottom: 0;
-      left: 240px;
+      left: 68px;
       right: 0;
       z-index: 100;
       background: var(--c-surface);
@@ -2541,32 +2541,21 @@
       left: 0;
       top: 0;
       height: 100vh;
-      width: 240px;
+      width: 68px;
       background: #0f2b46;
       color: white;
       border-right: 1px solid rgba(255,255,255,0.07);
       display: flex;
       flex-direction: column;
-      transition: width 0.3s var(--ease-out);
       z-index: 1000;
       overflow-y: auto;
       overflow-x: hidden;
     }
 
-    .sidebar.collapsed {
-      width: 64px;
-    }
-
     .sidebar-header {
-      padding: 20px 18px 12px;
+      padding: 16px 0 12px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-    }
-
-    .sidebar.collapsed .sidebar-header {
-      padding: 20px 12px 12px;
       justify-content: center;
     }
 
@@ -2584,77 +2573,63 @@
       font-size: 16px;
     }
 
-    .sidebar.collapsed .sidebar-logo-text {
-      display: none;
-    }
-
-    .sidebar-logo-text {
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      transition: opacity 0.3s;
-    }
+    .sidebar-logo-text { display: none; }
 
     /* Navigation */
     .sidebar-nav {
       flex: 1;
-      padding: 12px 0;
+      padding: 8px 0;
       overflow-y: auto;
     }
 
     .sidebar-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 9px 16px;
-      margin: 1px 8px;
+      justify-content: center;
+      gap: 3px;
+      padding: 8px 4px;
+      margin: 2px 4px;
       border-radius: 8px;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.5);
       text-decoration: none;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 9px;
       font-weight: 500;
-      border-left: 2px solid transparent;
       transition: all 0.15s;
-      white-space: nowrap;
       position: relative;
     }
 
-    .sidebar.collapsed .sidebar-item {
-      padding: 9px 12px;
-      margin: 1px 4px;
-      justify-content: center;
-    }
-
     .sidebar-item:hover {
-      background: rgba(255,255,255,0.07);
-      color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.85);
     }
 
     .sidebar-item.active {
-      background: #0d9488;
-      color: #ffffff;
-      border-left-color: transparent;
+      background: rgba(13,148,136,0.35);
+      color: #5dcaa5;
       font-weight: 600;
     }
 
     .sidebar-item.active .sidebar-item-icon {
-      color: #ffffff;
+      color: #5dcaa5;
     }
 
     .sidebar-item-icon {
-      min-width: 20px;
+      font-size: 18px;
+      line-height: 1;
       text-align: center;
-      font-size: 15px;
-    }
-
-    .sidebar.collapsed .sidebar-item-label {
-      display: none;
     }
 
     .sidebar-item-label {
-      transition: opacity 0.3s;
-      flex: 1;
+      font-size: 9px;
+      text-align: center;
+      line-height: 1.1;
+      max-width: 60px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: inherit;
     }
 
     /* ─── Titres de sections sidebar ─── */
@@ -2679,7 +2654,7 @@
       flex-shrink: 0;
     }
     .sidebar-section-title:first-child { padding-top: 8px; }
-    .sidebar.collapsed .sidebar-section-title { display: none; }
+    .sidebar-section-title { display: none; }
 
     /* ─── Badge numérique sur item sidebar ─── */
     .sidebar-item-badge {
@@ -2698,40 +2673,24 @@
       flex-shrink: 0;
     }
     .sidebar-item-badge:empty { display: none; }
-    .sidebar.collapsed .sidebar-item-badge { display: none; }
+    .sidebar-item-badge { display: none; }
 
     /* Sidebar footer */
     .sidebar-footer {
-      padding: 12px;
+      padding: 10px 4px;
       border-top: 1px solid rgba(255,255,255,0.1);
       display: flex;
-      justify-content: center;
-    }
-
-    .sidebar-collapse-btn {
-      display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.1);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 18px;
-      transition: all 0.2s var(--ease-out);
+      gap: 6px;
     }
 
-    .sidebar-collapse-btn:hover {
-      background: rgba(255,255,255,0.2);
-    }
+    .sidebar-collapse-btn { display: none; }
 
     /* Main content */
     .main-content {
       flex: 1;
-      margin-left: 240px;
-      transition: margin-left 0.3s var(--ease-out);
+      margin-left: 68px;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -4505,66 +4464,78 @@
        NAVIGATION SIDEBAR
   ════════════════════════════════════════════════════════════ -->
   <aside class="sidebar" id="sidebar">
+    <!-- Logo -->
     <div class="sidebar-header">
-      <div class="sidebar-logo" id="logo-letter" style="background:#0d9488;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;">L</div>
-      <div>
-        <div class="sidebar-logo-text brand-name" id="app-brand-name" style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.01em;line-height:1.2;">Lihtea</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;letter-spacing:0.04em;text-transform:uppercase;line-height:1;">Simulateur GEF</div>
-      </div>
+      <div class="sidebar-logo" id="logo-letter" style="background:#0d9488;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;">L</div>
     </div>
 
     <nav class="sidebar-nav">
 
-      <!-- ── 1. VENTES & PILOTAGE ─────── -->
-      <div class="sidebar-section-title">Ventes &amp; Pilotage</div>
-
       <a class="sidebar-item active" data-page="dashboard" onclick="switchPage('dashboard', this)">
-        <span class="sidebar-item-icon">◫</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </span>
         <span class="sidebar-item-label">Dashboard</span>
       </a>
+
       <a class="sidebar-item" data-page="pipeline" onclick="switchPage('pipeline', this)">
-        <span class="sidebar-item-icon">⊞</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </span>
         <span class="sidebar-item-label">Pipeline</span>
         <span class="sidebar-item-badge" id="badge-pipeline-overdue"></span>
       </a>
+
       <a class="sidebar-item" data-page="clients" onclick="switchPage('clients', this)">
-        <span class="sidebar-item-icon">👥</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </span>
         <span class="sidebar-item-label">Clients</span>
         <span class="sidebar-item-badge" id="badge-clients-alerte"></span>
       </a>
 
-      <!-- ── 2. EXPERTISE TECHNIQUE ───── -->
-      <div class="sidebar-section-title">Expertise Technique</div>
+      <!-- Séparateur discret -->
+      <div style="height:1px;background:rgba(255,255,255,0.07);margin:6px 10px;"></div>
 
       <a class="sidebar-item" data-page="resultats" onclick="switchPage('resultats', this)">
-        <span class="sidebar-item-icon">⚡</span>
-        <span class="sidebar-item-label">Simulateur</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </span>
+        <span class="sidebar-item-label">Simul.</span>
       </a>
 
-      <!-- ── 3. DOCUMENTS & SUIVI ──────── -->
-      <div class="sidebar-section-title">Documents &amp; Suivi</div>
+      <!-- Séparateur discret -->
+      <div style="height:1px;background:rgba(255,255,255,0.07);margin:6px 10px;"></div>
 
       <a class="sidebar-item" data-page="propositions" onclick="switchPage('propositions', this)">
-        <span class="sidebar-item-icon">📤</span>
-        <span class="sidebar-item-label">Propositions</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </span>
+        <span class="sidebar-item-label">Propos.</span>
       </a>
+
       <a class="sidebar-item" data-page="dossier" onclick="switchPage('dossier', this)">
-        <span class="sidebar-item-icon">📁</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </span>
         <span class="sidebar-item-label">Dossiers</span>
       </a>
+
       <a class="sidebar-item" data-page="ressources" onclick="switchPage('ressources', this)">
-        <span class="sidebar-item-icon">📚</span>
-        <span class="sidebar-item-label">Ressources</span>
+        <span class="sidebar-item-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
+        </span>
+        <span class="sidebar-item-label">Aide</span>
       </a>
 
     </nav>
 
-    <div class="sidebar-footer" style="flex-direction:column;gap:8px;">
-      <a class="sidebar-item" onclick="showUserProfile()" style="padding:10px 16px;margin:0 4px;border-radius:8px;border-left:none;">
-        <span class="sidebar-item-icon" id="user-avatar-icon" style="width:28px;height:28px;background:var(--c-teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;">?</span>
-        <span class="sidebar-item-label" id="user-sidebar-name" style="font-size:12px;">Mon compte</span>
+    <!-- Footer : avatar seul -->
+    <div class="sidebar-footer">
+      <a class="sidebar-item" onclick="showUserProfile()" style="margin:0;">
+        <span class="sidebar-item-icon" id="user-avatar-icon" style="width:30px;height:30px;background:var(--c-teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;">?</span>
+        <span class="sidebar-item-label" id="user-sidebar-name">Compte</span>
       </a>
-      <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebar()">☰</button>
     </div>
   </aside>
 
@@ -13301,26 +13272,12 @@ async function supprimerPropositionsClient(clientName) {
 // SIDEBAR MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) {
-    sidebar.classList.toggle('collapsed');
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('sidebar-collapsed', isCollapsed ? 'true' : 'false');
-    document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '64px' : '240px');
-    // Mettre à jour la position du simulateur immédiatement (sans attendre :has() CSS)
-    _updateSimulatorPosition(isCollapsed);
-  }
-}
+function toggleSidebar() { /* sidebar fixe 68px — toggle désactivé */ }
 
-// Le simulateur lit left: var(--sidebar-width) directement depuis le CSS.
-// Cette fonction met simplement la variable à jour (si toggle ne l'a pas déjà fait).
-function _updateSimulatorPosition(sidebarCollapsed) {
+// Sidebar toujours à 68px — variable CSS fixe
+function _updateSimulatorPosition() {
   if (window.innerWidth < 900) return;
-  const collapsed = sidebarCollapsed !== undefined
-    ? sidebarCollapsed
-    : (document.getElementById('sidebar')?.classList.contains('collapsed') ?? false);
-  document.documentElement.style.setProperty('--sidebar-width', collapsed ? '64px' : '240px');
+  document.documentElement.style.setProperty('--sidebar-width', '68px');
 }
 
 // Toggle masquage du panneau paramètres — libère la largeur pour les résultats
@@ -13333,14 +13290,7 @@ function toggleSimParams() {
 }
 
 function initSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-  if (collapsed && sidebar) {
-    sidebar.classList.add('collapsed');
-    document.documentElement.style.setProperty('--sidebar-width', '64px');
-  }
-  // Appliquer position correcte dès le chargement (si simulateur déjà actif)
-  requestAnimationFrame(() => _updateSimulatorPosition(collapsed));
+  document.documentElement.style.setProperty('--sidebar-width', '68px');
 }
 
 // ═══════════════════════════════════════════════════════════════════
