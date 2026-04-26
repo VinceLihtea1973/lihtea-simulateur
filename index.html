@@ -1802,6 +1802,80 @@
       color: var(--c-text-3);
       margin-top: 1px;
     }
+    /* ── Simulator param panel redesign ── */
+    .sp-step {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--c-navy);
+      color: white;
+      font-size: 10px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sp-block-badge {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      margin-left: auto;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .sp-block-badge-teal { background: var(--c-teal-bg); color: #0d9488; border: 1px solid var(--c-teal-border); }
+    .sp-block-badge-blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .sp-block-badge-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .sp-expert-pill {
+      font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+      background: #92400e; color: white;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .sp-grid-2 {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-bottom: 10px;
+    }
+    .sp-field {
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+      border-radius: 8px; padding: 8px 10px;
+    }
+    .sp-field-label {
+      font-size: 10px; color: var(--c-text-3); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 3px; line-height: 1.2;
+    }
+    .sp-field-val {
+      font-size: 14px; font-weight: 800;
+      color: var(--c-navy); font-family: var(--font-mono);
+      margin-bottom: 4px; line-height: 1;
+    }
+    .sp-field input[type="range"] { width: 100%; margin: 0; }
+    .sp-inv-input {
+      width: 100%; box-sizing: border-box;
+      border: 1px solid var(--c-teal-border);
+      background: var(--c-teal-bg);
+      border-radius: 5px; padding: 3px 6px;
+      font-size: 13px; font-weight: 700; font-family: var(--font-mono);
+      color: var(--c-navy); text-align: right; outline: none;
+      margin-bottom: 4px;
+    }
+    .sp-divider { height: 1px; background: var(--c-border); margin: 8px 0; }
+    .sp-result-card {
+      background: var(--c-teal-bg);
+      border: 1px solid var(--c-teal-border);
+      border-radius: 10px; padding: 10px 12px; margin-top: 2px;
+    }
+    .sp-result-label {
+      font-size: 10px; font-weight: 700; color: #0d9488;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .sp-result-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 3px; }
+    .sp-result-name { font-size: 11px; color: var(--c-text-2); }
+    .sp-result-val-sm { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: var(--c-text-2); }
+    .sp-result-val-lg { font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: #0d9488; }
+    .sp-cee-preview {
+      margin-top: 8px; padding: 8px 10px;
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+      font-size: 11px; color: #b45309; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
     /* Slider value pill */
     .field-value-pill {
       display: inline-flex;
@@ -4680,16 +4754,18 @@
           color:var(--c-teal-bright);font-weight:600;line-height:1.4;"></div>
       </div>
 
-      <!-- ── Équipement industriel ── -->
+      <!-- ── Bloc 1 : Équipement & Énergie ── -->
       <div class="card" style="margin-bottom:14px;">
         <div class="sim-card-header">
+          <div class="sp-step">1</div>
           <div class="sim-card-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div class="sim-card-title">Équipement & Énergie</div>
-            <div class="sim-card-sub">Paramètres de consommation annuelle</div>
+            <div class="sim-card-sub">Investissement & consommation</div>
           </div>
+          <div class="sp-block-badge sp-block-badge-teal" id="sp-badge-eco">—</div>
         </div>
 
         <!-- Unit toggle -->
@@ -4701,7 +4777,7 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" style="margin-bottom:8px;">
           <div class="field-label">Type d'équipement</div>
           <select id="equip-type" onchange="recalculer()">
             <option value="0.20">Compresseur / air comprimé (IND-UT-102)</option>
@@ -4714,15 +4790,14 @@
           </select>
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">Investissement total HT</span>
-          </div>
-          <!-- Saisie directe du montant (toujours visible) -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div class="sp-divider"></div>
+
+        <!-- Ligne 1 : Investissement + Gain -->
+        <div class="sp-grid-2">
+          <div class="sp-field">
+            <div class="sp-field-label">Investissement HT</div>
             <input type="text" id="inv-number" inputmode="numeric" autocomplete="off"
-              value="250 000"
-              style="flex:1;padding:8px 12px;border:2px solid var(--c-teal);border-radius:8px;font-size:16px;font-weight:700;font-family:var(--font-mono);color:var(--c-navy);background:var(--c-teal-bg);outline:none;text-align:right;"
+              value="250 000" class="sp-inv-input"
               oninput="
                 const raw=this.value.replace(/[^\d]/g,'');
                 const v=Math.max(20000,Math.min(2000000,parseInt(raw)||20000));
@@ -4739,153 +4814,139 @@
                 recalculer();
               "
               onfocus="this.select();">
-            <span style="font-size:12px;color:var(--c-text-3);white-space:nowrap;">€ HT</span>
+            <input type="range" id="inv" min="20000" max="2000000" step="5000" value="250000"
+                   oninput="
+                     const formatted=Number(this.value).toLocaleString('fr-FR');
+                     document.getElementById('inv-number').value=formatted;
+                     document.getElementById('inv-display').textContent=formatted+'\u202f€';
+                     recalculer();
+                   ">
+            <span id="inv-display" style="display:none;">250 000 €</span>
           </div>
-          <input type="range" id="inv" min="20000" max="2000000" step="5000" value="250000"
-                 oninput="
-                   const formatted=Number(this.value).toLocaleString('fr-FR');
-                   document.getElementById('inv-number').value=formatted;
-                   document.getElementById('inv-display').textContent=formatted+'\u202f€';
-                   recalculer();
-                 ">
-          <span id="inv-display" style="display:none;">250 000 €</span>
+          <div class="sp-field">
+            <div class="sp-field-label">Gain énergétique <span class="info-pill" data-tip="Réduction de consommation énergétique attendue après remplacement de l'équipement.&#10;&#10;Exemples typiques :&#10;• Variateur de vitesse moteur : 20–40%&#10;• Presse électrique vs hydraulique : 30–50%&#10;• Récupération chaleur fatale : 15–35%&#10;• Compresseur nouvelle génération : 15–25%&#10;&#10;Source : fiches CEE IND-UT, ADEME.">?</span></div>
+            <div class="sp-field-val" id="gain-display">25%</div>
+            <input type="range" id="gain" min="5" max="60" step="1" value="25" oninput="recalculer()">
+          </div>
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label" id="label-conso">Consommation actuelle (MWh/an)</span>
-            <span class="field-value" id="conso-display">500</span>
+        <!-- Ligne 2 : Consommation + Prix énergie -->
+        <div class="sp-grid-2">
+          <div class="sp-field">
+            <div class="sp-field-label" id="label-conso">Conso. actuelle</div>
+            <div class="sp-field-val" id="conso-display">500</div>
+            <input type="range" id="conso" min="50" max="5000" step="50" value="500" oninput="recalculer()">
           </div>
-          <input type="range" id="conso" min="50" max="5000" step="50" value="500"
-                 oninput="recalculer()">
+          <div class="sp-field">
+            <div class="sp-field-label" id="label-prix">Prix énergie</div>
+            <div class="sp-field-val" id="prix-display">180 €/MWh</div>
+            <input type="range" id="prix" min="80" max="400" step="5" value="180" oninput="recalculer()">
+          </div>
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">
-              Gain énergétique estimé
-              <span class="info-pill" data-tip="Réduction de consommation énergétique attendue après remplacement de l'équipement.&#10;&#10;Exemples typiques :&#10;• Variateur de vitesse moteur : 20–40%&#10;• Presse électrique vs hydraulique : 30–50%&#10;• Récupération chaleur fatale : 15–35%&#10;• Compresseur nouvelle génération : 15–25%&#10;&#10;Source : fiches CEE IND-UT, ADEME.">?</span>
-            </span>
-            <span class="field-value" id="gain-display">25%</span>
-          </div>
-          <input type="range" id="gain" min="5" max="60" step="1" value="25"
-                 oninput="recalculer()">
-        </div>
-
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label" id="label-prix">Prix énergie payé (€/MWh)</span>
-            <span class="field-value" id="prix-display">180 €/MWh</span>
-          </div>
-          <input type="range" id="prix" min="80" max="400" step="5" value="180"
-                 oninput="recalculer()">
-        </div>
-
-        <!-- Real-time eco preview -->
+        <!-- Aperçu éco temps réel -->
         <div class="eco-preview" id="eco-preview-bar">
           <div class="eco-preview-icon">⚡</div>
           <span id="eco-preview-text">Calcul en cours…</span>
         </div>
       </div>
 
-      <!-- ── Location financière ── -->
+      <!-- ── Bloc 2 : Location financière ── -->
       <div class="card" style="margin-bottom:14px;">
         <div class="sim-card-header">
+          <div class="sp-step" style="background:linear-gradient(135deg,#0f766e,#0d9488);">2</div>
           <div class="sim-card-icon" style="background:linear-gradient(135deg,#0f766e,#0d9488);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div class="sim-card-title">Location financière</div>
             <div class="sim-card-sub">Modalités de financement</div>
           </div>
+          <div class="sp-block-badge sp-block-badge-blue" id="sp-badge-loyer">— €/mois</div>
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">Durée du contrat</span>
-            <span class="field-value" id="duree-display">5 ans</span>
+        <!-- 2 colonnes : Durée + Taille -->
+        <div class="sp-grid-2">
+          <div class="sp-field">
+            <div class="sp-field-label">Durée du contrat</div>
+            <div class="sp-field-val" id="duree-display">5 ans</div>
+            <input type="range" id="duree" min="2" max="12" step="1" value="5" oninput="recalculer()">
           </div>
-          <input type="range" id="duree" min="2" max="12" step="1" value="5"
-                 oninput="recalculer()">
+          <div class="sp-field">
+            <div class="sp-field-label">Taille entreprise</div>
+            <select id="taille" onchange="recalculer()" style="font-size:11px;margin-top:2px;width:100%;padding:3px 4px;">
+              <option value="tpe">TPE (&lt;10 sal.)</option>
+              <option value="pme" selected>PME (10–249)</option>
+              <option value="eti">ETI (250–4 999)</option>
+              <option value="ge">GE (5 000+)</option>
+            </select>
+          </div>
         </div>
 
-        <div class="field" id="bareme-info-field" style="background:var(--c-teal-bg);border-radius:10px;padding:12px 14px;border:1px solid var(--c-teal-border);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-            <span class="field-label" style="color:#0d9488;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Conditions de financement</span>
+        <!-- Barème compact -->
+        <div id="bareme-info-field" style="background:var(--c-teal-bg);border-radius:8px;padding:8px 10px;border:1px solid var(--c-teal-border);margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:10px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:0.05em;">Conditions de financement</span>
             <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#8896a7;color:#fff;font-weight:700;transition:background 0.3s;">Chargement…</span>
           </div>
-          <!-- Nom du barème + date de mise en vigueur -->
-          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.5;margin-bottom:8px;">Initialisation du barème…</div>
-          <!-- Coefficient héro — affiché après calcul -->
-          <div id="bareme-coef-block" style="display:none;align-items:baseline;gap:6px;flex-wrap:wrap;">
-            <span id="bareme-coef-value" style="font-size:24px;font-weight:800;color:#0d9488;letter-spacing:-0.5px;line-height:1;"></span>
-            <span style="font-size:11px;color:#5eead4;font-weight:600;align-self:flex-end;padding-bottom:2px;">coefficient mensuel</span>
+          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.5;margin-bottom:4px;">Initialisation du barème…</div>
+          <div id="bareme-coef-block" style="display:none;align-items:baseline;gap:6px;">
+            <span id="bareme-coef-value" style="font-size:22px;font-weight:800;color:#0d9488;letter-spacing:-0.5px;line-height:1;"></span>
+            <span style="font-size:10px;color:#5eead4;font-weight:600;align-self:flex-end;padding-bottom:1px;">coefficient mensuel</span>
           </div>
-          <!-- Input caché — valeur mise à jour dynamiquement par le barème -->
           <input type="hidden" id="taux" value="4.5">
         </div>
 
-        <div class="field">
-          <div class="field-label">Taille de l'entreprise</div>
-          <select id="taille" onchange="recalculer()">
-            <option value="tpe">TPE (moins de 10 salariés)</option>
-            <option value="pme" selected>PME (10 à 249 salariés)</option>
-            <option value="eti">ETI (250 à 4 999 salariés)</option>
-            <option value="ge">Grande entreprise (5 000+)</option>
-          </select>
-        </div>
-
-        <div class="loyer-bloc">
-          <div class="loyer-row">
-            <span class="loyer-label">Loyer mensuel brut</span>
-            <span class="loyer-val loyer-brut" id="loyer-brut">— €/mois</span>
+        <!-- Loyer — carte résultat -->
+        <div class="sp-result-card">
+          <div class="sp-result-label">Loyer mensuel <span class="info-pill" data-tip="Loyer calculé en mode BEGIN (paiement en début de période — standard location financière).&#10;&#10;Il intègre :&#10;• Le capital net après déduction des subventions directes (CEE, ADEME, FEDER)&#10;• Le taux réduit si le Prêt Vert BPI est activé (−0,8%/an)&#10;&#10;C'est le montant réel facturé chaque mois au client.">?</span></div>
+          <div class="sp-result-row">
+            <span class="sp-result-name">Brut</span>
+            <span class="sp-result-val-sm" id="loyer-brut">— €/mois</span>
           </div>
-          <div class="loyer-row loyer-row-net">
-            <span class="loyer-label">
-              Loyer mensuel net
-              <span class="info-pill" data-tip="Loyer calculé en mode BEGIN (paiement en début de période — standard location financière).&#10;&#10;Il intègre :&#10;• Le capital net après déduction des subventions directes (CEE, ADEME, FEDER)&#10;• Le taux réduit si le Prêt Vert BPI est activé (−0,8%/an)&#10;&#10;C'est le montant réel facturé chaque mois au client.">?</span>
-            </span>
-            <span class="loyer-val loyer-net" id="loyer-net">— €/mois</span>
+          <div class="sp-result-row">
+            <span class="sp-result-name">Net (après subventions)</span>
+            <span class="sp-result-val-lg" id="loyer-net">— €/mois</span>
           </div>
-          <div class="loyer-eco" id="loyer-eco-line"></div>
+          <div class="loyer-eco" id="loyer-eco-line" style="margin-top:6px;border-radius:6px;padding:5px 8px;font-size:11px;"></div>
         </div>
       </div>
 
-      <!-- ── CEE avancés ── -->
+      <!-- ── Bloc 3 : CEE avancés ── -->
       <div class="card expert-only" style="margin-bottom:14px;" id="cee-card">
         <div class="sim-card-header" onclick="toggleCeeCard()" style="cursor:pointer;user-select:none;">
+          <div class="sp-step" style="background:linear-gradient(135deg,#92400e,#b45309);">3</div>
           <div class="sim-card-icon" style="background:linear-gradient(135deg,#92400e,#b45309);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div style="flex:1;">
-            <div class="sim-card-title">Paramètres CEE avancés</div>
+            <div class="sim-card-title">CEE avancés <span class="sp-expert-pill">Expert</span></div>
             <div class="sim-card-sub">Certificats d'Économies d'Énergie</div>
           </div>
-          <div id="cee-toggle-icon" style="font-size:11px;color:var(--c-text-3);font-weight:600;padding:2px 8px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);transition:transform 0.2s;">▲ Réduire</div>
+          <div class="sp-block-badge sp-block-badge-amber" id="sp-badge-cee">—</div>
+          <div id="cee-toggle-icon" style="font-size:11px;color:var(--c-text-3);font-weight:600;padding:2px 6px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);margin-left:4px;">▲</div>
         </div>
         <div id="cee-card-body">
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">
-              kWh cumac estimés
-              <span class="info-pill" data-tip="Le kWh cumac (Cumulé Actualisé) est l'unité de mesure des CEE.&#10;&#10;Il représente les économies d'énergie totales générées sur toute la durée de vie de l'équipement, corrigées de son usure.&#10;&#10;1 kWh cumac = 1 Certificat d'Économie d'Énergie&#10;Cours actuel : ~8 €/MWh cumac (mars 2026)&#10;&#10;Le volume est calculé par un délégataire CEE selon la fiche standardisée applicable (IND-UT-xxx).">?</span>
-            </span>
-            <span class="field-value" id="kwh-display">1 GWh cumac</span>
+        <!-- 2 colonnes : kWh cumac + Cours -->
+        <div class="sp-grid-2">
+          <div class="sp-field">
+            <div class="sp-field-label">kWh cumac <span class="info-pill" data-tip="Le kWh cumac (Cumulé Actualisé) est l'unité de mesure des CEE.&#10;&#10;Il représente les économies d'énergie totales générées sur toute la durée de vie de l'équipement, corrigées de son usure.&#10;&#10;1 kWh cumac = 1 Certificat d'Économie d'Énergie&#10;Cours actuel : ~8 €/MWh cumac (mars 2026)&#10;&#10;Le volume est calculé par un délégataire CEE selon la fiche standardisée applicable (IND-UT-xxx).">?</span></div>
+            <div class="sp-field-val" id="kwh-display">1 GWh</div>
+            <input type="range" id="kwh" min="100000" max="10000000" step="100000" value="1000000" oninput="recalculer()">
           </div>
-          <input type="range" id="kwh" min="100000" max="10000000" step="100000" value="1000000"
-                 oninput="recalculer()">
+          <div class="sp-field">
+            <div class="sp-field-label">Cours CEE (€/MWh)</div>
+            <div class="sp-field-val" id="cours-display">8.0 €</div>
+            <input type="range" id="cours" min="4" max="15" step="0.1" value="8" oninput="recalculer()">
+          </div>
         </div>
 
-        <div class="field">
-          <div class="field-header">
-            <span class="field-label">Cours CEE du marché (€/MWh cumac)</span>
-            <span class="field-value" id="cours-display">8.0 €</span>
-          </div>
-          <input type="range" id="cours" min="4" max="15" step="0.1" value="8"
-                 oninput="recalculer()">
+        <!-- Prime CEE preview -->
+        <div class="sp-cee-preview">
+          <span>⚡</span>
+          <span>Prime CEE estimée : <strong id="sp-cee-preview-val">—</strong></span>
         </div>
-      </div>
 
         </div><!-- fin cee-card-body -->
 
@@ -7631,6 +7692,16 @@ function recalculer() {
       : Math.round(mwhEco) + ' MWh';
     ecoPreviewEl.textContent = `Économie estimée : ${ecoAnRounded} €/an · ${ecoMwhRounded} économisés`;
   }
+
+  // ── Badges panel paramètres (sp-*) ──
+  const _spBadgeEco = document.getElementById('sp-badge-eco');
+  if (_spBadgeEco) _spBadgeEco.textContent = Math.round(ecoAn).toLocaleString('fr-FR') + ' €/an';
+  const _spBadgeLoyer = document.getElementById('sp-badge-loyer');
+  if (_spBadgeLoyer) _spBadgeLoyer.textContent = Math.round(a.mensNette).toLocaleString('fr-FR') + ' €/mois';
+  const _spBadgeCee = document.getElementById('sp-badge-cee');
+  if (_spBadgeCee) _spBadgeCee.textContent = formaterEuros(a.primeCEE, true);
+  const _spCeePrev = document.getElementById('sp-cee-preview-val');
+  if (_spCeePrev) _spCeePrev.textContent = formaterEuros(a.primeCEE, true);
 
   // ── PAYBACK BRUT (kept for insight text) ──
   const pbBrutAff = paybackBrutAns >= HORIZON
