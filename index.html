@@ -7292,9 +7292,10 @@ function switchPage(pageName, navItem) {
   } else if (pageName === 'propositions') {
     renderPropositions();
   } else if (pageName === 'scenarios') {
-    // Auto-capture current scenario on first visit if none exist
-    if (typeof scenarios !== 'undefined' && scenarios.length === 0 && typeof captureScenario === 'function') {
-      captureScenario();
+    // Auto-capture silencieux (sans modal) si aucun scénario
+    if (typeof scenarios !== 'undefined' && scenarios.length === 0) {
+      if (typeof _origCaptureScenario === 'function') _origCaptureScenario();
+      else if (typeof captureScenario === 'function') captureScenario();
     }
     renderScenarios();
   } else if (pageName === 'clients') {
@@ -16026,10 +16027,12 @@ function switchSimDTab(name, btn) {
   if (name === 'graphiques' && typeof recalculer === 'function') {
     setTimeout(recalculer, 50);
   }
-  // Auto-capture + render scenarios table when switching to scenarios tab
+  // Auto-capture silencieux + render quand on ouvre l'onglet Scénarios
   if (name === 'scenarios') {
-    if (typeof scenarios !== 'undefined' && scenarios.length === 0 && typeof captureScenario === 'function') {
-      captureScenario();
+    if (typeof scenarios !== 'undefined' && scenarios.length === 0) {
+      // _origCaptureScenario = version sans modal (captureScenario est surchargé avec une dialog)
+      if (typeof _origCaptureScenario === 'function') _origCaptureScenario();
+      else if (typeof captureScenario === 'function') captureScenario();
     }
     if (typeof renderScenarios === 'function') renderScenarios();
   }
