@@ -4451,10 +4451,6 @@
         <span class="sidebar-item-icon">⚡</span>
         <span class="sidebar-item-label">Simulateur</span>
       </a>
-      <a class="sidebar-item" data-page="scenarios" onclick="switchPage('scenarios', this)">
-        <span class="sidebar-item-icon">⚖</span>
-        <span class="sidebar-item-label">Scénarios</span>
-      </a>
 
       <!-- ── 3. DOCUMENTS & SUIVI ──────── -->
       <div class="sidebar-section-title">Documents &amp; Suivi</div>
@@ -4616,7 +4612,7 @@
       </div>
       <div class="sim-tb-actions">
         <button class="sim-tb-btn" id="btn-toggle-params" onclick="toggleSimParams()" title="Masquer / afficher les paramètres">◀</button>
-        <button class="sim-tb-btn" onclick="if(typeof captureScenario==='function')captureScenario()">⚖ Scénarios</button>
+        <button class="sim-tb-btn" onclick="switchSimDTab('scenarios',document.getElementById('sim-dtab-btn-scenarios'))">⚖ Scénarios</button>
         <button class="sim-tb-btn" onclick="if(typeof exporterExcel==='function')exporterExcel()">Excel</button>
         <button class="sim-tb-btn" onclick="if(typeof genererProposition==='function')genererProposition()">PDF</button>
         <button class="sim-tb-btn primary" onclick="if(typeof enregistrerEtude==='function')enregistrerEtude()">Enregistrer</button>
@@ -4885,6 +4881,7 @@
         <button class="sim-dtab" onclick="switchSimDTab('graphiques',this)">Graphiques</button>
         <button class="sim-dtab" onclick="switchSimDTab('aides',this)">Aides publiques</button>
         <button class="sim-dtab" onclick="switchSimDTab('tableau',this)">Tableau annuel</button>
+        <button class="sim-dtab" id="sim-dtab-btn-scenarios" onclick="switchSimDTab('scenarios',this)">⚖ Scénarios</button>
       </div>
 
       <!-- TAB: Synthèse -->
@@ -4989,6 +4986,39 @@
               </tr></thead>
               <tbody id="sim-annual-tbody"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Scénarios -->
+      <div class="sim-dtab-panel" id="sim-dtab-scenarios">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--c-navy);color:white;">
+            <div>
+              <div style="font-size:14px;font-weight:700;">Comparaison de scénarios</div>
+              <div style="font-size:11px;color:var(--c-teal-bright);margin-top:2px;">Jusqu'à 4 configurations côte à côte</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="scenarios-btn" onclick="captureScenario()">+ Capturer l'actuel</button>
+              <button class="scenarios-btn danger" onclick="clearScenarios()" id="btn-clear-scenarios" style="display:none;">Tout effacer</button>
+            </div>
+          </div>
+          <div id="scenarios-table-wrap">
+            <div style="padding:30px 20px;text-align:center;">
+              <div style="font-size:32px;margin-bottom:10px;opacity:0.3;">⚖</div>
+              <div style="font-size:13px;color:var(--c-text-2);font-weight:600;margin-bottom:6px;">Aucun scénario capturé</div>
+              <div style="font-size:12px;color:var(--c-text-3);max-width:340px;margin:0 auto;line-height:1.6;">
+                Ajustez les paramètres dans la colonne de gauche, puis cliquez sur « Capturer l'actuel ». Répétez avec d'autres configurations pour comparer.
+              </div>
+            </div>
+          </div>
+          <!-- RADAR COMPARATEUR -->
+          <div class="radar-section" id="radar-section" style="display:none;">
+            <div class="section-label">Comparaison visuelle</div>
+            <div class="radar-wrap">
+              <div class="radar-chart-container" id="radar-chart"></div>
+              <div class="radar-legend" id="radar-legend"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -15683,6 +15713,10 @@ function switchSimDTab(name, btn) {
   // Re-render charts when switching to graphiques (they may need resize)
   if (name === 'graphiques' && typeof recalculer === 'function') {
     setTimeout(recalculer, 50);
+  }
+  // Re-render scenarios table when switching to scenarios tab
+  if (name === 'scenarios' && typeof renderScenariosTable === 'function') {
+    renderScenariosTable();
   }
 }
 
