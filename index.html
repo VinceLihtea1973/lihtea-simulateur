@@ -35,7 +35,7 @@
   <style>
     /* ─── VARIABLES DE DESIGN — LIHTEA BRAND ─── */
     :root {
-      --sidebar-width: 68px; /* Slack-style — fixe */
+      --sidebar-width: 80px; /* Slack-style — fixe */
       /* Palette Lihtea — Navy / Teal / Gold */
       --c-navy: #0f2b46;
       --c-navy-light: #1a3d5c;
@@ -879,7 +879,7 @@
     .export-bar-sticky {
       position: fixed;
       bottom: 0;
-      left: 68px;
+      left: 80px;
       right: 0;
       z-index: 100;
       background: var(--c-surface);
@@ -2541,7 +2541,7 @@
       left: 0;
       top: 0;
       height: 100vh;
-      width: 68px;
+      width: 80px;
       background: #0f2b46;
       color: white;
       border-right: 1px solid rgba(255,255,255,0.07);
@@ -2625,7 +2625,7 @@
       font-size: 9px;
       text-align: center;
       line-height: 1.1;
-      max-width: 60px;
+      max-width: 72px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -2690,7 +2690,7 @@
     /* Main content */
     .main-content {
       flex: 1;
-      margin-left: 68px;
+      margin-left: 80px;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -13272,12 +13272,12 @@ async function supprimerPropositionsClient(clientName) {
 // SIDEBAR MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════
 
-function toggleSidebar() { /* sidebar fixe 68px — toggle désactivé */ }
+function toggleSidebar() { /* sidebar fixe 80px — toggle désactivé */ }
 
-// Sidebar toujours à 68px — variable CSS fixe
+// Sidebar toujours à 80px — variable CSS fixe
 function _updateSimulatorPosition() {
   if (window.innerWidth < 900) return;
-  document.documentElement.style.setProperty('--sidebar-width', '68px');
+  document.documentElement.style.setProperty('--sidebar-width', '80px');
 }
 
 // Toggle masquage du panneau paramètres — libère la largeur pour les résultats
@@ -13290,7 +13290,7 @@ function toggleSimParams() {
 }
 
 function initSidebar() {
-  document.documentElement.style.setProperty('--sidebar-width', '68px');
+  document.documentElement.style.setProperty('--sidebar-width', '80px');
 }
 
 // ═══════════════════════════════════════════════════════════════════
