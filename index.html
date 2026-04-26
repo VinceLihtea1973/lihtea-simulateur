@@ -3088,6 +3088,12 @@
 
     /* Dashboard inline-grid replacements — targetable in media queries */
     .dash-2col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+    .dash-3col-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; }
+    .dash-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text-3); margin-bottom: 10px; margin-top: 4px; }
+    .dash-highlight-box { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-radius: 10px; background: var(--c-teal-bg, #f0fdfa); border: 1px solid var(--c-teal-border, #99f6e4); margin-bottom: 12px; }
+    .dash-highlight-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--c-teal); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dash-highlight-main { font-size: 13px; font-weight: 700; color: var(--c-navy); }
+    .dash-highlight-sub { font-size: 11px; color: var(--c-teal); margin-top: 2px; }
     /* Prospect/Client table scroll wrapper */
     .prospect-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     /* Ressources hub — 3 cols desktop */
@@ -3267,6 +3273,11 @@
 
       /* Dashboard inline-grid sections → single column */
       .dash-2col-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+      }
+      .dash-3col-grid {
         grid-template-columns: 1fr !important;
         gap: 10px !important;
         margin-bottom: 10px !important;
@@ -4511,15 +4522,14 @@
       <!-- Header -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
         <div>
-          <div style="font-size:20px;font-weight:800;color:var(--c-navy);margin-bottom:4px;">Dashboard</div>
-          <div style="font-size:13px;color:var(--c-text-3);">Vue d'ensemble de votre activité commerciale</div>
+          <div id="dash-welcome-title" style="font-size:20px;font-weight:800;color:var(--c-navy);margin-bottom:4px;">Bonjour</div>
+          <div id="dash-date" style="font-size:13px;color:var(--c-text-3);"></div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span id="dash-alerte-badge" style="display:none;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#dc2626;padding:5px 10px;border-radius:20px;background:rgba(220,38,38,0.1);">
-            <span style="width:7px;height:7px;border-radius:4px;background:#dc2626;display:inline-block;flex-shrink:0;"></span>
-            <span id="dash-alerte-txt">0 en retard</span>
-          </span>
-          <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" style="padding:8px 14px;background:var(--c-bg);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">⚡ Simulation</button>
+          <button onclick="switchPage('resultats',document.querySelector('[data-page=&quot;resultats&quot;]'))" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c-bg);color:var(--c-navy);border:1px solid var(--c-border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Simulation
+          </button>
           <button onclick="switchPage('clients',document.querySelector('[data-page=&quot;clients&quot;]'));setTimeout(openNewClientModal,350);" style="padding:8px 16px;background:var(--c-teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">+ Nouveau client</button>
         </div>
       </div>
@@ -4527,42 +4537,30 @@
       <!-- 4 KPI cards (rempli par JS) -->
       <div id="dash-kpi-row" class="dash-kpi-grid"></div>
 
-      <!-- Charts — 2 colonnes symétriques -->
-      <div class="dash-2col-grid">
-        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
-            <div>
-              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Répartition Pipeline <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">Pondération active</span></div>
-              <div id="dash-pipeline-subtitle" style="font-size:12px;color:var(--c-text-3);">Entonnoir commercial</div>
-            </div>
-            <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:11px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">Voir le kanban →</button>
-          </div>
-          <!-- Tableau de pondération par étape -->
-          <div style="background:var(--c-surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--c-border);overflow:hidden;flex-shrink:0;">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;white-space:normal;line-height:1.3;">Pondération par étape</div>
-            <div id="dash-prob-table" style="display:flex;flex-direction:column;gap:0;"></div>
-          </div>
-          <div id="dash-pipeline-chart" style="overflow:hidden;flex:1;"></div>
+      <!-- Section: À traiter aujourd'hui -->
+      <div class="dash-section-label">À traiter aujourd'hui</div>
+
+      <!-- Highlight box urgences -->
+      <div class="dash-highlight-box" id="dash-highlight-box" style="display:none;">
+        <div class="dash-highlight-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.49 12 19.79 19.79 0 0 1 1.42 3.35 2 2 0 0 1 3.4 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </div>
-        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
-            <div>
-              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Répartition par secteur <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">SIREN → NAF</span></div>
-              <div id="dash-sector-subtitle" style="font-size:12px;color:var(--c-text-3);">Prospects par industrie</div>
-            </div>
-          </div>
-          <div id="dash-sector-wrap" style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;flex:1;">
-            <svg id="dash-donut-svg" viewBox="0 0 190 190" width="150" height="150" style="flex-shrink:0;display:block;overflow:visible;max-width:100%;"></svg>
-            <div id="dash-sector-legend" style="flex:1;min-width:120px;"></div>
-          </div>
+        <div>
+          <div class="dash-highlight-main" id="dash-highlight-main">Actions en attente</div>
+          <div class="dash-highlight-sub" id="dash-highlight-sub"></div>
         </div>
       </div>
 
-      <!-- Top 5 + Urgentes — 2 colonnes symétriques -->
+      <!-- 2-col: Relances | Activités en retard -->
       <div class="dash-2col-grid">
-        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
-          <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:16px;flex-shrink:0;">Top 5 Prospects <span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;">Score ICP</span></div>
-          <div id="dash-top5" style="flex:1;"></div>
+        <div class="card" style="padding:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Relances du jour <span id="dash-relance-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
+              <div style="font-size:12px;color:var(--c-text-3);margin-top:3px;">Prospects à rappeler aujourd'hui ou en retard</div>
+            </div>
+          </div>
+          <div id="dash-relances"></div>
         </div>
         <div class="card" style="padding:22px;display:flex;flex-direction:column;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0;">
@@ -4573,15 +4571,38 @@
         </div>
       </div>
 
-      <!-- Relances du jour -->
-      <div class="card" style="padding:22px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <div>
-            <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Relances du jour 📅 <span id="dash-relance-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
-            <div style="font-size:12px;color:var(--c-text-3);margin-top:3px;">Prospects à rappeler aujourd'hui ou en retard de relance</div>
+      <!-- Section: Vue pipeline -->
+      <div class="dash-section-label">Vue pipeline</div>
+
+      <!-- 3-col: Étapes pipeline | Top 5 | Secteurs -->
+      <div class="dash-3col-grid">
+        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Pipeline</div>
+              <div id="dash-pipeline-subtitle" style="font-size:12px;color:var(--c-text-3);">Entonnoir commercial</div>
+            </div>
+            <button onclick="switchPage('pipeline',document.querySelector('[data-page=&quot;pipeline&quot;]'))" style="font-size:11px;font-weight:600;color:var(--c-teal);background:var(--c-teal-bg,#f0fdfa);border:1px solid var(--c-teal-border,#99f6e4);padding:5px 10px;border-radius:6px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">Kanban →</button>
+          </div>
+          <div id="dash-prob-table" style="display:flex;flex-direction:column;gap:0;margin-bottom:10px;"></div>
+          <div id="dash-pipeline-chart" style="overflow:hidden;flex:1;"></div>
+        </div>
+        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
+          <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:16px;flex-shrink:0;">Top 5 prospects</div>
+          <div id="dash-top5" style="flex:1;"></div>
+        </div>
+        <div class="card" style="padding:22px;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);margin-bottom:3px;">Secteurs</div>
+              <div id="dash-sector-subtitle" style="font-size:12px;color:var(--c-text-3);">Prospects par industrie</div>
+            </div>
+          </div>
+          <div id="dash-sector-wrap" style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;flex:1;">
+            <svg id="dash-donut-svg" viewBox="0 0 190 190" width="150" height="150" style="flex-shrink:0;display:block;overflow:visible;max-width:100%;"></svg>
+            <div id="dash-sector-legend" style="flex:1;min-width:120px;"></div>
           </div>
         </div>
-        <div id="dash-relances"></div>
       </div>
 
     </div>
@@ -12357,9 +12378,19 @@ function openProspectFromDash(id) {
 }
 
 async function renderGlobalDashboard() {
-  // ── Date header
+  // ── Welcome header
+  const welcomeEl = document.getElementById('dash-welcome-title');
+  if (welcomeEl) {
+    const profile = (() => { try { return JSON.parse(localStorage.getItem('gef_user_profile') || '{}'); } catch { return {}; } })();
+    const prenom = profile.prenom || '';
+    welcomeEl.textContent = prenom ? 'Bonjour, ' + prenom : 'Bonjour';
+  }
   const dateEl = document.getElementById('dash-date');
-  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  if (dateEl) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+    dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  }
 
   // ── Loading state
   const kpiRow = document.getElementById('dash-kpi-row');
@@ -12397,11 +12428,8 @@ async function renderGlobalDashboard() {
     const totalEco  = clients.reduce((s,c) => s + c.ecoKwh, 0);
     const alertCount= clients.filter(c => c.hasAlert).length;
 
-    // ── Alert badge
-    const badge = document.getElementById('dash-alerte-badge');
-    const badgeTxt = document.getElementById('dash-alerte-txt');
-    if (badge) badge.style.display = alertCount > 0 ? '' : 'none';
-    if (badgeTxt) badgeTxt.textContent = alertCount + ' en retard';
+    // ── Highlight box (populated after relances are computed — updated at end)
+    // (kept for compatibility, actual update is below after withRelance is known)
 
     // ── KPI Cards
     const avgAides  = active.length > 0 ? Math.round(totalAides / active.length / 1000) : 0;
@@ -12566,6 +12594,25 @@ async function renderGlobalDashboard() {
       return nr ? { ...c, nextRelance: nr } : null;
     }).filter(Boolean).filter(c => c.nextRelance <= todayStr && !['gagne','perdu'].includes(c.statut));
     withRelance.sort((a,b) => a.nextRelance.localeCompare(b.nextRelance));
+
+    // ── Highlight box
+    const hlBox  = document.getElementById('dash-highlight-box');
+    const hlMain = document.getElementById('dash-highlight-main');
+    const hlSub  = document.getElementById('dash-highlight-sub');
+    const overdue2 = clients.filter(c => c.hasAlert);
+    const totalActions = withRelance.length + overdue2.length;
+    if (hlBox) {
+      if (totalActions > 0) {
+        hlBox.style.display = 'flex';
+        const parts = [];
+        if (withRelance.length > 0) parts.push(withRelance.length + ' relance' + (withRelance.length > 1 ? 's' : '') + ' à effectuer');
+        if (overdue2.length > 0) parts.push(overdue2.length + ' prospect' + (overdue2.length > 1 ? 's' : '') + ' sans contact récent');
+        if (hlMain) hlMain.textContent = totalActions + ' action' + (totalActions > 1 ? 's' : '') + ' à traiter aujourd\'hui';
+        if (hlSub) hlSub.textContent = parts.join(' · ');
+      } else {
+        hlBox.style.display = 'none';
+      }
+    }
 
     if (relanceBadge) {
       if (withRelance.length > 0) {
