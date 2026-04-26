@@ -9064,8 +9064,24 @@ async function _kbMarkContacted(prospectId, activityId) {
       if (btn) switchDrawerTab('historique', btn);
     }, 150);
 
+    // Mise à jour optimiste du cache dashboard — marquer les activités planifiées comme réalisées
+    if (_dashCache) {
+      const pidx = _dashCache.prospects.findIndex(p => p.id === prospectId);
+      if (pidx >= 0) {
+        const updatedActs = (_dashCache.prospects[pidx].activites || []).map(a =>
+          (a.statut === 'planifiee') ? { ...a, statut: 'realisee', date_realisee: now } : a
+        );
+        _dashCache.prospects = [
+          ..._dashCache.prospects.slice(0, pidx),
+          { ..._dashCache.prospects[pidx], activites: updatedActs, updated_at: now },
+          ..._dashCache.prospects.slice(pidx + 1),
+        ];
+      }
+    }
+
     if (typeof renderPipelinePage   === 'function') renderPipelinePage();
-    if (typeof renderGlobalDashboard === 'function') { invalidateDashCache(); renderGlobalDashboard(); }
+    // Re-render avec le cache mis à jour (pas d'invalidation, on a déjà corrigé les activités)
+    if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
   } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
 }
 
@@ -9425,13 +9441,37 @@ async function logActivity(prospectId) {
       throw new Error('POST /activites ' + res.status + (err.error ? ' — ' + err.error : ''));
     }
 
+    // Récupérer l'activité créée (pour avoir l'id DB) ou fallback sur le body envoyé
+    const actData = await res.json().catch(() => null);
+    const createdAct = actData?.data || { ...body, id: '_opt_' + Date.now(), created_at: new Date().toISOString() };
+
+    // ── Mise à jour optimiste du cache dashboard ──────────────────────────────
+    // On injecte l'activité directement dans le cache sans attendre GET /activites
+    // (qui peut ne pas exister). Ainsi getNextRelance() trouve immédiatement la
+    // date_planifiee et "Relances du jour" s'affiche sans re-fetch.
+    if (_dashCache) {
+      const pidx = _dashCache.prospects.findIndex(p => p.id === prospectId);
+      if (pidx >= 0) {
+        const updatedProspect = {
+          ..._dashCache.prospects[pidx],
+          activites: [...(_dashCache.prospects[pidx].activites || []), createdAct],
+          updated_at: new Date().toISOString(),
+        };
+        _dashCache.prospects = [
+          ..._dashCache.prospects.slice(0, pidx),
+          updatedProspect,
+          ..._dashCache.prospects.slice(pidx + 1),
+        ];
+      }
+    }
+
     // Mettre à jour updated_at sur le prospect
     await fetch(ADMIN_API + '/prospects/' + prospectId, {
       method: 'PUT', headers: hdrs,
       body: JSON.stringify({ updated_at: new Date().toISOString() }),
     });
 
-    showToast('✓ Contact enregistré' + (datePlanifiee ? ' · Relance planifiée le ' + new Date(datePlanifiee+'T12:00:00').toLocaleDateString('fr-FR') : ''), 'success');
+    showToast('✓ Contact enregistré' + (datePlanifiee ? ' · Relance planifiée le ' + new Date(datePlanifiee).toLocaleDateString('fr-FR') : ''), 'success');
 
     // Rafraîchir drawer sur onglet Activités
     await openClientDrawer(prospectId);
@@ -9441,9 +9481,10 @@ async function logActivity(prospectId) {
     }, 200);
 
     setTimeout(() => {
-      if (typeof renderPipelinePage   === 'function' && pageCourante === 'pipeline') renderPipelinePage();
-      if (typeof renderGlobalDashboard === 'function') { invalidateDashCache(); renderGlobalDashboard(); }
-    }, 600);
+      if (typeof renderPipelinePage === 'function' && pageCourante === 'pipeline') renderPipelinePage();
+      // Re-render dashboard avec le cache mis à jour (pas d'invalidation — on a déjà injecté)
+      if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
+    }, 400);
   } catch(e) {
     showToast('⚠️ ' + e.message, 'error');
   }
@@ -12446,24 +12487,23 @@ async function _fetchDashData() {
   if (_dashFetching) return;
   _dashFetching = true;
   try {
-    const [prospRes, simRes, actRes] = await Promise.all([
+    const [prospRes, simRes] = await Promise.all([
       fetch(ADMIN_API + '/prospects',   { headers: getAuthHeaders() }),
       fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/activites',   { headers: getAuthHeaders() }).catch(() => null),
     ]);
     const allProspects = (await prospRes.json())?.data || [];
     const allSims      = (await simRes.json())?.data  || [];
-    // Activités : join par prospect_id pour que getNextRelance() fonctionne dans le dashboard
-    const allActs      = actRes ? ((await actRes.json())?.data || []) : [];
-    const actsByProspect = {};
-    for (const a of allActs) {
-      if (!a.prospect_id) continue;
-      (actsByProspect[a.prospect_id] = actsByProspect[a.prospect_id] || []).push(a);
+    // Les activités sont injectées de façon optimiste lors du logContact().
+    // On préserve les activites déjà présentes dans le cache si elles existent.
+    const prevActsByProspect = {};
+    if (_dashCache) {
+      for (const p of _dashCache.prospects) {
+        if (p.activites?.length) prevActsByProspect[p.id] = p.activites;
+      }
     }
-    // Injecter activites dans chaque prospect (écrase éventuellement le tableau vide)
     const enrichedProspects = allProspects.map(p => ({
       ...p,
-      activites: actsByProspect[p.id] || p.activites || [],
+      activites: prevActsByProspect[p.id] || p.activites || [],
     }));
     _dashCache = { prospects: enrichedProspects, simulations: allSims, ts: Date.now() };
     return _dashCache;
