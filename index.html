@@ -4859,9 +4859,9 @@
         <div id="bareme-info-field" style="background:var(--c-teal-bg);border-radius:8px;padding:8px 10px;border:1px solid var(--c-teal-border);margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
             <span style="font-size:10px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:0.05em;">Conditions de financement</span>
-            <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#8896a7;color:#fff;font-weight:700;transition:background 0.3s;">Chargement…</span>
+            <span id="bareme-status-badge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:#0d9488;color:#fff;font-weight:700;transition:background 0.3s;">Standard</span>
           </div>
-          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.5;margin-bottom:4px;">Initialisation du barème…</div>
+          <div id="bareme-detail" style="font-size:11px;color:#0f766e;line-height:1.5;margin-bottom:4px;">Taux standard <strong>4,5 %</strong> · <span style="color:var(--c-text-3);">Barème personnalisé via l'admin Lihtea</span></div>
           <div id="bareme-coef-block" style="display:none;align-items:baseline;gap:6px;">
             <span id="bareme-coef-value" style="font-size:22px;font-weight:800;color:#0d9488;letter-spacing:-0.5px;line-height:1;"></span>
             <span style="font-size:10px;color:#5eead4;font-weight:600;align-self:flex-end;padding-bottom:1px;">coefficient mensuel</span>
@@ -12106,17 +12106,18 @@ async function loadBareme() {
 
 /**
  * Fallback : utilise le taux par défaut admin si la vue Supabase est inaccessible.
- * Le simulateur reste pleinement fonctionnel avec le taux standard.
+ * Le badge HTML est déjà à "Standard" par défaut — cette fonction met juste à jour
+ * _baremeLoaded pour que recalculer() ne soit plus bloqué.
  */
 function _useFallbackBareme() {
-  _baremeLoaded = true; // libère le verrou — plus de "Chargement..."
+  _baremeLoaded = true;
+  const taux = adminBaremes?.tauxDefaut || BAREMES_DEFAUT.tauxDefaut || 4.5;
   const badge  = document.getElementById('bareme-status-badge');
   const detail = document.getElementById('bareme-detail');
-  const taux   = adminBaremes?.tauxDefaut || BAREMES_DEFAUT.tauxDefaut || 4.5;
   if (badge)  { badge.textContent = 'Standard'; badge.style.background = '#0d9488'; }
   if (detail) detail.innerHTML = 'Taux standard <strong>' + taux + ' %</strong> · '
-    + '<span style="color:var(--c-text-3);">Barème personnalisé configuré via l\'admin Lihtea</span>';
-  recalculer();
+    + '<span style="color:var(--c-text-3);">Barème personnalisé via l\'admin Lihtea</span>';
+  if (typeof recalculer === 'function') try { recalculer(); } catch(e) {}
 }
 
 // Chargement initial du barème au démarrage de la page
