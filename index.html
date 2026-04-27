@@ -9105,16 +9105,6 @@ function _kbPhone(prospectId, triggerEl) {
   pop.style.cssText = `position:fixed;z-index:9999;width:260px;background:var(--c-surface);border:1px solid var(--c-border);
     border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);padding:16px;font-family:var(--font-body);`;
 
-  // Position near trigger button
-  if (triggerEl) {
-    const r = triggerEl.getBoundingClientRect();
-    pop.style.top  = (r.bottom + 8) + 'px';
-    pop.style.left = Math.min(r.left, window.innerWidth - 276) + 'px';
-  } else {
-    pop.style.top = '50%'; pop.style.left = '50%';
-    pop.style.transform = 'translate(-50%,-50%)';
-  }
-
   pop.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-size:11px;font-weight:700;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;">📞 Contact rapide</span>
@@ -9141,8 +9131,25 @@ function _kbPhone(prospectId, triggerEl) {
       </button>
     </div>`;
 
+  // Insérer dans le DOM avant de mesurer la hauteur réelle
   document.body.appendChild(pop);
-  // Close on outside click
+
+  // Positionner intelligemment : en dessous si la place le permet, sinon au-dessus
+  if (triggerEl) {
+    const r  = triggerEl.getBoundingClientRect();
+    const ph = pop.offsetHeight || 280;
+    const pw = pop.offsetWidth  || 260;
+    const left = Math.min(Math.max(r.left, 8), window.innerWidth - pw - 8);
+    const spaceBelow = window.innerHeight - r.bottom - 8;
+    const top = spaceBelow >= ph ? r.bottom + 8 : Math.max(r.top - ph - 8, 8);
+    pop.style.left = left + 'px';
+    pop.style.top  = top  + 'px';
+  } else {
+    pop.style.top = '50%'; pop.style.left = '50%';
+    pop.style.transform = 'translate(-50%,-50%)';
+  }
+
+  // Fermer sur clic extérieur
   setTimeout(() => {
     document.addEventListener('click', function _close(e) {
       if (!pop.contains(e.target)) { pop.remove(); document.removeEventListener('click', _close); }
