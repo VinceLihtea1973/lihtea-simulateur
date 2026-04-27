@@ -9156,22 +9156,23 @@ async function _kbMarkContacted(prospectId, activityId) {
     const hdrs = { ...getAuthHeaders(), 'Content-Type': 'application/json' };
     const now  = new Date().toISOString();
 
-    // 1. Clore les activités planifiées ouvertes (date_planifiee non nulle, statut planifiee)
+    // 1. Clore toutes les activités ayant une relance planifiée (quelle que soit statut)
+    //    → on efface date_planifiee pour qu'elles n'apparaissent plus dans getNextRelance()
     const pendingRelances = (_drawerCrmData?.activites || [])
-      .filter(a => a.statut === 'planifiee' && a.date_planifiee);
+      .filter(a => a.date_planifiee && a.statut !== 'annulee');
     for (const act of pendingRelances) {
-      if (act.id) {
+      if (act.id && !act.id.startsWith('_opt_')) {
         await fetch(ADMIN_API + '/activites/' + act.id, {
           method: 'PATCH', headers: hdrs,
-          body: JSON.stringify({ statut: 'realisee', date_realisee: now }),
+          body: JSON.stringify({ date_planifiee: null, statut: 'realisee', date_realisee: now }),
         });
       }
     }
-    // Si un activityId spécifique est passé (bouton "Fait" par activité), le marquer aussi
-    if (activityId) {
+    // Si un activityId spécifique est passé, le marquer aussi
+    if (activityId && !activityId.startsWith('_opt_')) {
       await fetch(ADMIN_API + '/activites/' + activityId, {
         method: 'PATCH', headers: hdrs,
-        body: JSON.stringify({ statut: 'realisee', date_realisee: now }),
+        body: JSON.stringify({ date_planifiee: null, statut: 'realisee', date_realisee: now }),
       });
     }
 
@@ -9206,13 +9207,13 @@ async function _kbMarkContacted(prospectId, activityId) {
       if (btn) switchDrawerTab('historique', btn);
     }, 150);
 
-    // Mise à jour optimiste du cache dashboard — marquer les activités planifiées comme réalisées
+    // Mise à jour optimiste du cache dashboard — effacer date_planifiee sur toutes les activités
+    // (c'est date_planifiee qui pilote getNextRelance, pas statut)
+    const _clearRelance = a => a.date_planifiee ? { ...a, date_planifiee: null, statut: 'realisee', date_realisee: now } : a;
     if (_dashCache) {
       const pidx = _dashCache.prospects.findIndex(p => p.id === prospectId);
       if (pidx >= 0) {
-        const updatedActs = (_dashCache.prospects[pidx].activites || []).map(a =>
-          (a.statut === 'planifiee') ? { ...a, statut: 'realisee', date_realisee: now } : a
-        );
+        const updatedActs = (_dashCache.prospects[pidx].activites || []).map(_clearRelance);
         _dashCache.prospects = [
           ..._dashCache.prospects.slice(0, pidx),
           { ..._dashCache.prospects[pidx], activites: updatedActs, updated_at: now },
@@ -9221,8 +9222,14 @@ async function _kbMarkContacted(prospectId, activityId) {
       }
     }
 
+    // Vider aussi _pendingActivities pour ce prospect (la relance est clôturée)
+    if (_pendingActivities && _pendingActivities[prospectId]) {
+      _pendingActivities[prospectId] = (_pendingActivities[prospectId] || []).map(_clearRelance);
+    }
+
     if (typeof renderPipelinePage   === 'function') renderPipelinePage();
-    // Re-render avec le cache mis à jour (pas d'invalidation, on a déjà corrigé les activités)
+    // Invalider le cache pour forcer un re-fetch propre depuis la DB
+    invalidateDashCache();
     if (typeof renderGlobalDashboard === 'function') renderGlobalDashboard();
   } catch(e) { showToast('⚠️ Erreur : ' + e.message, 'error'); }
 }
@@ -12658,43 +12665,42 @@ let _dashFetchPromise = null; // évite les races concurrentes
 let _pendingActivities = {}; // { [prospectId]: Activity[] }
 
 async function _fetchDashData() {
-  // Si un fetch est déjà en cours, retourner la même promesse plutôt que undefined
   if (_dashFetchPromise) return _dashFetchPromise;
   if (_dashFetching) return null;
   _dashFetching = true;
-  try {
-    const [prospRes, simRes] = await Promise.all([
-      fetch(ADMIN_API + '/prospects',   { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
-    ]);
-    const allProspects = (await prospRes.json())?.data || [];
-    const allSims      = (await simRes.json())?.data  || [];
-    // Les activités sont injectées de façon optimiste (logActivity) et via _pendingActivities.
-    // On préserve les activités déjà présentes dans le cache ET le store local.
-    const prevActsByProspect = {};
-    if (_dashCache) {
-      for (const p of _dashCache.prospects) {
-        if (p.activites?.length) prevActsByProspect[p.id] = p.activites;
+  _dashFetchPromise = (async () => {
+    try {
+      const hdrs = getAuthHeaders();
+      const [prospRes, simRes, actRes] = await Promise.all([
+        fetch(ADMIN_API + '/prospects',   { headers: hdrs }),
+        fetch(ADMIN_API + '/simulations', { headers: hdrs }),
+        fetch(ADMIN_API + '/activites',   { headers: hdrs }),
+      ]);
+      const allProspects = (await prospRes.json())?.data || [];
+      const allSims      = (await simRes.json())?.data   || [];
+      // Grouper les activités DB par prospect_id
+      const allActsRaw   = actRes.ok ? ((await actRes.json())?.data || []) : [];
+      const actsByProspect = {};
+      for (const a of allActsRaw) {
+        if (!actsByProspect[a.prospect_id]) actsByProspect[a.prospect_id] = [];
+        actsByProspect[a.prospect_id].push(a);
       }
-    }
-    const enrichedProspects = allProspects.map(p => {
-      const cached  = prevActsByProspect[p.id] || p.activites || [];
-      const pending = _pendingActivities[p.id] || [];
-      // Fusionner en dédupliquant par id
-      const seen = new Set();
-      const activites = [...cached, ...pending].filter(a => {
-        if (seen.has(a.id)) return false;
-        seen.add(a.id);
-        return true;
+      // Fusionner avec _pendingActivities (activités optimistes de la session)
+      const enrichedProspects = allProspects.map(p => {
+        const fromDB    = actsByProspect[p.id] || [];
+        const pending   = _pendingActivities[p.id] || [];
+        const seen = new Set(fromDB.map(a => a.id));
+        const activites = [...fromDB, ...pending.filter(a => !seen.has(a.id))];
+        return { ...p, activites };
       });
-      return { ...p, activites };
-    });
-    _dashCache = { prospects: enrichedProspects, simulations: allSims, ts: Date.now() };
-    return _dashCache;
-  } finally {
-    _dashFetching = false;
-    _dashFetchPromise = null;
-  }
+      _dashCache = { prospects: enrichedProspects, simulations: allSims, ts: Date.now() };
+      return _dashCache;
+    } finally {
+      _dashFetching = false;
+      _dashFetchPromise = null;
+    }
+  })();
+  return _dashFetchPromise;
 }
 
 // Appelé au login — lance le fetch en arrière-plan sans bloquer
