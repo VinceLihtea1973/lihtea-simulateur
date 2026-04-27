@@ -9856,7 +9856,139 @@ function _renderActivitesTab(p) {
     <!-- Timeline -->
     <div style="padding:4px 20px 20px;">
       ${timelineHtml}
+    </div>
+
+    <!-- ═══ NOTES INTERNES ═══ -->
+    <div style="margin:0 16px 20px;border-top:2px solid var(--c-border);padding-top:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:14px;">💬</span>
+        <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--c-navy);">Notes internes</span>
+        <span id="notes-count-${p.id}" style="font-size:10px;font-weight:700;color:var(--c-text-3);"></span>
+      </div>
+
+      <!-- Saisie rapide -->
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px;">
+        <textarea id="note-input-${p.id}" rows="2" placeholder="Ajouter une note interne…"
+          style="flex:1;box-sizing:border-box;border:1px solid var(--c-border);border-radius:8px;
+            padding:8px 10px;font-size:12px;font-family:var(--font-body);resize:none;
+            background:var(--c-bg);color:var(--c-text);outline:none;line-height:1.5;transition:border .15s;"
+          onfocus="this.style.borderColor='var(--c-teal)'" onblur="this.style.borderColor='var(--c-border)'"
+          onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey)){event.preventDefault();ajouterNoteInterne('${p.id}');}"></textarea>
+        <button onclick="ajouterNoteInterne('${p.id}')"
+          style="padding:8px 14px;border:none;border-radius:8px;background:var(--c-teal);color:#fff;
+            font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);white-space:nowrap;flex-shrink:0;">
+          ↵ Ajouter
+        </button>
+      </div>
+
+      <!-- Fil de notes -->
+      <div id="notes-list-${p.id}">
+        ${_renderNotesHtml(p.metadata?.notes_internes || [], p.id)}
+      </div>
     </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   NOTES INTERNES PAR PROSPECT
+══════════════════════════════════════════════════════ */
+
+function _renderNotesHtml(notes, pid) {
+  if (!notes || !notes.length) {
+    return `<div id="notes-empty-${pid}" style="text-align:center;padding:16px 0 4px;color:var(--c-text-3);font-size:11px;">
+      Aucune note pour l'instant · Cmd+Entrée pour envoyer
+    </div>`;
+  }
+  const fmt = d => {
+    const dt = new Date(d);
+    const diffDays = Math.floor((Date.now() - dt.getTime()) / 86400000);
+    if (diffDays === 0) return 'Aujourd\'hui ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    if (diffDays === 1) return 'Hier ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) + ' · ' + dt.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  };
+  return [...notes].reverse().map(n => `
+    <div data-note-id="${n.id}" style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--c-border);">
+      <div style="width:28px;height:28px;border-radius:50%;background:#f59e0b18;border:1.5px solid #f59e0b;
+        display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">💬</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;color:var(--c-text);line-height:1.55;white-space:pre-wrap;word-break:break-word;">${esc(n.content)}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:10px;color:var(--c-text-3);">${fmt(n.created_at)}</span>
+          <button onclick="supprimerNoteInterne('${pid}','${n.id}')"
+            style="border:none;background:none;color:var(--c-text-3);font-size:11px;cursor:pointer;
+              padding:2px 6px;border-radius:4px;font-family:var(--font-body);transition:color .15s;"
+            onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--c-text-3)'">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function ajouterNoteInterne(prospectId) {
+  const input = document.getElementById('note-input-' + prospectId);
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) { input.focus(); return; }
+
+  const note = { id: '_n_' + Date.now(), content, created_at: new Date().toISOString() };
+
+  // Mise à jour locale optimiste
+  const p = _drawerCrmData;
+  if (!p || p.id !== prospectId) return;
+  if (!p.metadata) p.metadata = {};
+  const notes = [...(p.metadata.notes_internes || []), note];
+  p.metadata.notes_internes = notes;
+
+  input.value = '';
+  _refreshNotesUI(prospectId, notes);
+
+  // Persistance Supabase REST (PATCH partiel — n'écrase pas les autres colonnes)
+  try {
+    await _saveNotesInternes(prospectId, p.metadata);
+  } catch(e) {
+    console.warn('[Notes] Erreur sauvegarde:', e);
+    showToast('Erreur lors de la sauvegarde', 'error');
+  }
+}
+
+async function supprimerNoteInterne(prospectId, noteId) {
+  const p = _drawerCrmData;
+  if (!p || p.id !== prospectId || !p.metadata?.notes_internes) return;
+
+  const notes = p.metadata.notes_internes.filter(n => n.id !== noteId);
+  p.metadata.notes_internes = notes;
+  _refreshNotesUI(prospectId, notes);
+
+  try {
+    await _saveNotesInternes(prospectId, p.metadata);
+  } catch(e) {
+    console.warn('[Notes] Erreur suppression:', e);
+  }
+}
+
+async function _saveNotesInternes(prospectId, metadata) {
+  const token = localStorage.getItem('gef_auth_token');
+  const res = await fetch(SUPABASE_URL + '/rest/v1/prospects?id=eq.' + prospectId, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + (token || SUPABASE_ANON),
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ metadata }),
+  });
+  if (!res.ok) throw new Error('PATCH /prospects ' + res.status);
+  // Mettre à jour le cache dashboard
+  if (_dashCache?.prospects) {
+    const idx = _dashCache.prospects.findIndex(x => x.id === prospectId);
+    if (idx !== -1) _dashCache.prospects[idx].metadata = metadata;
+  }
+}
+
+function _refreshNotesUI(prospectId, notes) {
+  const list    = document.getElementById('notes-list-'  + prospectId);
+  const counter = document.getElementById('notes-count-' + prospectId);
+  if (list) list.innerHTML = _renderNotesHtml(notes, prospectId);
+  if (counter) counter.textContent = notes.length ? `(${notes.length})` : '';
 }
 
 /* ── Helpers activités ── */
