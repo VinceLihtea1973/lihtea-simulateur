@@ -11447,54 +11447,77 @@ function _buildFinancementParams({ siren, raison_sociale, type_equipement, inves
   });
 }
 
+// Message affiché quand l'URL partenaire n'est pas encore configurée
+function _showPartenaireMessage() {
+  showToast(
+    'Un compte partenaire est requis pour soumettre une demande. Contactez votre responsable Lihtea pour l\'activer.',
+    'info',
+    6000
+  );
+}
+
 // Appelé depuis le topbar du simulateur
 function ouvrirDemandeFinancement() {
   const d = lireParametres();
   const nomClient = d.nomClient && d.nomClient !== 'Client' ? d.nomClient : '';
-  if (!nomClient || !d.inv || isNaN(d.inv) || d.inv <= 0) {
-    showToast('Renseignez un client et un investissement avant de soumettre une demande', 'warning');
+  const siren = (document.getElementById('client-siren')?.value || '').replace(/\D/g, '');
+
+  // ── Validation des champs obligatoires ──
+  const manque = [];
+  if (!nomClient)                              manque.push('nom de la société');
+  if (!siren || siren.length !== 9)            manque.push('SIREN (9 chiffres)');
+  if (!d.inv  || isNaN(d.inv)  || d.inv  <= 0) manque.push('montant d\'investissement');
+  if (!d.duree|| isNaN(d.duree)|| d.duree<= 0) manque.push('durée de financement');
+  if (!d.typeLabel)                            manque.push('type d\'équipement');
+
+  if (manque.length > 0) {
+    showToast('Informations manquantes : ' + manque.join(' · '), 'warning', 5000);
     return;
   }
-  const siren = (document.getElementById('client-siren')?.value || '').replace(/\D/g, '');
+
   const params = _buildFinancementParams({
     siren,
     raison_sociale:  nomClient,
-    type_equipement: d.typeLabel || '',
+    type_equipement: d.typeLabel,
     investissement:  d.inv,
     cout_net:        d.coutNet,
     duree:           d.duree,
     mensualite:      d.mensNette,
   });
-  const url = FINANCEMENT_PARTNER_URL === '#'
-    ? null
-    : FINANCEMENT_PARTNER_URL + '?' + params.toString();
-  if (!url) {
-    showToast('Application partenaire en cours de développement — disponible prochainement', 'info');
-    return;
-  }
-  window.open(url, '_blank');
+
+  if (FINANCEMENT_PARTNER_URL === '#') { _showPartenaireMessage(); return; }
+  window.open(FINANCEMENT_PARTNER_URL + '?' + params.toString(), '_blank');
 }
 
 // Appelé depuis la fiche client (drawer simulations)
 function ouvrirDemandeFinancementDrawer(siren, raison_sociale, reParams, investissement, cout_net, mensualite) {
-  const rp = reParams || {};
+  const rp    = reParams || {};
+  const duree = Number(rp.duree_ans || rp.duree) || 0;
+
+  // ── Validation des champs obligatoires ──
+  const manque = [];
+  if (!raison_sociale)              manque.push('nom de la société');
+  if (!siren || siren.length !== 9) manque.push('SIREN (9 chiffres)');
+  if (!investissement || investissement <= 0) manque.push('montant d\'investissement');
+  if (!duree)                       manque.push('durée de financement');
+
+  if (manque.length > 0) {
+    showToast('Informations manquantes sur ce dossier : ' + manque.join(' · '), 'warning', 5000);
+    return;
+  }
+
   const params = _buildFinancementParams({
     siren,
     raison_sociale,
     type_equipement: rp.type_equipement || rp.typeLabel || '',
     investissement,
     cout_net,
-    duree:     Number(rp.duree_ans || rp.duree) || 0,
+    duree,
     mensualite,
   });
-  const url = FINANCEMENT_PARTNER_URL === '#'
-    ? null
-    : FINANCEMENT_PARTNER_URL + '?' + params.toString();
-  if (!url) {
-    showToast('Application partenaire en cours de développement — disponible prochainement', 'info');
-    return;
-  }
-  window.open(url, '_blank');
+
+  if (FINANCEMENT_PARTNER_URL === '#') { _showPartenaireMessage(); return; }
+  window.open(FINANCEMENT_PARTNER_URL + '?' + params.toString(), '_blank');
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -14152,14 +14175,14 @@ function makeFieldValuesEditable() {
     container.className = 'toast-container';
     document.body.appendChild(container);
   }
-  window.showToast = function(message, type) {
+  window.showToast = function(message, type, duration) {
     type = type || 'info';
     const icons = { success:'✓', error:'✗', warning:'⚠', info:'ℹ' };
     const t = document.createElement('div');
     t.className = 'toast ' + type;
     t.innerHTML = '<span>' + (icons[type]||'') + '</span> ' + message;
     container.appendChild(t);
-    setTimeout(function() { if (t.parentNode) t.remove(); }, 3200);
+    setTimeout(function() { if (t.parentNode) t.remove(); }, duration || 3200);
   };
 })();
 
