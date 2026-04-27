@@ -13018,9 +13018,9 @@ async function renderGlobalDashboard() {
         relancesEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--c-text-3);font-size:12px;">✅ Aucune relance prévue pour aujourd\'hui</div>';
       } else {
         relancesEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">'
-          + withRelance.slice(0, 6).map(c => {
+          + withRelance.map(c => {
             const isLate = c.nextRelance < todayStr;
-            const nr = new Date(c.nextRelance);
+            const nr = new Date(c.nextRelance + 'T12:00:00');
             const nrStr = nr.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
             const stageColor = PIPELINE_STAGES?.find?.(s => s.id === c.statut)?.color || '#64748b';
             return '<div style="padding:12px 14px;border-radius:10px;border:1px solid '
