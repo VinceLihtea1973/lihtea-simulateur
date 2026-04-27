@@ -545,7 +545,7 @@
 
     /* ── Simulator parameter panel — dark mode ── */
     [data-theme="dark"] #sim-params-panel { background: var(--c-sim-panel-bg) !important; }
-    [data-theme="dark"] #sim-params-panel .card { background: #132035 !important; border-color: #1e3352 !important; }
+    [data-theme="dark"] #sim-params-panel .card:not(#sim-client-card) { background: #132035 !important; border-color: #1e3352 !important; }
     [data-theme="dark"] #sim-params-panel .sp-field { background: #0c1829 !important; border-color: #1e3352 !important; }
     [data-theme="dark"] #sim-params-panel .sp-field-val { color: #e2e8f0 !important; }
     [data-theme="dark"] #sim-params-panel .sp-field-label { color: #64748b !important; }
@@ -4336,8 +4336,9 @@
         padding: 12px 14px !important;
         background: var(--c-surface) !important;
       }
-      /* Bloc client — navy fixe (override !important) */
-      #sim-client-card {
+      /* Bloc client — navy fixe (spécificité 2-ids) */
+      #sim-params-panel #sim-client-card,
+      #sim-params-panel #sim-client-card.card {
         background: linear-gradient(135deg,#0f2b46 0%,#1a3d5c 100%) !important;
         border-color: rgba(255,255,255,0.08) !important;
       }
