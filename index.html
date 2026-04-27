@@ -6508,6 +6508,7 @@ async function syncFindOrCreateProspect(clientName, clientEmail, clientSiret, cl
     console.log('[Sync] Prospect created:', newId);
     _currentProspectId = newId;
     _currentProspectStatut = 'nouveau';
+    if (typeof invalidateDashCache === 'function') invalidateDashCache();
     return newId;
   } catch(e) {
     console.warn('[Sync] Prospect sync error:', e);
@@ -8885,18 +8886,23 @@ async function renderPipelinePage() {
     board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise</div>';
     return;
   }
-  board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
+  // ── Cache-first: shared _dashCache (pre-warmed at login) ──
+  const cacheAge = _dashCache ? Date.now() - _dashCache.ts : Infinity;
+  const hasFreshCache = _dashCache && cacheAge < _DASH_TTL;
+  const hasStaleCache = _dashCache && !hasFreshCache;
   try {
-    const [prospRes, simsRes] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
-    ]);
-    if (!prospRes.ok) throw new Error('Prospects API ' + prospRes.status);
-    if (!simsRes.ok)  throw new Error('Simulations API ' + simsRes.status);
-    const prosp = await prospRes.json();
-    const sims  = await simsRes.json();
-    _pipelineClients = (prosp?.data || []).map(p => {
-      const pSims = (sims?.data || []).filter(s => s.prospect_id === p.id);
+    if (!_dashCache) {
+      board.innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-text-3);">Chargement…</div>';
+      const data = await _fetchDashData();
+      if (!data) return;
+    } else if (hasStaleCache) {
+      // Refresh silencieux en arrière-plan, affichage immédiat du cache stale
+      _fetchDashData().then(() => { if (pageCourante === 'pipeline') renderPipelinePage(); }).catch(() => {});
+    }
+    const allProspects = _dashCache.prospects;
+    const allSims      = _dashCache.simulations;
+    _pipelineClients = allProspects.map(p => {
+      const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a, s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a, s) => a + (Number(s.montant_aides_total || s.resultats?.total_aides)||0), 0);
       const lastContact = new Date(p.updated_at || p.created_at).getTime();
@@ -9725,19 +9731,22 @@ async function renderClientsPage() {
     container.innerHTML = '<div style="padding:48px;text-align:center;color:var(--c-text-3);">🔒 Connexion requise pour accéder au portefeuille clients.</div>';
     return;
   }
-  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:14px;height:14px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>';
+  // ── Cache-first: shared _dashCache (pre-warmed at login) ──
+  const cacheAge = _dashCache ? Date.now() - _dashCache.ts : Infinity;
+  const hasFreshCache = _dashCache && cacheAge < _DASH_TTL;
+  const hasStaleCache = _dashCache && !hasFreshCache;
   try {
-    const [prospRes, simsRes] = await Promise.all([
-      fetch(ADMIN_API + '/prospects', { headers: getAuthHeaders() }),
-      fetch(ADMIN_API + '/simulations', { headers: getAuthHeaders() }),
-    ]);
-    if (!prospRes.ok) throw new Error('Prospects API ' + prospRes.status);
-    if (!simsRes.ok)  throw new Error('Simulations API ' + simsRes.status);
-    const prosp = await prospRes.json();
-    const sims  = await simsRes.json();
-    const allSims = sims?.data || [];
+    if (!_dashCache) {
+      container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--c-text-3);"><span style="display:inline-block;width:14px;height:14px;border:2px solid var(--c-teal);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Chargement…</div>';
+      const data = await _fetchDashData();
+      if (!data) return;
+    } else if (hasStaleCache) {
+      // Refresh silencieux en arrière-plan, affichage immédiat du cache stale
+      _fetchDashData().then(() => { if (pageCourante === 'clients') renderClientsPage(); }).catch(() => {});
+    }
+    const allSims = _dashCache.simulations;
     const _delIds=(()=>{try{return JSON.parse(localStorage.getItem('gef_deleted_prospect_ids')||'[]')}catch{return[]}})();
-    _clientsAll = (prosp?.data || []).filter(p => !(p.score_lead < 0) && !_delIds.includes(p.id)).map(p => {
+    _clientsAll = _dashCache.prospects.filter(p => !(p.score_lead < 0) && !_delIds.includes(p.id)).map(p => {
       const pSims = allSims.filter(s => s.prospect_id === p.id);
       const inv   = pSims.reduce((a,s) => a + (Number(s.parametres?.investissement)||0), 0);
       const aides = pSims.reduce((a,s) => a + (Number(s.montant_aides_total)||0), 0);
@@ -9746,7 +9755,6 @@ async function renderClientsPage() {
       return { ...p, nb_sims: pSims.length, totalInvest: inv, totalAides: aides, daysInactive: daysInact, score,
                hasAlert: daysInact > 15 && !['gagne','perdu','inactif'].includes(p.statut) };
     });
-    // Badge alerte sidebar
     const alertCount = _clientsAll.filter(c => c.hasAlert).length;
     const badge = document.getElementById('badge-clients-alerte');
     if (badge) badge.textContent = alertCount > 0 ? String(alertCount) : '';
@@ -12705,7 +12713,7 @@ function openProspectFromDash(id, tab) {
 
 // ── Dashboard data cache (stale-while-revalidate) ──────────────────────────
 let _dashCache = null; // { prospects, simulations, ts }
-const _DASH_TTL = 60000; // 60s avant refresh automatique
+const _DASH_TTL = 300000; // 5min — stale-while-revalidate (toutes les pages partagent ce cache)
 let _dashFetching = false;
 let _dashFetchPromise = null; // évite les races concurrentes
 
