@@ -9922,13 +9922,23 @@ function renderDrawerContent(p) {
     const conso_ = Number(p_.consommation)||0;
     const gain_  = Number(p_.gain_energetique)||0;
     const prix_  = Number(p_.prix_energie)||0;
-    const duree_ = Number(p_.duree_ans)||0;
-    const mens_  = _kpiSim.montant_loyer_mensuel||0;
+    const duree_ = Number(p_.duree)||Number(p_.duree_ans)||7;
+    // Loyer : cascade identique au bloc Dernière étude
+    let mens_ = _kpiSim.montant_loyer_mensuel || _kpiSim.resultats?.mensualite_nette || 0;
+    if (!mens_) {
+      const _cN = _kpiInv - _kpiAides;
+      const _t  = Number(p_.taux) || 3;
+      const _m  = duree_ * 12;
+      if (_cN > 0 && _m > 0) {
+        const _r = _t / 100 / 12;
+        mens_ = _r > 0 ? Math.round(_cN * _r / (1 - Math.pow(1 + _r, -_m))) : Math.round(_cN / _m);
+      }
+    }
     const ecoAn_ = (conso_ > 0 && gain_ > 0 && prix_ > 0) ? conso_ * gain_ / 100 * prix_ : 0;
     const loyers_= mens_ * duree_ * 12;
     if (ecoAn_ > 0 && loyers_ > 0) return Math.round(loyers_ / (ecoAn_ / 12));
     const stored = _kpiSim.roi_mois||0;
-    return (stored > 0 && stored < 600) ? stored : 0; // fiable seulement si <600 mois
+    return (stored > 0 && stored < 600) ? stored : 0;
   })();
   const _kpiRoi = _kpiPayback;
   const score = calcScoreICP({ ...p, nb_sims: p.simulations?.length||0, totalInvest: _kpiInv||0, daysInactive: Math.floor((Date.now()-new Date(p.updated_at||p.created_at).getTime())/86400000) });
