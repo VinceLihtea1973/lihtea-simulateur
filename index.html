@@ -11145,7 +11145,7 @@ function lireParametres() {
   };
 }
 
-// ─── PDF EXPORT REFONDU ───
+// ─── PDF EXPORT — PROPOSITION COMMERCIALE LIHTEA ───
 async function exporterPDF(previewOnly = false) {
   const btn = document.querySelector('.export-btn-pdf');
   if (!previewOnly && btn) { btn.disabled = true; btn.textContent = 'Generation...'; }
@@ -11153,7 +11153,6 @@ async function exporterPDF(previewOnly = false) {
 
   try {
     const d = lireParametres();
-    // Scores d'éligibilité (score >= 70 = Éligible, seules ces aides apparaissent dans le PDF)
     const elig = evaluerEligibilite();
     const isEligible = key => (elig[key]?.score ?? 0) >= 70;
     const { jsPDF } = window.jspdf;
@@ -11161,7 +11160,7 @@ async function exporterPDF(previewOnly = false) {
 
     const W = 210, H = 297, MARG = 14, CONTENU = W - MARG * 2;
     let Y = 0;
-    let pageNum = 0; // cover is page 0
+    let pageNum = 0;
 
     const rect = (x, y, w, h, c) => { doc.setFillColor(...c); doc.rect(x, y, w, h, 'F'); };
     const txt = (t, x, y, s, c, b, a) => {
@@ -11171,602 +11170,262 @@ async function exporterPDF(previewOnly = false) {
       doc.text(String(t), x, y, { align: a || 'left' });
     };
     const ligne = (y, c) => { doc.setDrawColor(...(c || PDF_COLORS.bordure)); doc.setLineWidth(0.3); doc.line(MARG, y, W - MARG, y); };
+    const fe = n => { const s = Math.round(n).toLocaleString('fr-FR'); return s.replace(/[   ]/g, ' ') + ' EUR'; };
 
-    const fe = n => {
-      const s = Math.round(n).toLocaleString('fr-FR');
-      return s.replace(/[\u00a0\u202f\u2009]/g, ' ') + ' EUR';
-    };
-
-    // Gestion saut de page automatique
     const FOOTER_ZONE = 22;
     const checkPageBreak = (needed) => {
-      if (Y + needed > H - FOOTER_ZONE) {
-        drawFooter();
-        doc.addPage();
-        pageNum++;
-        Y = 16;
-        return true;
-      }
+      if (Y + needed > H - FOOTER_ZONE) { drawFooter(); doc.addPage(); pageNum++; Y = 16; return true; }
       return false;
     };
-
+    const drawHeader = (title) => {
+      rect(0, 0, W, 28, PDF_COLORS.navy);
+      doc.setFillColor(...PDF_COLORS.teal); doc.circle(MARG + 5, 14, 5, 'F');
+      txt('L', MARG + 2.8, 16.5, 9, PDF_COLORS.blanc, true);
+      txt('LIHTEA', MARG + 14, 12, 8.5, PDF_COLORS.blanc, true);
+      txt('Equipment Finance & Advisory', MARG + 14, 17, 7, PDF_COLORS.tealLight);
+      const pillW = title.length * 1.6 + 6;
+      rect(W - MARG - pillW, 9, pillW, 8, [26,93,122]);
+      txt(title, W - MARG - pillW/2, 14.5, 6.5, PDF_COLORS.tealLight, true, 'center');
+      txt('Confidentiel', W - MARG - pillW - 30, 14.5, 6.5, PDF_COLORS.tealLight);
+    };
     const drawFooter = () => {
-      const fy = H - 16;
+      const fy = H - 14;
       ligne(fy, PDF_COLORS.bordure);
-      txt('Lihtea — Equipment Finance & Advisory — ' + d.date + ' — Confidentiel — Page ' + pageNum, MARG, fy + 5, 6.5, PDF_COLORS.gris);
+      txt('Confidentiel  ·  ' + (d.nomClient || 'Lihtea') + '  ·  Proposition commerciale', MARG, fy + 5, 6.5, PDF_COLORS.gris);
+      txt(d.date + '  ·  Page ' + pageNum, W - MARG, fy + 5, 6.5, PDF_COLORS.gris, false, 'right');
     };
 
-    // ═══ PAGE DE COUVERTURE PREMIUM ═══
-    // Full navy background
+    // ═══ COUVERTURE ═══
     rect(0, 0, W, H, PDF_COLORS.navy);
-
-    // Top gold accent line
-    rect(0, 0, W, 3, PDF_COLORS.gold);
-
-    // Logo block
-    rect(W/2 - 16, 55, 32, 32, PDF_COLORS.gold);
-    doc.setFontSize(28); doc.setTextColor(...PDF_COLORS.navy); doc.setFont('helvetica', 'bold');
-    doc.text('L', W/2, 77, { align: 'center' });
-
-    // Brand name
-    txt('LIHTEA', W/2, 105, 32, PDF_COLORS.blanc, true, 'center');
-    txt('Equipment Finance & Advisory', W/2, 115, 12, PDF_COLORS.tealLight, false, 'center');
-
-    // Separator line
-    rect(W/2 - 30, 125, 60, 0.5, PDF_COLORS.gold);
-
-    // Document title
-    txt('PROPOSITION FINANCIERE', W/2, 145, 18, PDF_COLORS.blanc, true, 'center');
-    txt('Simulation de gain net — Location financiere Green', W/2, 155, 11, PDF_COLORS.tealLight, false, 'center');
-
-    // Client info box
-    rect(MARG + 20, 175, CONTENU - 40, 40, PDF_COLORS.navyLight);
-    rect(MARG + 20, 175, 3, 40, PDF_COLORS.gold);
-    txt('Client', MARG + 30, 188, 9, PDF_COLORS.tealLight);
-    txt(d.nomClient, MARG + 30, 198, 16, PDF_COLORS.blanc, true);
-    txt(d.typeLabel.substring(0, 50), MARG + 30, 208, 10, PDF_COLORS.tealLight);
-
-    // Key figures strip
-    const stripY = 230;
-    const stripW = (CONTENU - 40) / 3;
-    const stripLabels = [
-      ['Investissement', fe(d.inv)],
-      ['Aides mobilisees', fe(d.totalAides) + ' (' + d.pctCouvert + '%)'],
-      ['Gain net', (d.roi >= 0 ? '+' : '') + fe(d.roi)],
-    ];
-    stripLabels.forEach(([label, val], i) => {
-      const sx = MARG + 20 + i * stripW;
-      if (i > 0) { rect(sx, stripY + 3, 0.5, 20, PDF_COLORS.navyLight); }
-      txt(label, sx + 8, stripY + 10, 8, PDF_COLORS.tealLight);
-      txt(val, sx + 8, stripY + 20, 11, PDF_COLORS.blanc, true);
+    rect(0, 0, W, 4, PDF_COLORS.teal);
+    doc.setFillColor(...PDF_COLORS.teal); doc.circle(W/2, 68, 18, 'F');
+    txt('L', W/2 - 5.5, 74, 26, PDF_COLORS.navy, true);
+    txt('LIHTEA', W/2, 100, 30, PDF_COLORS.blanc, true, 'center');
+    txt('EQUIPMENT FINANCE & ADVISORY', W/2, 110, 9, PDF_COLORS.tealLight, false, 'center');
+    rect(W/2 - 25, 118, 50, 0.6, PDF_COLORS.teal);
+    txt('PROPOSITION COMMERCIALE', W/2, 134, 16, PDF_COLORS.blanc, true, 'center');
+    txt('Financement vert & aides publiques mobilisees', W/2, 143, 10, PDF_COLORS.tealLight, false, 'center');
+    rect(MARG + 15, 162, CONTENU - 30, 44, PDF_COLORS.navyLight);
+    rect(MARG + 15, 162, 3, 44, PDF_COLORS.teal);
+    txt('PREPARE POUR', MARG + 24, 172, 7.5, PDF_COLORS.tealLight, true);
+    txt(d.nomClient || 'Entreprise cliente', MARG + 24, 183, 15, PDF_COLORS.blanc, true);
+    txt(d.typeLabel.substring(0, 55), MARG + 24, 191, 8.5, PDF_COLORS.tealLight);
+    txt('PREPARE PAR', W - MARG - 15, 172, 7.5, PDF_COLORS.tealLight, true, 'right');
+    txt('Lihtea', W - MARG - 15, 183, 11, PDF_COLORS.blanc, true, 'right');
+    txt('lihtea.com', W - MARG - 15, 191, 8, PDF_COLORS.tealLight, false, 'right');
+    const kpis = [['Investissement HT', fe(d.inv)], ['Aides mobilisees', fe(d.totalAides)], ['Gain net ' + d.duree + ' ans', (d.roi >= 0 ? '+' : '') + fe(d.roi)]];
+    kpis.forEach(([label, val], i) => {
+      const kx = MARG + 15 + i * ((CONTENU - 30) / 3);
+      if (i > 0) rect(kx, 218, 0.5, 22, PDF_COLORS.teal);
+      txt(label, kx + 6, 226, 7.5, PDF_COLORS.tealLight);
+      txt(val, kx + 6, 235, 10.5, PDF_COLORS.blanc, true);
     });
+    rect(0, H - 4, W, 4, PDF_COLORS.teal);
+    txt(d.date + '  ·  Document confidentiel  ·  P6 CEE 2026-2030', W/2, H - 8, 7, PDF_COLORS.gris, false, 'center');
 
-    // QR Code placeholder (simple generated pattern — links to app.lihtea.com)
-    const qrY = 258;
-    const qrSize = 16;
-    rect(W/2 - qrSize/2, qrY, qrSize, qrSize, PDF_COLORS.blanc);
-    // Mini QR pattern simulation
-    for (let qx = 0; qx < 8; qx++) {
-      for (let qy = 0; qy < 8; qy++) {
-        const isCorner = (qx < 3 && qy < 3) || (qx >= 5 && qy < 3) || (qx < 3 && qy >= 5);
-        const isFilled = isCorner || ((qx + qy) % 3 === 0);
-        if (isFilled) rect(W/2 - qrSize/2 + qx * 2, qrY + qy * 2, 2, 2, PDF_COLORS.navy);
-      }
-    }
-    txt('app.lihtea.com', W/2, qrY + qrSize + 6, 8, PDF_COLORS.tealLight, false, 'center');
+    // ═══ PAGE 1 : SYNTHESE ═══
+    doc.addPage(); pageNum = 1;
+    drawHeader('SYNTHESE');
+    Y = 36;
 
-    // Footer on cover
-    txt(d.date + ' — Document confidentiel', W/2, H - 18, 8, PDF_COLORS.gris, false, 'center');
-    txt('P6 CEE 2026-2030', W/2, H - 12, 7, PDF_COLORS.gris, false, 'center');
+    txt('SYNTHESE EXECUTIVE', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 8;
 
-    // Bottom gold accent
-    rect(0, H - 3, W, 3, PDF_COLORS.gold);
-
-    // ═══ PAGE 1 : SYNTHÈSE ═══
-    doc.addPage();
-    pageNum = 1;
-
-    // En-tête navy Lihtea (compact: 36mm)
-    rect(0, 0, W, 36, PDF_COLORS.navy);
-    rect(MARG, 7, 9, 9, PDF_COLORS.gold);
-    txt('L', MARG + 3.2, 13.5, 11, PDF_COLORS.navy, true);
-    txt('LIHTEA', MARG + 13, 12, 9, PDF_COLORS.blanc, true);
-    txt('Equipment Finance & Advisory', MARG + 13, 17, 7.5, PDF_COLORS.tealLight);
-    txt('SYNTHESE CLIENT', MARG, 28, 16, PDF_COLORS.blanc, true);
-    txt(d.date, W - MARG, 12, 8, PDF_COLORS.tealLight, false, 'right');
-    txt('P6 CEE 2026-2030', W - MARG, 17, 7.5, PDF_COLORS.tealLight, false, 'right');
-
-    Y = 42;
-
-    // Bloc client (compact: 14mm)
     rect(MARG, Y, CONTENU, 14, PDF_COLORS.grisClair);
     rect(MARG, Y, 3, 14, PDF_COLORS.teal);
-    txt('Client :', MARG + 7, Y + 5.5, 8.5, PDF_COLORS.gris);
-    txt(d.nomClient, MARG + 22, Y + 5.5, 10, PDF_COLORS.grisfonce, true);
-    txt('Equipement :', MARG + 7, Y + 11, 8.5, PDF_COLORS.gris);
-    txt(d.typeLabel.substring(0, 60), MARG + 27, Y + 11, 8.5, PDF_COLORS.grisfonce);
+    txt('Client', MARG + 8, Y + 5.5, 8, PDF_COLORS.gris);
+    txt(d.nomClient || '—', MARG + 24, Y + 5.5, 10, PDF_COLORS.grisfonce, true);
+    txt('Equipement', MARG + 8, Y + 11, 8, PDF_COLORS.gris);
+    txt(d.typeLabel.substring(0, 65), MARG + 30, Y + 11, 8, PDF_COLORS.grisfonce);
     Y += 18;
 
-    // Résultats clés (compact: 2×18mm + spacing = 42mm)
-    txt('RESULTATS CLES', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 6;
-
-    const colW = CONTENU / 2 - 2, rowH = 18;
-    const metrique = (x, y, label, val, bgC, valC) => {
-      rect(x, y, colW, rowH, bgC);
-      txt(label, x + 4, y + 6, 7, PDF_COLORS.gris);
-      txt(val, x + 4, y + 13.5, 11.5, valC, true);
+    txt('INDICATEURS CLES', MARG, Y, 7, PDF_COLORS.gris, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 7;
+    const colW2 = CONTENU / 2 - 2, rowH2 = 20;
+    const kpiCard = (x, y, label, val, bgC, valC) => {
+      rect(x, y, colW2, rowH2, bgC);
+      rect(x, y, 3, rowH2, valC);
+      txt(label, x + 7, y + 7, 7, PDF_COLORS.gris);
+      txt(val, x + 7, y + 15, 12, valC, true);
     };
-
-    metrique(MARG, Y, 'Cout net apres aides', fe(d.coutNet), PDF_COLORS.bleuClair, PDF_COLORS.bleu);
-    metrique(MARG + colW + 4, Y, 'Loyer mensuel net', fe(d.mensNette) + ' /mois', PDF_COLORS.grisClair, PDF_COLORS.grisfonce);
-    Y += rowH + 2;
-    metrique(MARG, Y, 'Economies energie par an', fe(d.ecoAn), PDF_COLORS.tealLight, PDF_COLORS.teal);
-    metrique(MARG + colW + 4, Y, 'Gain net total (' + d.duree + ' ans)', (d.roi >= 0 ? '+' : '') + fe(d.roi), d.roi >= 0 ? PDF_COLORS.tealLight : [254,226,226], d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge);
-    Y += rowH + 6;
-
-    // Aides (compact: 4×8 + 9 + spacing = 48mm)
-    txt('AIDES & SUBVENTIONS MOBILISEES', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 6;
+    kpiCard(MARG,         Y, 'Cout net apres aides',          fe(d.coutNet),                               PDF_COLORS.grisClair, PDF_COLORS.navy);
+    kpiCard(MARG+colW2+4, Y, 'Loyer mensuel net',             fe(d.mensNette) + ' /mois',                  PDF_COLORS.grisClair, PDF_COLORS.grisfonce);
+    Y += rowH2 + 3;
+    kpiCard(MARG,         Y, 'Economies energie / an',        fe(d.ecoAn) + ' /an',                        PDF_COLORS.vertClair, PDF_COLORS.teal);
+    kpiCard(MARG+colW2+4, Y, 'Gain net (' + d.duree + ' ans)',(d.roi >= 0 ? '+' : '') + fe(d.roi),        d.roi >= 0 ? PDF_COLORS.vertClair : [254,226,226], d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge);
+    Y += rowH2 + 8;
 
     const aidesDonnees = [
-      aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0 ? ['Prime CEE (P6 2026-2030)', fe(d.primeCEE)] : null,
-      aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0 ? ['Fonds Chaleur / DECARB FLASH ADEME', fe(d.primeADEME)] : null,
-      aidesActives.bpi   && isEligible('bpi')   && d.gainBPI    > 0 ? ['Pret Vert Bpifrance (reduction de taux)', fe(d.gainBPI)] : null,
-      aidesActives.feder && isEligible('feder') && d.primeFEDER > 0 ? ['FEDER regional', fe(d.primeFEDER)] : null,
+      aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0 ? ['Prime CEE (P6 2026-2030)',           fe(d.primeCEE)]   : null,
+      aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0 ? ['Subvention ADEME - Fonds Chaleur',   fe(d.primeADEME)] : null,
+      aidesActives.bpi   && isEligible('bpi')   && d.gainBPI    > 0 ? ['Pret Vert Bpifrance (gain de taux)', fe(d.gainBPI)]    : null,
+      aidesActives.feder && isEligible('feder') && d.primeFEDER > 0 ? ['Subvention FEDER regionale',         fe(d.primeFEDER)] : null,
     ].filter(Boolean);
-    if (aidesDonnees.length === 0) {
-      rect(MARG, Y, CONTENU, 8, PDF_COLORS.grisClair);
-      txt('Aucune aide activee pour cette simulation', MARG + 4, Y + 5.5, 8.5, PDF_COLORS.gris, false);
-      Y += 8;
-    } else {
+
+    if (aidesDonnees.length > 0) {
+      txt('AIDES & SUBVENTIONS MOBILISEES', MARG, Y, 7, PDF_COLORS.gris, true);
+      rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+      Y += 7;
       aidesDonnees.forEach(([label, montant], i) => {
-        rect(MARG, Y, CONTENU, 8, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
-        doc.setFillColor(...PDF_COLORS.teal);
-        doc.circle(MARG + 4, Y + 4, 1.3, 'F');
-        txt(label, MARG + 9, Y + 5.5, 8.5, PDF_COLORS.grisfonce);
-        txt(montant, W - MARG - 2, Y + 5.5, 8.5, PDF_COLORS.teal, true, 'right');
-        Y += 8;
+        rect(MARG, Y, CONTENU, 9, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
+        doc.setFillColor(...PDF_COLORS.teal); doc.circle(MARG + 5, Y + 4.5, 1.5, 'F');
+        txt(label, MARG + 11, Y + 6, 8.5, PDF_COLORS.grisfonce);
+        txt(montant, W - MARG - 2, Y + 6, 8.5, PDF_COLORS.teal, true, 'right');
+        Y += 9;
       });
+      rect(MARG, Y, CONTENU, 10, PDF_COLORS.teal);
+      txt('TOTAL AIDES MOBILISEES', MARG + 5, Y + 7, 8.5, PDF_COLORS.blanc, true);
+      txt(fe(d.totalAides) + '   (' + d.pctCouvert + '% du projet)', W - MARG - 2, Y + 7, 8.5, PDF_COLORS.tealLight, true, 'right');
+      Y += 14;
     }
 
-    rect(MARG, Y, CONTENU, 9, PDF_COLORS.teal);
-    txt('TOTAL AIDES MOBILISEES', MARG + 4, Y + 6, 8.5, PDF_COLORS.blanc, true);
-    txt(fe(d.totalAides) + '  (' + d.pctCouvert + '%)', W - MARG - 2, Y + 6, 8.5, PDF_COLORS.tealLight, true, 'right');
-    Y += 13;
+    txt('RETOUR SUR INVESTISSEMENT', MARG, Y, 7, PDF_COLORS.gris, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 7;
+    const lignesRoi = [
+      ['Consommation actuelle',     Math.round(d.conso) + ' MWh/an',                                          PDF_COLORS.grisfonce],
+      ['Gain energetique',          d.gain.toFixed(0) + '%  soit  ' + Math.round(d.mwhEco) + ' MWh economises', PDF_COLORS.teal],
+      ['Economie annuelle',         fe(d.ecoAn) + ' /an',                                                     PDF_COLORS.teal],
+      ['Economies totales (' + d.horizon + ' ans)', fe(d.ecoTotal),                                            PDF_COLORS.teal],
+      ['Delai de retour',           d.paybackMois > 120 ? 'Plus de 10 ans' : d.paybackMois + ' mois',         d.paybackMois <= 36 ? PDF_COLORS.teal : PDF_COLORS.amber],
+    ];
+    lignesRoi.forEach(([l, v, c], i) => {
+      checkPageBreak(8);
+      rect(MARG, Y, CONTENU, 8, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
+      txt(l, MARG + 5, Y + 5.5, 8.5, PDF_COLORS.gris);
+      txt(v, W - MARG - 2, Y + 5.5, 8.5, c, c !== PDF_COLORS.grisfonce, 'right');
+      Y += 8;
+    });
+    Y += 3;
+    rect(MARG, Y, CONTENU, 12, d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge);
+    const roiMsg = d.roi >= 0
+      ? 'GAIN NET CONFIRME : +' + fe(d.roi) + ' sur ' + d.horizon + ' ans  ·  Payback ' + (d.paybackMois > 120 ? '> 10 ans' : d.paybackMois + ' mois')
+      : 'DEFICIT NET : ' + fe(Math.abs(d.roi)) + ' sur ' + d.horizon + ' ans  ·  Revoir les parametres';
+    txt(roiMsg, W/2, Y + 8, 8.5, PDF_COLORS.blanc, true, 'center');
+    Y += 16;
+    drawFooter();
 
-    // Financement (compact: lignes de 7mm)
-    txt('STRUCTURE DE FINANCEMENT', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.navy);
+    // ═══ PAGE 2 : FINANCEMENT ═══
+    doc.addPage(); pageNum++;
+    drawHeader('FINANCEMENT');
+    Y = 36;
+
+    txt('DECOMPOSITION DU FINANCEMENT', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 9;
+
+    const wfSteps = [{ label: 'Investissement HT', val: d.inv, pct: 100, color: PDF_COLORS.gris, type: 'base' }];
+    let wfRunning = d.inv;
+    if (aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0) { wfRunning -= d.primeCEE;   wfSteps.push({ label: '- Prime CEE', val: d.primeCEE, pct: d.primeCEE/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
+    if (aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0) { wfRunning -= d.primeADEME; wfSteps.push({ label: '- Subvention ADEME', val: d.primeADEME, pct: d.primeADEME/d.inv*100, color: [5,150,105], type: 'sub', left: wfRunning/d.inv*100 }); }
+    if (aidesActives.feder && isEligible('feder') && d.primeFEDER > 0) { wfRunning -= d.primeFEDER; wfSteps.push({ label: '- FEDER regional', val: d.primeFEDER, pct: d.primeFEDER/d.inv*100, color: [99,102,241], type: 'sub', left: Math.max(0,wfRunning/d.inv*100) }); }
+    wfSteps.push({ label: '= Capital net a financer', val: d.coutNet, pct: d.coutNet/d.inv*100, color: PDF_COLORS.navy, type: 'total' });
+
+    const barMaxW = CONTENU - 60;
+    wfSteps.forEach(s => {
+      const bw = Math.max(4, Math.round(s.pct / 100 * barMaxW));
+      const left = s.type === 'sub' ? Math.round(s.left / 100 * barMaxW) : 0;
+      const xStart = MARG + 54 + left;
+      txt(s.label, MARG, Y + 5, 8, s.type === 'total' ? PDF_COLORS.navy : PDF_COLORS.gris, s.type === 'total');
+      rect(xStart, Y, bw, 7, s.color);
+      txt(fe(s.val), xStart + bw + 2, Y + 5, 7.5, s.type === 'total' ? PDF_COLORS.navy : s.color, s.type === 'total');
+      if (s.type === 'total') { doc.setDrawColor(...PDF_COLORS.bordure); doc.setLineWidth(0.3); doc.line(MARG + 54, Y - 1, MARG + 54 + barMaxW, Y - 1); }
+      Y += 10;
+    });
     Y += 6;
+
+    txt('CONDITIONS DE FINANCEMENT', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 7;
 
     const lignesFin = [
-      ['Investissement total HT', fe(d.inv), PDF_COLORS.gris],
-      ...(aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0 ? [['- Prime CEE', '- ' + fe(d.primeCEE), PDF_COLORS.teal]] : []),
-      ...(aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0 ? [['- Subvention ADEME', '- ' + fe(d.primeADEME), PDF_COLORS.teal]] : []),
-      ...(aidesActives.feder && isEligible('feder') && d.primeFEDER > 0 ? [['- FEDER regional', '- ' + fe(d.primeFEDER), PDF_COLORS.teal]] : []),
-      ['= Capital net a financer', fe(d.coutNet), PDF_COLORS.navy],
-      ['Duree / Taux brut / Taux net', d.duree + ' ans  |  ' + d.taux.toFixed(1) + '%  |  ' + d.tauxNet.toFixed(1) + '%', PDF_COLORS.grisfonce],
-      ['Loyer mensuel brut', fe(Math.round(d.mensBrute)) + ' /mois', PDF_COLORS.gris],
-      ['Loyer mensuel net', fe(Math.round(d.mensNette)) + ' /mois', PDF_COLORS.navy],
-      ['Total loyers sur ' + d.duree + ' ans', fe(Math.round(d.totalLoyers)), PDF_COLORS.grisfonce],
+      ['Investissement total HT',           fe(d.inv),                                                    PDF_COLORS.gris],
+      ...(aidesDonnees.map(([l, v]) => ['- ' + l, '- ' + v, PDF_COLORS.teal])),
+      ['= Capital net a financer',           fe(d.coutNet),                                                PDF_COLORS.navy],
+      ['Duree du contrat',                   d.duree + ' ans',                                             PDF_COLORS.grisfonce],
+      ['Taux brut / Taux net subventionne',  d.taux.toFixed(1) + '%  /  ' + d.tauxNet.toFixed(1) + '%',  PDF_COLORS.grisfonce],
+      ['Loyer mensuel brut',                 fe(Math.round(d.mensBrute)) + ' /mois',                       PDF_COLORS.gris],
+      ['Loyer mensuel net',                  fe(Math.round(d.mensNette)) + ' /mois',                       PDF_COLORS.navy],
+      ['Economies mensuelles energie',       fe(Math.round(d.ecoAn / 12)) + ' /mois',                     PDF_COLORS.teal],
+      ['Effort mensuel net reel',            fe(Math.round(d.mensNette - d.ecoAn/12)) + ' /mois',         d.mensNette - d.ecoAn/12 <= 0 ? PDF_COLORS.teal : PDF_COLORS.navy],
     ];
     lignesFin.forEach(([l, v, c], i) => {
-      checkPageBreak(7);
-      rect(MARG, Y, CONTENU, 7, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
-      txt(l, MARG + 4, Y + 5, 8.5, PDF_COLORS.gris);
-      txt(v, W - MARG - 2, Y + 5, 8.5, c, l.startsWith('=') || l.includes('net'), 'right');
-      Y += 7;
-    });
-    Y += 4;
-
-    // Économies d'énergie & ROI
-    checkPageBreak(70); // besoin d'au moins 70mm pour la section entière
-    txt('ECONOMIES D\'ENERGIE & ROI', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 6;
-
-    const lignesEco = [
-      ['Consommation actuelle', Math.round(d.conso) + ' MWh/an', PDF_COLORS.grisfonce],
-      ['Gain energetique', d.gain.toFixed(0) + '% soit ' + Math.round(d.mwhEco) + ' MWh economises', PDF_COLORS.teal],
-      ['Prix de l\'energie', d.prix + ' EUR/MWh', PDF_COLORS.grisfonce],
-      ['Economie annuelle', fe(d.ecoAn) + ' /an', PDF_COLORS.teal],
-      ['Economie totale (' + d.horizon + ' ans)', fe(d.ecoTotal), PDF_COLORS.teal],
-      ['Delai de retour', d.paybackMois > 120 ? 'Plus de 10 ans' : d.paybackMois + ' mois', d.paybackMois <= 36 ? PDF_COLORS.teal : PDF_COLORS.amber],
-      ['Gain net total', (d.roi >= 0 ? '+' : '') + fe(d.roi) + ' sur ' + d.horizon + ' ans', d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge],
-    ];
-    lignesEco.forEach(([l, v, c], i) => {
-      rect(MARG, Y, CONTENU, 7, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
-      txt(l, MARG + 4, Y + 5, 8.5, PDF_COLORS.gris);
-      txt(v, W - MARG - 2, Y + 5, 8.5, c, true, 'right');
-      Y += 7;
+      checkPageBreak(8);
+      rect(MARG, Y, CONTENU, 8, i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
+      txt(l, MARG + 5, Y + 5.5, 8.5, l.startsWith('=') ? PDF_COLORS.grisfonce : PDF_COLORS.gris, l.startsWith('='));
+      txt(v, W - MARG - 2, Y + 5.5, 8.5, c, l.startsWith('=') || l.includes('net') || l.includes('Net'), 'right');
+      Y += 8;
     });
     Y += 5;
 
-    // Flux cumulé graphique
-    checkPageBreak(10 + d.flux.length * 7);
-    txt('FLUX DE TRESORERIE CUMULE PAR ANNEE', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.bordure);
-    Y += 6;
+    checkPageBreak(20);
+    txt('AMORTISSEMENT ANNUEL', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 7;
 
-    const maxFlux = Math.max(...d.flux.map(Math.abs), 1);
-    d.flux.forEach((val, i) => {
-      const isPos = val >= 0;
-      const barMax = CONTENU - 50;
-      const barW = Math.max(2, Math.round(Math.abs(val) / maxFlux * barMax));
-      txt('An ' + (i + 1), MARG, Y + 3.5, 7.5, PDF_COLORS.gris);
-      rect(MARG + 14, Y, barW, 4.5, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge);
-      txt((val >= 0 ? '+' : '') + fe(val), MARG + 14 + barW + 2, Y + 3.5, 7, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge, true);
-      Y += 7;
-    });
-
-    // Footer page 1
-    drawFooter();
-
-    // ═══ PAGE 2 : AMORTISSEMENT ANNUEL ═══
-    doc.addPage();
-    pageNum++;
-
-    rect(0, 0, W, 24, PDF_COLORS.navy);
-    rect(MARG, 6, 8, 8, PDF_COLORS.gold);
-    txt('L', MARG + 2.8, 12, 10, PDF_COLORS.navy, true);
-    txt('TABLEAU D\'AMORTISSEMENT — RESUME ANNUEL', MARG + 12, 11, 11, PDF_COLORS.blanc, true);
-    txt(d.nomClient + ' — ' + d.date, MARG + 12, 18, 8, PDF_COLORS.tealLight);
-    txt('Capital : ' + fe(d.coutNet) + '  |  Taux : ' + d.tauxNet.toFixed(1) + '%  |  ' + d.duree + ' ans', W - MARG, 18, 8, PDF_COLORS.tealLight, false, 'right');
-
-    Y = 30;
-
-    // Résumé par année
     const colsAn = [
-      { label: 'Annee', x: MARG, w: 20 },
-      { label: 'Loyers annuels', x: MARG + 20, w: 30 },
-      { label: 'Capital rembourse', x: MARG + 50, w: 30 },
-      { label: 'Interets payes', x: MARG + 80, w: 28 },
-      { label: 'Capital restant', x: MARG + 108, w: 28 },
-      { label: 'Eco. energie', x: MARG + 136, w: 24 },
-      { label: 'Solde net cumule', x: MARG + 160, w: 22 },
+      { label: 'Annee', x: MARG, w: 18 },
+      { label: 'Loyers', x: MARG+18, w: 28 },
+      { label: 'Capital', x: MARG+46, w: 28 },
+      { label: 'Interets', x: MARG+74, w: 26 },
+      { label: 'Eco. energie', x: MARG+100, w: 30 },
+      { label: 'Solde net cumule', x: MARG+130, w: 52 },
     ];
+    rect(MARG, Y, CONTENU, 8, PDF_COLORS.navy);
+    colsAn.forEach(c => txt(c.label, c.x + 2, Y + 5.5, 7, PDF_COLORS.blanc, true));
+    Y += 8;
 
-    rect(MARG, Y, CONTENU, 9, PDF_COLORS.navy);
-    colsAn.forEach(c => txt(c.label, c.x + 2, Y + 6, 7, PDF_COLORS.blanc, true));
-    Y += 9;
-
-    // Agréger par année
     for (let an = 1; an <= d.duree; an++) {
+      checkPageBreak(8);
       const lignesAn = d.amortissement.filter(l => l.annee === an);
       const loyersAn = lignesAn.reduce((s, l) => s + l.mensualite, 0);
       const capitalAn = lignesAn.reduce((s, l) => s + l.capital, 0);
       const interetsAn = lignesAn.reduce((s, l) => s + l.interets, 0);
-      const capitalRest = lignesAn[lignesAn.length - 1]?.capitalRestant || 0;
-      const ecoAn = lignesAn.reduce((s, l) => s + l.economie, 0);
+      const ecoAnn = lignesAn.reduce((s, l) => s + l.economie, 0);
       const solde = d.flux[an - 1] || 0;
-
-      const bg = an % 2 === 0 ? PDF_COLORS.grisClair : PDF_COLORS.blanc;
-      rect(MARG, Y, CONTENU, 8, bg);
-      txt('Annee ' + an, colsAn[0].x + 2, Y + 5.5, 8, PDF_COLORS.grisfonce, true);
-      txt(fe(loyersAn), colsAn[1].x + 2, Y + 5.5, 8, PDF_COLORS.grisfonce);
-      txt(fe(capitalAn), colsAn[2].x + 2, Y + 5.5, 8, PDF_COLORS.navy);
-      txt(fe(interetsAn), colsAn[3].x + 2, Y + 5.5, 8, PDF_COLORS.amber);
-      txt(fe(capitalRest), colsAn[4].x + 2, Y + 5.5, 8, PDF_COLORS.grisfonce);
-      txt(fe(ecoAn), colsAn[5].x + 2, Y + 5.5, 8, PDF_COLORS.teal);
-      const solCol = solde >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge;
-      txt((solde >= 0 ? '+' : '') + fe(solde), colsAn[6].x + 2, Y + 5.5, 8, solCol, true);
-      Y += 8;
-    }
-
-    // Total
-    Y += 2;
-    rect(MARG, Y, CONTENU, 10, PDF_COLORS.navy);
-    txt('TOTAL ' + d.duree + ' ANS', MARG + 3, Y + 7, 8, PDF_COLORS.blanc, true);
-    doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(204,251,241);
-    doc.text(fe(Math.round(d.totalLoyers)), colsAn[1].x + colsAn[1].w - 1, Y + 7, { align: 'right' });
-    doc.text(fe(Math.round(d.ecoTotal)), colsAn[5].x + colsAn[5].w - 1, Y + 7, { align: 'right' });
-    const soldeTotal = Math.round(d.ecoTotal - d.totalLoyers);
-    doc.setTextColor(...(soldeTotal >= 0 ? [204,251,241] : [255,160,160]));
-    doc.text((soldeTotal >= 0 ? '+' : '') + fe(soldeTotal), colsAn[6].x + colsAn[6].w - 1, Y + 7, { align: 'right' });
-
-    Y += 20;
-
-    // Note importante
-    rect(MARG, Y, CONTENU, 18, PDF_COLORS.vertClair);
-    rect(MARG, Y, 3, 18, PDF_COLORS.teal);
-    txt('RESUME : Ce tableau presente un resume annuel de l\'amortissement.', MARG + 8, Y + 6, 8, PDF_COLORS.teal, true);
-    txt('Le detail mensuel complet est disponible dans l\'export Excel pour une analyse fine.', MARG + 8, Y + 12, 8, PDF_COLORS.gris);
-
-    // Footer page 2
-    drawFooter();
-
-    // ═══ PAGE 3 : WATERFALL + SCORING ═══
-    doc.addPage();
-    pageNum++;
-
-    rect(0, 0, W, 24, PDF_COLORS.navy);
-    rect(MARG, 6, 8, 8, PDF_COLORS.gold);
-    txt('L', MARG + 2.8, 12, 10, PDF_COLORS.navy, true);
-    txt('DECOMPOSITION DU FINANCEMENT & ELIGIBILITE', MARG + 12, 11, 10, PDF_COLORS.blanc, true);
-    txt(d.nomClient + ' — ' + d.date, MARG + 12, 18, 8, PDF_COLORS.tealLight);
-
-    Y = 32;
-
-    // ── Waterfall visuel ──
-    txt('WATERFALL — DECOMPOSITION DU FINANCEMENT', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 8;
-
-    const wfSteps = [
-      { label: 'Investissement HT', val: d.inv, pct: 100, color: PDF_COLORS.gris, type: 'base' },
-    ];
-    let wfRunning = d.inv;
-    if (aidesActives.cee   && isEligible('cee')   && d.primeCEE   > 0) { wfRunning -= d.primeCEE;   wfSteps.push({ label: '- Prime CEE', val: d.primeCEE, pct: d.primeCEE/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
-    if (aidesActives.ademe && isEligible('ademe') && d.primeADEME > 0) { wfRunning -= d.primeADEME; wfSteps.push({ label: '- Subvention ADEME', val: d.primeADEME, pct: d.primeADEME/d.inv*100, color: PDF_COLORS.teal, type: 'sub', left: wfRunning/d.inv*100 }); }
-    if (aidesActives.feder && isEligible('feder') && d.primeFEDER > 0) { wfRunning -= d.primeFEDER; wfSteps.push({ label: '- FEDER regional', val: d.primeFEDER, pct: d.primeFEDER/d.inv*100, color: [124,58,237], type: 'sub', left: Math.max(0,wfRunning/d.inv*100) }); }
-    wfSteps.push({ label: '= Capital net', val: d.coutNet, pct: d.coutNet/d.inv*100, color: PDF_COLORS.navy, type: 'total' });
-
-    const barMaxW = CONTENU - 50;
-    wfSteps.forEach(s => {
-      const w = Math.max(2, Math.round(s.pct / 100 * barMaxW));
-      const left = s.type === 'sub' ? Math.round(s.left / 100 * barMaxW) : 0;
-      const xStart = MARG + 45 + left;
-
-      txt(s.label, MARG, Y + 4, 8, PDF_COLORS.gris, s.type === 'total');
-      rect(xStart, Y, w, 6, s.color);
-      txt(fe(s.val), xStart + w + 2, Y + 4, 7, s.color, true);
-
-      if (s.type === 'total') {
-        doc.setDrawColor(...PDF_COLORS.bordure);
-        doc.setLineWidth(0.3);
-        doc.line(MARG + 45, Y - 1, MARG + 45 + barMaxW, Y - 1);
-      }
-      Y += 9;
-    });
-
-    Y += 8;
-
-    // ── Scoring d'éligibilité ──
-    txt('SCORING D\'ELIGIBILITE PAR DISPOSITIF', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 8;
-
-    const scoring = evaluerEligibilite();
-    const scoringEntries = Object.entries(scoring);
-    
-    // Header
-    rect(MARG, Y, CONTENU, 8, PDF_COLORS.navy);
-    txt('Dispositif', MARG + 4, Y + 5.5, 8, PDF_COLORS.blanc, true);
-    txt('Score', MARG + 110, Y + 5.5, 8, PDF_COLORS.blanc, true);
-    txt('Statut', MARG + 140, Y + 5.5, 8, PDF_COLORS.blanc, true);
-    Y += 8;
-
-    scoringEntries.forEach(([key, r], i) => {
-      const bg = i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair;
-      const statusColor = r.score >= 70 ? PDF_COLORS.teal : r.score >= 40 ? PDF_COLORS.amber : PDF_COLORS.rouge;
-      const statusText = r.score >= 70 ? 'Eligible' : r.score >= 40 ? 'A verifier' : 'Non eligible';
-      
-      rect(MARG, Y, CONTENU, 8, bg);
-      txt(r.name, MARG + 4, Y + 5.5, 8, PDF_COLORS.grisfonce);
-      txt(r.score + '%', MARG + 110, Y + 5.5, 8, statusColor, true);
-      txt(statusText, MARG + 140, Y + 5.5, 8, statusColor);
-      
-      // Mini progress bar
-      const barX = MARG + 110;
-      const barY2 = Y + 6.5;
-      rect(barX, barY2, 25, 2, PDF_COLORS.bordure);
-      rect(barX, barY2, Math.round(r.score / 100 * 25), 2, statusColor);
-      
-      Y += 8;
-    });
-
-    // Global score
-    const allScores = scoringEntries.map(([,r]) => r.score);
-    const avgScore = Math.round(allScores.reduce((a,b) => a+b, 0) / allScores.length);
-    const eligCount = allScores.filter(s => s >= 70).length;
-    Y += 4;
-    rect(MARG, Y, CONTENU, 12, PDF_COLORS.vertClair);
-    rect(MARG, Y, 3, 12, PDF_COLORS.teal);
-    txt('Score global : ' + avgScore + '%  -  ' + eligCount + '/' + allScores.length + ' dispositifs eligibles', MARG + 8, Y + 8, 9, PDF_COLORS.teal, true);
-
-    Y += 20;
-
-    // ── Critères détaillés pour chaque dispositif ──
-    txt('DETAIL DES CRITERES PAR DISPOSITIF', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.bordure);
-    Y += 10;
-
-    const MAX_TXT_W = CONTENU - 20; // max text width inside card
-
-    scoringEntries.forEach(([key, r]) => {
-      // Estimate height needed for this device block
-      const estHeight = 12 + r.criteria.length * 12;
-      checkPageBreak(Math.min(estHeight, 60)); // at least start on page with some room
-
-      // Device header bar
-      const statusColor = r.score >= 70 ? PDF_COLORS.teal : r.score >= 40 ? PDF_COLORS.amber : PDF_COLORS.rouge;
-      rect(MARG, Y, CONTENU, 9, PDF_COLORS.navy);
-      txt(r.name, MARG + 4, Y + 6.5, 8, PDF_COLORS.blanc, true);
-      txt(r.score + '%', W - MARG - 4, Y + 6.5, 8, PDF_COLORS.blanc, true, 'right');
-      // Score mini bar in header
-      rect(W - MARG - 36, Y + 7, 28, 1.5, [255,255,255]);
-      rect(W - MARG - 36, Y + 7, Math.round(r.score / 100 * 28), 1.5, statusColor);
-      Y += 10;
-
-      // Background card for criteria
-      const cardStartY = Y;
-      r.criteria.forEach(c => {
-        checkPageBreak(14);
-        const iconColor = c.pass ? PDF_COLORS.teal : c.warn ? PDF_COLORS.amber : PDF_COLORS.rouge;
-        const bgRow = c.pass ? PDF_COLORS.vertClair : c.warn ? [255,251,235] : [254,242,242];
-
-        // Wrap label text to fit within margins
-        doc.setFontSize(7.5);
-        doc.setFont('helvetica', 'normal');
-        const labelLines = doc.splitTextToSize(String(c.label), MAX_TXT_W - 10);
-        const detailLines = c.detail ? doc.splitTextToSize(String(c.detail), MAX_TXT_W - 10) : [];
-        const rowH = 4 + labelLines.length * 3.5 + (detailLines.length > 0 ? detailLines.length * 3 + 1.5 : 0) + 2;
-
-        rect(MARG + 1, Y, CONTENU - 2, rowH, bgRow);
-        rect(MARG + 1, Y, 2, rowH, iconColor);
-
-        // Draw icon shape instead of Unicode (Helvetica doesn't support special chars)
-        const iconX = MARG + 5.5;
-        const iconY = Y + 3;
-        if (c.pass) {
-          // Green filled circle
-          doc.setFillColor(...PDF_COLORS.teal);
-          doc.circle(iconX, iconY + 1, 1.8, 'F');
-          // White check line inside
-          doc.setDrawColor(255, 255, 255);
-          doc.setLineWidth(0.5);
-          doc.line(iconX - 0.8, iconY + 1, iconX - 0.1, iconY + 1.7);
-          doc.line(iconX - 0.1, iconY + 1.7, iconX + 1, iconY + 0.3);
-        } else if (c.warn) {
-          // Amber filled triangle
-          doc.setFillColor(...PDF_COLORS.amber);
-          doc.triangle(iconX, iconY - 0.2, iconX - 1.8, iconY + 2.5, iconX + 1.8, iconY + 2.5, 'F');
-          txt('!', iconX - 0.5, iconY + 2.2, 6, PDF_COLORS.blanc, true);
-        } else {
-          // Red filled circle with X
-          doc.setFillColor(...PDF_COLORS.rouge);
-          doc.circle(iconX, iconY + 1, 1.8, 'F');
-          doc.setDrawColor(255, 255, 255);
-          doc.setLineWidth(0.5);
-          doc.line(iconX - 0.8, iconY + 0.2, iconX + 0.8, iconY + 1.8);
-          doc.line(iconX + 0.8, iconY + 0.2, iconX - 0.8, iconY + 1.8);
-        }
-
-        // Label (wrapped)
-        let lineY = Y + 4.5;
-        labelLines.forEach(line => {
-          txt(line, MARG + 12, lineY, 7.5, c.pass ? PDF_COLORS.grisfonce : PDF_COLORS.gris, false);
-          lineY += 3.5;
-        });
-
-        // Detail text (wrapped, lighter)
-        if (detailLines.length > 0) {
-          lineY += 0.5;
-          detailLines.forEach(line => {
-            txt(line, MARG + 12, lineY, 6.5, PDF_COLORS.gris);
-            lineY += 3;
-          });
-        }
-
-        Y += rowH + 1;
-      });
-
-      Y += 6;
-    });
-
-    // Footer page 3
-    drawFooter();
-
-    // ═══ PAGE 4 : TABLEAU DE BORD GRAPHIQUE ═══
-    doc.addPage();
-    pageNum++;
-
-    rect(0, 0, W, 24, PDF_COLORS.navy);
-    rect(MARG, 6, 8, 8, PDF_COLORS.gold);
-    txt('L', MARG + 2.8, 12, 10, PDF_COLORS.navy, true);
-    txt('TABLEAU DE BORD — LOYERS, ECONOMIES & ROI', MARG + 12, 11, 10, PDF_COLORS.blanc, true);
-    txt(d.nomClient + ' — ' + d.date, MARG + 12, 18, 8, PDF_COLORS.tealLight);
-
-    Y = 32;
-
-    // ── Graphique annuel : barres loyer/éco + lignes flux/ROI ──
-    txt('EVOLUTION ANNUELLE', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.teal);
-    Y += 8;
-
-    const HORIZON_PDF = 12;
-    const mensAn = Math.round(d.mensNette * 12);
-    const ecoAnR = Math.round(d.ecoAn);
-    const chartData = [];
-    let loyerCum = 0, ecoCum = 0;
-    for (let y = 1; y <= HORIZON_PDF; y++) {
-      const loyer = y <= d.duree ? mensAn : 0;
-      loyerCum += loyer;
-      ecoCum += ecoAnR;
-      chartData.push({ year: y, loyer, eco: ecoAnR, loyerCum, ecoCum, rac: d.flux[y-1] || 0, roi: ecoCum - loyerCum, isPost: y > d.duree });
-    }
-
-    // Table header
-    const tblCols = [
-      { label: 'Annee', w: 18 },
-      { label: 'Loyer annuel', w: 26 },
-      { label: 'Eco. annuelle', w: 26 },
-      { label: 'Loyer cumule', w: 26 },
-      { label: 'Eco. cumulee', w: 26 },
-      { label: 'Flux cumule', w: 28 },
-      { label: 'ROI cumule', w: 28 },
-    ];
-    let tx = MARG;
-    rect(MARG, Y, CONTENU, 8, PDF_COLORS.navy);
-    tblCols.forEach(c => {
-      txt(c.label, tx + 2, Y + 5.5, 7, PDF_COLORS.blanc, true);
-      tx += c.w;
-    });
-    Y += 8;
-
-    chartData.forEach((row, i) => {
-      const bg = row.isPost ? PDF_COLORS.vertClair : (i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
-      rect(MARG, Y, CONTENU, 7, bg);
-      tx = MARG;
-      const yearLabel = row.isPost ? 'An ' + row.year + ' *' : 'An ' + row.year;
-      txt(yearLabel, tx + 2, Y + 5, 7.5, row.isPost ? PDF_COLORS.teal : PDF_COLORS.grisfonce, true); tx += tblCols[0].w;
-      txt(row.loyer > 0 ? fe(row.loyer) : '—', tx + 2, Y + 5, 7.5, row.loyer > 0 ? PDF_COLORS.navy : PDF_COLORS.gris); tx += tblCols[1].w;
-      txt(fe(row.eco), tx + 2, Y + 5, 7.5, row.isPost ? [5,150,105] : PDF_COLORS.teal); tx += tblCols[2].w;
-      txt(fe(row.loyerCum), tx + 2, Y + 5, 7.5, PDF_COLORS.gris); tx += tblCols[3].w;
-      txt(fe(row.ecoCum), tx + 2, Y + 5, 7.5, PDF_COLORS.gris); tx += tblCols[4].w;
-      const racCol = row.rac >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge;
-      txt((row.rac >= 0 ? '+' : '') + fe(row.rac), tx + 2, Y + 5, 7.5, racCol, true); tx += tblCols[5].w;
-      const roiCol = row.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge;
-      txt((row.roi >= 0 ? '+' : '') + fe(row.roi), tx + 2, Y + 5, 7.5, roiCol, true);
+      rect(MARG, Y, CONTENU, 7, an % 2 === 0 ? PDF_COLORS.grisClair : PDF_COLORS.blanc);
+      txt('An ' + an, colsAn[0].x + 2, Y + 5, 8, PDF_COLORS.grisfonce, true);
+      txt(fe(loyersAn), colsAn[1].x + 2, Y + 5, 7.5, PDF_COLORS.grisfonce);
+      txt(fe(capitalAn), colsAn[2].x + 2, Y + 5, 7.5, PDF_COLORS.navy);
+      txt(fe(interetsAn), colsAn[3].x + 2, Y + 5, 7.5, PDF_COLORS.amber);
+      txt(fe(ecoAnn), colsAn[4].x + 2, Y + 5, 7.5, PDF_COLORS.teal);
+      txt((solde >= 0 ? '+' : '') + fe(solde), colsAn[5].x + 2, Y + 5, 7.5, solde >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge, true);
       Y += 7;
-    });
-
-    // Total row
+    }
     Y += 2;
-    rect(MARG, Y, CONTENU, 9, PDF_COLORS.teal);
-    tx = MARG;
-    txt('TOTAL', tx + 2, Y + 6, 8, PDF_COLORS.blanc, true); tx += tblCols[0].w;
-    txt(fe(loyerCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[1].w;
-    txt(fe(ecoCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[2].w;
-    tx += tblCols[3].w + tblCols[4].w; // skip cumulated cols
-    const lastRac = chartData[chartData.length-1]?.rac || 0;
-    const lastRoi = chartData[chartData.length-1]?.roi || 0;
-    txt((lastRac >= 0 ? '+' : '') + fe(lastRac), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[5].w;
-    txt((lastRoi >= 0 ? '+' : '') + fe(lastRoi), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true);
-    Y += 15;
+    rect(MARG, Y, CONTENU, 9, PDF_COLORS.navy);
+    txt('TOTAL ' + d.duree + ' ANS', MARG + 3, Y + 6.5, 8, PDF_COLORS.blanc, true);
+    const soldeTotal2 = Math.round(d.ecoTotal - d.totalLoyers);
+    txt(fe(Math.round(d.totalLoyers)), colsAn[1].x + 2, Y + 6.5, 7.5, PDF_COLORS.tealLight, true);
+    txt(fe(Math.round(d.ecoTotal)), colsAn[4].x + 2, Y + 6.5, 7.5, PDF_COLORS.tealLight, true);
+    txt((soldeTotal2 >= 0 ? '+' : '') + fe(soldeTotal2), colsAn[5].x + 2, Y + 6.5, 7.5, soldeTotal2 >= 0 ? PDF_COLORS.tealLight : [255,160,160], true);
+    Y += 14;
 
-    // ── Graphique visuel : barres de progression par année ──
-    txt('FLUX DE TRESORERIE CUMULE — VISUALISATION', MARG, Y, 7.5, PDF_COLORS.gris, true);
-    rect(MARG, Y + 2, 28, 0.7, PDF_COLORS.bordure);
-    Y += 8;
-
-    const maxFluxPDF = Math.max(...d.flux.map(Math.abs), 1);
+    checkPageBreak(12 + d.flux.length * 6);
+    txt('FLUX DE TRESORERIE CUMULE', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
+    Y += 7;
+    const maxFlux = Math.max(...d.flux.map(Math.abs), 1);
     d.flux.forEach((val, i) => {
       const isPos = val >= 0;
-      const barMax2 = CONTENU - 50;
-      const barW2 = Math.max(2, Math.round(Math.abs(val) / maxFluxPDF * barMax2));
-      txt('An ' + (i + 1), MARG, Y + 3.5, 7.5, PDF_COLORS.gris);
-      rect(MARG + 14, Y, barW2, 4.5, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge);
-      txt((val >= 0 ? '+' : '') + fe(val), MARG + 14 + barW2 + 2, Y + 3.5, 7, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge, true);
+      const bMax = CONTENU - 46;
+      const bw2 = Math.max(2, Math.round(Math.abs(val) / maxFlux * bMax));
+      txt('An ' + (i+1), MARG, Y + 3.5, 7.5, PDF_COLORS.gris);
+      rect(MARG + 16, Y, bw2, 5, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge);
+      txt((val >= 0 ? '+' : '') + fe(val), MARG + 16 + bw2 + 3, Y + 3.5, 7, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge, isPos);
       Y += 7;
     });
-    Y += 6;
-
-    // ── Résumé ROI ──
-    rect(MARG, Y, CONTENU, 20, d.roi >= 0 ? PDF_COLORS.vertClair : [254,226,226]);
-    rect(MARG, Y, 3, 20, d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge);
-    const roiLabel = d.roi >= 0
-      ? 'PROJET RENTABLE : gain net de +' + fe(d.roi) + ' sur ' + d.duree + ' ans.'
-      : 'ATTENTION : deficit net de ' + fe(Math.abs(d.roi)) + ' sur ' + d.duree + ' ans.';
-    txt(roiLabel, MARG + 8, Y + 8, 9, d.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge, true);
-    const roiDetail = 'Economies totales : ' + fe(d.ecoTotal) + ' | Loyers totaux : ' + fe(Math.round(d.totalLoyers)) + ' | Payback : ' + (d.paybackMois > 120 ? '> 10 ans' : d.paybackMois + ' mois');
-    txt(roiDetail, MARG + 8, Y + 15, 7.5, PDF_COLORS.gris);
+    Y += 4;
+    rect(MARG, Y, CONTENU, 12, PDF_COLORS.teal);
+    const finMsg = 'Economies totales : ' + fe(d.ecoTotal) + '   Loyers totaux : ' + fe(Math.round(d.totalLoyers)) + '   Payback : ' + (d.paybackMois > 120 ? '> 10 ans' : d.paybackMois + ' mois');
+    txt(finMsg, W/2, Y + 8, 7.5, PDF_COLORS.blanc, false, 'center');
+    Y += 12;
 
     // Footer page 4
     drawFooter();
+
 
     // Sauvegarde
     const nomFichier = 'Lihtea_' + d.nomClient.replace(/\s+/g, '-') + '_' + d.date.replace(/\//g, '-') + '.pdf';
