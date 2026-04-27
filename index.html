@@ -4866,6 +4866,10 @@
         <button class="sim-tb-btn" onclick="if(typeof exporterExcel==='function')exporterExcel()">Export Excel</button>
         <button class="sim-tb-btn" onclick="if(typeof genererProposition==='function')genererProposition()">Générer la proposition</button>
         <button class="sim-tb-btn primary" onclick="if(typeof enregistrerEtude==='function')enregistrerEtude()">Enregistrer</button>
+        <button class="sim-tb-btn" id="btn-demande-financement" onclick="ouvrirDemandeFinancement()" title="Soumettre une demande de financement à un partenaire" style="background:var(--c-teal);color:#fff;border-color:var(--c-teal);gap:5px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Demande financement
+        </button>
         <button id="notif-bell-btn-sim" onclick="toggleNotifPanel()" title="Notifications" style="position:relative;background:none;border:1px solid var(--c-border);border-radius:8px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--c-text-2);transition:background 0.15s,color 0.15s;flex-shrink:0;" onmouseover="this.style.background='var(--c-surface-2)';this.style.color='var(--c-teal)'" onmouseout="this.style.background='none';this.style.color='var(--c-text-2)'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span id="notif-badge-sim" style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;padding:0 3px;display:none;align-items:center;justify-content:center;line-height:1;pointer-events:none;"></span>
@@ -10680,6 +10684,10 @@ function renderDrawerContent(p) {
             📄 Générer la proposition
           </button>
         </div>
+        <button onclick="ouvrirDemandeFinancementDrawer('${sirenEsc}','${raisonEsc}',window._drawerSimParams['${reParamsKey}'],${Math.round(reInv)},${Math.round(reInv-reAides)},${Math.round(reMens)})" style="width:100%;margin-top:8px;padding:9px;border:none;border-radius:7px;background:var(--c-teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;opacity:0.92;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.92'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Faire une demande de financement
+        </button>
       </div>`;
     })() : '';
 
@@ -11420,6 +11428,75 @@ const PDF_COLORS = {
   bordure:    [225, 231, 239],
   vertClair:  [240, 253, 250],
 };
+
+// ─── DEMANDE DE FINANCEMENT PARTENAIRE ───────────────────────────────────────
+// Construit l'URL avec les paramètres de l'étude en cours et l'ouvre dans un nouvel onglet.
+// URL = '#' en attendant le domaine de l'application partenaire (en dev).
+const FINANCEMENT_PARTNER_URL = '#'; // TODO: remplacer par l'URL de l'app partenaire
+
+function _buildFinancementParams({ siren, raison_sociale, type_equipement, investissement, cout_net, duree, mensualite }) {
+  return new URLSearchParams({
+    siren:            siren            || '',
+    raison_sociale:   raison_sociale   || '',
+    type_equipement:  type_equipement  || '',
+    investissement:   Math.round(investissement || 0),
+    cout_net:         Math.round(cout_net       || 0), // montant financé = investissement - aides (reste à charge)
+    duree:            Math.round(duree          || 0),
+    mensualite:       Math.round(mensualite     || 0),
+    tenant_id:        currentTenantId || localStorage.getItem('gef_tenant_id') || '',
+  });
+}
+
+// Appelé depuis le topbar du simulateur
+function ouvrirDemandeFinancement() {
+  const d = lireParametres();
+  const nomClient = d.nomClient && d.nomClient !== 'Client' ? d.nomClient : '';
+  if (!nomClient || !d.inv || isNaN(d.inv) || d.inv <= 0) {
+    showToast('Renseignez un client et un investissement avant de soumettre une demande', 'warning');
+    return;
+  }
+  const siren = (document.getElementById('client-siren')?.value || '').replace(/\D/g, '');
+  const params = _buildFinancementParams({
+    siren,
+    raison_sociale:  nomClient,
+    type_equipement: d.typeLabel || '',
+    investissement:  d.inv,
+    cout_net:        d.coutNet,
+    duree:           d.duree,
+    mensualite:      d.mensNette,
+  });
+  const url = FINANCEMENT_PARTNER_URL === '#'
+    ? null
+    : FINANCEMENT_PARTNER_URL + '?' + params.toString();
+  if (!url) {
+    showToast('Application partenaire en cours de développement — disponible prochainement', 'info');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+// Appelé depuis la fiche client (drawer simulations)
+function ouvrirDemandeFinancementDrawer(siren, raison_sociale, reParams, investissement, cout_net, mensualite) {
+  const rp = reParams || {};
+  const params = _buildFinancementParams({
+    siren,
+    raison_sociale,
+    type_equipement: rp.type_equipement || rp.typeLabel || '',
+    investissement,
+    cout_net,
+    duree:     Number(rp.duree_ans || rp.duree) || 0,
+    mensualite,
+  });
+  const url = FINANCEMENT_PARTNER_URL === '#'
+    ? null
+    : FINANCEMENT_PARTNER_URL + '?' + params.toString();
+  if (!url) {
+    showToast('Application partenaire en cours de développement — disponible prochainement', 'info');
+    return;
+  }
+  window.open(url, '_blank');
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function lireParametres() {
   const inv = parseFloat(document.getElementById('inv').value);
