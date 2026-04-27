@@ -402,15 +402,20 @@
       --c-navy: #93c5fd;
       --c-navy-light: #1e3a5f;
       --c-navy-soft: #264a6a;
-      --c-teal-bg: rgba(13,148,136,0.12);
+      --c-teal-bg: rgba(13,148,136,0.15);
       --c-teal-border: rgba(20,184,166,0.25);
-      --c-green-bg: rgba(5,150,105,0.12);
-      --c-blue-bg: rgba(37,99,235,0.12);
-      --c-amber-bg: rgba(217,119,6,0.12);
-      --c-amber-border: rgba(217,119,6,0.3);
-      --c-red-bg: rgba(220,38,38,0.12);
-      --c-red-border: rgba(220,38,38,0.3);
-      --c-purple-bg: rgba(124,58,237,0.12);
+      --c-green: #34d399;
+      --c-green-bg: rgba(5,150,105,0.15);
+      --c-blue: #60a5fa;
+      --c-blue-bg: rgba(37,99,235,0.15);
+      --c-amber: #fbbf24;
+      --c-amber-bg: rgba(217,119,6,0.15);
+      --c-amber-border: rgba(217,119,6,0.35);
+      --c-red: #f87171;
+      --c-red-bg: rgba(220,38,38,0.15);
+      --c-red-border: rgba(220,38,38,0.35);
+      --c-purple: #a78bfa;
+      --c-purple-bg: rgba(124,58,237,0.15);
       --c-gold-light: rgba(212,168,67,0.12);
       --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
@@ -454,6 +459,38 @@
     [data-theme="dark"] .org-card-actions .btn-toggle-off { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
     [data-theme="dark"] .org-card-actions .btn-del:hover { background: var(--c-red-bg); }
     [data-theme="dark"] .equip-edit-hint { background: var(--c-teal-bg); }
+
+    /* ── Dark mode global — catch-all pour textes et tableaux ── */
+    [data-theme="dark"] table td,
+    [data-theme="dark"] table th { color: inherit; }
+    [data-theme="dark"] .prospect-table td { color: var(--c-text); }
+    [data-theme="dark"] .pipeline-kanban-card { background: var(--c-surface) !important; }
+
+    /* ── Badges & tags — dark mode ── */
+    [data-theme="dark"] .scoring-badge { color: var(--c-text) !important; }
+    [data-theme="dark"] .scoring-badge.orange { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+    [data-theme="dark"] .scoring-badge.red { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
+    [data-theme="dark"] .timeline-tag.alerte { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
+    [data-theme="dark"] .dossier-tl-alerte-tag { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
+    [data-theme="dark"] .dossier-tag-critique { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
+    [data-theme="dark"] .scoring-check.fail { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
+    [data-theme="dark"] .scoring-check.warn { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+    [data-theme="dark"] .org-badge-calc { background: rgba(5,150,105,0.18) !important; color: #34d399 !important; }
+    [data-theme="dark"] .org-badge-info { background: rgba(37,99,235,0.18) !important; color: #60a5fa !important; }
+    [data-theme="dark"] .org-badge-off { background: rgba(100,116,139,0.18) !important; color: var(--c-text-3) !important; }
+    [data-theme="dark"] .org-card-actions .btn-toggle-on { background: rgba(5,150,105,0.18) !important; color: #34d399 !important; border-color: rgba(5,150,105,0.3) !important; }
+    [data-theme="dark"] .admin-taux-badge.high { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+    [data-theme="dark"] .dlbadge-collect { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+    [data-theme="dark"] .dlbadge-sign { background: rgba(190,24,93,0.18) !important; color: #f9a8d4 !important; }
+    [data-theme="dark"] .dlbadge-template { background: rgba(124,58,237,0.18) !important; color: #a78bfa !important; }
+    [data-theme="dark"] #drawer-admin-badge { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+
+    /* ── Cards, modals, drawers — dark mode ── */
+    [data-theme="dark"] .card { background: var(--c-surface); color: var(--c-text); border-color: var(--c-border); }
+    [data-theme="dark"] .modal-content { background: var(--c-surface) !important; color: var(--c-text) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .saved-sim-card { background: var(--c-surface) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    [data-theme="dark"] .crm-kpi-card { background: var(--c-surface) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .header-sticky { background: #0e1f35 !important; }
 
     /* ── Simulator parameter panel — dark mode ── */
     [data-theme="dark"] #sim-params-panel { background: var(--c-sim-panel-bg) !important; }
@@ -4624,7 +4661,7 @@
         <div class="card" style="padding:22px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div>
-              <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Relances du jour <span id="dash-relance-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-left:6px;"></span></div>
+              <div style="font-size:15px;font-weight:700;color:var(--c-navy);">Relances du jour <span id="dash-relance-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--c-red-bg);color:var(--c-red);border:1px solid var(--c-red-border);margin-left:6px;"></span></div>
               <div style="font-size:12px;color:var(--c-text-3);margin-top:3px;">Prospects à rappeler aujourd'hui ou en retard</div>
             </div>
           </div>
@@ -5817,7 +5854,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <span id="drawer-statut-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;"></span>
-      <span id="drawer-admin-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#fef3c7;color:#92400e;">⏳ En revue Admin</span>
+      <span id="drawer-admin-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--c-amber-bg);color:var(--c-amber);border:1px solid var(--c-amber-border);">⏳ En revue Admin</span>
       <button onclick="openDossierForClient()" style="margin-left:auto;padding:5px 13px;background:var(--c-teal);border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;" title="Ouvrir le dossier de montage pour ce client">📋 Dossier</button>
     </div>
   </div>
@@ -9088,13 +9125,13 @@ function _renderPipelineBoard() {
                 const todayK = new Date().toISOString().split('T')[0];
                 if (nr && nr <= todayK) {
                   const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-                  return `<span style="font-size:10px;font-weight:700;color:#dc2626;background:#fee2e2;border:1px solid #fca5a5;padding:2px 7px;border-radius:6px;" title="Relance prévue le ${nrDate}">🔴 Relance ${nrDate}</span>`;
+                  return `<span style="font-size:10px;font-weight:700;color:var(--c-red);background:var(--c-red-bg);border:1px solid var(--c-red-border);padding:2px 7px;border-radius:6px;" title="Relance prévue le ${nrDate}">🔴 Relance ${nrDate}</span>`;
                 }
                 if (nr) {
                   const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-                  return `<span style="font-size:10px;font-weight:700;color:#f59e0b;background:#fef3c7;border:1px solid #fde68a;padding:2px 7px;border-radius:6px;" title="Prochaine relance">📅 ${nrDate}</span>`;
+                  return `<span style="font-size:10px;font-weight:700;color:var(--c-amber);background:var(--c-amber-bg);border:1px solid var(--c-amber-border);padding:2px 7px;border-radius:6px;" title="Prochaine relance">📅 ${nrDate}</span>`;
                 }
-                return `<span style="font-size:10px;font-weight:700;color:${overdue ? '#ef4444' : 'var(--c-text-3)'};background:${overdue ? '#fee2e2' : 'var(--c-surface)'};border:1px solid ${overdue ? '#fca5a5' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">📅 ${dayLbl}</span>`;
+                return `<span style="font-size:10px;font-weight:700;color:${overdue ? 'var(--c-red)' : 'var(--c-text-3)'};background:${overdue ? 'var(--c-red-bg)' : 'var(--c-surface)'};border:1px solid ${overdue ? 'var(--c-red-border)' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">📅 ${dayLbl}</span>`;
               })()}
               <div style="display:flex;gap:4px;">
                 ${actionBtns(c)}
@@ -10936,7 +10973,7 @@ function renderScenarios() {
       <input class="scenario-label-input" value="${s.label}" onchange="scenarios[${i}].label=this.value" />
       <div style="margin-top:4px;">
         <button onclick="event.stopPropagation();removeScenario(${i})" style="font-size:10px;color:var(--c-text-3);background:none;border:none;cursor:pointer;text-decoration:underline;">supprimer</button>
-        ${i===bestIdx && scenarios.length>1 ? '<span style="display:inline-block;margin-left:6px;font-size:9px;padding:2px 6px;border-radius:8px;background:#ccfbf1;color:#065f46;">MEILLEUR</span>' : ''}
+        ${i===bestIdx && scenarios.length>1 ? '<span style="display:inline-block;margin-left:6px;font-size:9px;padding:2px 6px;border-radius:8px;background:var(--c-green-bg);color:var(--c-green);">MEILLEUR</span>' : ''}
       </div></th>`;
   });
   html += '</tr></thead><tbody>';
@@ -14113,7 +14150,7 @@ renderScoring = function() {
       <div class="scoring-aide-body">
         <div class="scoring-criteria">
           ${r.criteria.map(c => `<div class="scoring-criterion" style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;">
-            <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;${c.pass ? 'background:#ccfbf1;color:#065f46;' : c.warn ? 'background:#fef3c7;color:#92400e;' : 'background:#fee2e2;color:#991b1b;'}">${c.pass ? '✓' : c.warn ? '!' : '✗'}</div>
+            <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;${c.pass ? 'background:var(--c-green-bg);color:var(--c-green);' : c.warn ? 'background:var(--c-amber-bg);color:var(--c-amber);' : 'background:var(--c-red-bg);color:var(--c-red);'}">${c.pass ? '✓' : c.warn ? '!' : '✗'}</div>
             <div>
               <div style="font-weight:600;color:var(--c-text);margin-bottom:1px;font-size:12px;">${c.label}</div>
               <div style="font-size:11px;color:var(--c-text-3);">${c.detail}</div>
