@@ -12657,9 +12657,18 @@ function dashPipelineFunnel(containerId, funnelData, outcomeData) {
 }
 
 // Deep-link depuis dashboard → fiche client (évite les quotes imbriquées dans onclick)
-function openProspectFromDash(id) {
+function openProspectFromDash(id, tab) {
   switchPage('clients', document.querySelector('[data-page="clients"]'));
-  setTimeout(function() { openClientDrawer(id); }, 400);
+  setTimeout(function() {
+    openClientDrawer(id).then(function() {
+      if (tab) {
+        setTimeout(function() {
+          const btn = document.querySelector('.drawer-tab-btn[onclick*="' + tab + '"]');
+          if (btn) switchDrawerTab(tab, btn);
+        }, 150);
+      }
+    });
+  }, 400);
 }
 
 // ── Dashboard data cache (stale-while-revalidate) ──────────────────────────
@@ -13026,7 +13035,7 @@ async function renderGlobalDashboard() {
             return '<div style="padding:12px 14px;border-radius:10px;border:1px solid '
               + (isLate ? 'var(--c-red-border)' : 'var(--c-border)') + ';background:'
               + (isLate ? 'var(--c-red-bg)' : 'var(--c-surface)') + ';cursor:pointer;transition:box-shadow .15s;"'
-              + ' onclick="openProspectFromDash(\'' + c.id + '\')"'
+              + ' onclick="openProspectFromDash(\'' + c.id + '\',\'historique\')"'
               + ' onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.1)\'"'
               + ' onmouseout="this.style.boxShadow=\'none\'">'
               + '<div style="font-size:13px;font-weight:700;color:var(--c-navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (c.raison_sociale||'—') + '</div>'
