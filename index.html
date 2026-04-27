@@ -9373,11 +9373,11 @@ function _renderPipelineBoard() {
                 const todayK = new Date().toISOString().split('T')[0];
                 if (nr && nr <= todayK) {
                   const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-                  return `<span style="font-size:10px;font-weight:700;color:var(--c-red);background:var(--c-red-bg);border:1px solid var(--c-red-border);padding:2px 7px;border-radius:6px;" title="Relance prévue le ${nrDate}">🔴 Relance ${nrDate}</span>`;
+                  return `<span onclick="event.stopPropagation();_kbRelance('${c.id}')" style="font-size:10px;font-weight:700;color:var(--c-red);background:var(--c-red-bg);border:1px solid var(--c-red-border);padding:2px 7px;border-radius:6px;cursor:pointer;" title="Voir les activités — relance ${nrDate}">🔴 Relance ${nrDate}</span>`;
                 }
                 if (nr) {
                   const nrDate = new Date(nr).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-                  return `<span style="font-size:10px;font-weight:700;color:var(--c-amber);background:var(--c-amber-bg);border:1px solid var(--c-amber-border);padding:2px 7px;border-radius:6px;" title="Prochaine relance">📅 ${nrDate}</span>`;
+                  return `<span onclick="event.stopPropagation();_kbRelance('${c.id}')" style="font-size:10px;font-weight:700;color:var(--c-amber);background:var(--c-amber-bg);border:1px solid var(--c-amber-border);padding:2px 7px;border-radius:6px;cursor:pointer;" title="Voir les activités — relance ${nrDate}">📅 ${nrDate}</span>`;
                 }
                 return `<span style="font-size:10px;font-weight:700;color:${overdue ? 'var(--c-red)' : 'var(--c-text-3)'};background:${overdue ? 'var(--c-red-bg)' : 'var(--c-surface)'};border:1px solid ${overdue ? 'var(--c-red-border)' : 'var(--c-border)'};padding:2px 7px;border-radius:6px;">📅 ${dayLbl}</span>`;
               })()}
@@ -9571,6 +9571,9 @@ function _kbDossier(prospectId) { _kbOpenDrawerTab(prospectId, 'documents'); }
 
 // ⚖️ Comparaison scénarios — ouvre le drawer sur l'onglet Simulations
 function _kbScenarios(prospectId) { _kbOpenDrawerTab(prospectId, 'simulations'); }
+
+// 📅 Relance — ouvre le drawer directement sur l'onglet Activités
+function _kbRelance(prospectId) { _kbOpenDrawerTab(prospectId, 'historique'); }
 
 // ─── End kanban quick-action handlers ─────────────────────────────────────────
 
