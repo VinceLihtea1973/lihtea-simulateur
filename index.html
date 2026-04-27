@@ -10015,7 +10015,20 @@ function renderDrawerContent(p) {
       if (!refE) return '';
       const reInv   = Number(refE.parametres?.investissement) || 0;
       const reAides = refE.montant_aides_total || 0;
-      const reMens  = refE.montant_loyer_mensuel || 0;
+      // Loyer : cascade de fallbacks, puis recalcul depuis les paramètres si tout est 0
+      let reMens = refE.montant_loyer_mensuel || refE.resultats?.mensualite_nette || 0;
+      if (!reMens && refE.parametres) {
+        const _rP    = refE.parametres;
+        const _coutN = reInv - reAides;
+        const _taux  = Number(_rP.taux) || 3;
+        const _mois  = (Number(_rP.duree) || 7) * 12;
+        if (_coutN > 0 && _mois > 0) {
+          const _r = _taux / 100 / 12;
+          reMens = _r > 0
+            ? Math.round(_coutN * _r / (1 - Math.pow(1 + _r, -_mois)))
+            : Math.round(_coutN / _mois);
+        }
+      }
       const reDate  = refE.updated_at
         ? new Date(refE.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})
         : '—';
@@ -10138,7 +10151,16 @@ function renderDrawerContent(p) {
       const re = refEtude;
       const reInv  = Number(re.parametres?.investissement)||0;
       const reAides = re.montant_aides_total||0;
-      const reMens  = re.montant_loyer_mensuel||0;
+      let reMens = re.montant_loyer_mensuel || re.resultats?.mensualite_nette || 0;
+      if (!reMens && re.parametres) {
+        const _cN = reInv - reAides;
+        const _t  = Number(re.parametres.taux) || 3;
+        const _m  = (Number(re.parametres.duree) || 7) * 12;
+        if (_cN > 0 && _m > 0) {
+          const _r = _t / 100 / 12;
+          reMens = _r > 0 ? Math.round(_cN * _r / (1 - Math.pow(1 + _r, -_m))) : Math.round(_cN / _m);
+        }
+      }
       const reDate  = re.updated_at ? new Date(re.updated_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
       const reParams = re.parametres || {};
       // Recalculer économies/an depuis les parametres stockés (plus fiable que gain_net_annuel en DB)
