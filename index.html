@@ -12065,25 +12065,28 @@ function updateBaremeDisplay(rules, ok) {
 
 /**
  * Charge le barème actif depuis Supabase (vue active_financing_rules).
+ * Fallback sur barème standard local si la vue est indisponible ou vide.
  * Déclenche recalculer() après chargement.
  */
 async function loadBareme() {
+  const TIMEOUT_MS = 7000;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON };
     const res = await fetch(
       SUPABASE_URL + '/rest/v1/active_financing_rules?select=*&order=amount_min.asc,duration_months.asc',
-      { headers }
+      { headers, signal: controller.signal }
     );
+    clearTimeout(timeoutId);
     if (!res.ok) {
-      console.warn('[Barème] HTTP error:', res.status);
-      updateBaremeDisplay(null, false);
-      return;
+      console.warn('[Barème] HTTP', res.status, '— fallback barème standard');
+      _useFallbackBareme(); return;
     }
     const rules = await res.json();
     if (!rules || !rules.length) {
-      console.warn('[Barème] Aucune règle active — barème non configuré dans l\'admin');
-      updateBaremeDisplay(null, false);
-      return;
+      console.warn('[Barème] Vue vide ou non configurée — fallback barème standard');
+      _useFallbackBareme(); return;
     }
     _financingRules = rules;
     _baremeName = rules[0]?.grid_name || 'Barème actif';
@@ -12092,9 +12095,28 @@ async function loadBareme() {
     recalculer();
     console.log('[Barème] Chargé :', _baremeName, '—', rules.length, 'règles sur', [...new Set(rules.map(r=>r.duration_months))].length, 'durées');
   } catch (e) {
-    console.warn('[Barème] Erreur de chargement :', e.message || e);
-    updateBaremeDisplay(null, false);
+    if (e.name === 'AbortError') {
+      console.warn('[Barème] Timeout (7s) — fallback barème standard');
+    } else {
+      console.warn('[Barème] Erreur :', e.message || e);
+    }
+    _useFallbackBareme();
   }
+}
+
+/**
+ * Fallback : utilise le taux par défaut admin si la vue Supabase est inaccessible.
+ * Le simulateur reste pleinement fonctionnel avec le taux standard.
+ */
+function _useFallbackBareme() {
+  _baremeLoaded = true; // libère le verrou — plus de "Chargement..."
+  const badge  = document.getElementById('bareme-status-badge');
+  const detail = document.getElementById('bareme-detail');
+  const taux   = adminBaremes?.tauxDefaut || BAREMES_DEFAUT.tauxDefaut || 4.5;
+  if (badge)  { badge.textContent = 'Standard'; badge.style.background = '#0d9488'; }
+  if (detail) detail.innerHTML = 'Taux standard <strong>' + taux + ' %</strong> · '
+    + '<span style="color:var(--c-text-3);">Barème personnalisé configuré via l\'admin Lihtea</span>';
+  recalculer();
 }
 
 // Chargement initial du barème au démarrage de la page
