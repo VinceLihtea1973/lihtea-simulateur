@@ -11403,27 +11403,86 @@ async function exporterPDF(previewOnly = false) {
     txt((soldeTotal2 >= 0 ? '+' : '') + fe(soldeTotal2), colsAn[5].x + 2, Y + 6.5, 7.5, soldeTotal2 >= 0 ? PDF_COLORS.tealLight : [255,160,160], true);
     Y += 14;
 
-    checkPageBreak(12 + d.flux.length * 6);
-    txt('FLUX DE TRESORERIE CUMULE', MARG, Y, 7, PDF_COLORS.teal, true);
-    rect(MARG, Y + 2, 22, 0.6, PDF_COLORS.teal);
-    Y += 7;
-    const maxFlux = Math.max(...d.flux.map(Math.abs), 1);
-    d.flux.forEach((val, i) => {
-      const isPos = val >= 0;
-      const bMax = CONTENU - 46;
-      const bw2 = Math.max(2, Math.round(Math.abs(val) / maxFlux * bMax));
-      txt('An ' + (i+1), MARG, Y + 3.5, 7.5, PDF_COLORS.gris);
-      rect(MARG + 16, Y, bw2, 5, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge);
-      txt((val >= 0 ? '+' : '') + fe(val), MARG + 16 + bw2 + 3, Y + 3.5, 7, isPos ? PDF_COLORS.teal : PDF_COLORS.rouge, isPos);
+    // ── Tableau de flux annuel sur 12 ans ──
+    checkPageBreak(20 + 13 * 7);
+    txt('TABLEAU DE FLUX ANNUEL', MARG, Y, 7, PDF_COLORS.teal, true);
+    rect(MARG, Y + 2, 24, 0.6, PDF_COLORS.teal);
+    Y += 8;
+
+    const HORIZON_PDF = 12;
+    const mensAn = Math.round(d.mensNette * 12);
+    const ecoAnR = Math.round(d.ecoAn);
+    const chartData = [];
+    let loyerCum = 0, ecoCum = 0;
+    for (let y = 1; y <= HORIZON_PDF; y++) {
+      const loyer = y <= d.duree ? mensAn : 0;
+      loyerCum += loyer;
+      ecoCum += ecoAnR;
+      chartData.push({ year: y, loyer, eco: ecoAnR, loyerCum, ecoCum, rac: d.flux[y-1] || 0, roi: ecoCum - loyerCum, isPost: y > d.duree });
+    }
+
+    const tblCols = [
+      { label: 'Annee',        w: 18 },
+      { label: 'Loyer annuel', w: 27 },
+      { label: 'Eco. annuelle',w: 27 },
+      { label: 'Loyer cumule', w: 27 },
+      { label: 'Eco. cumulee', w: 27 },
+      { label: 'Flux cumule',  w: 29 },
+      { label: 'ROI cumule',   w: 27 },
+    ];
+    let tx = MARG;
+    rect(MARG, Y, CONTENU, 8, PDF_COLORS.navy);
+    tblCols.forEach(c => { txt(c.label, tx + 2, Y + 5.5, 7, PDF_COLORS.blanc, true); tx += c.w; });
+    Y += 8;
+
+    chartData.forEach((row, i) => {
+      checkPageBreak(8);
+      const bg = row.isPost ? PDF_COLORS.vertClair : (i % 2 === 0 ? PDF_COLORS.blanc : PDF_COLORS.grisClair);
+      rect(MARG, Y, CONTENU, 7, bg);
+      tx = MARG;
+      const yearLabel = row.isPost ? 'An ' + row.year + ' *' : 'An ' + row.year;
+      txt(yearLabel, tx + 2, Y + 5, 7.5, row.isPost ? PDF_COLORS.teal : PDF_COLORS.grisfonce, true); tx += tblCols[0].w;
+      txt(row.loyer > 0 ? fe(row.loyer) : '-', tx + 2, Y + 5, 7.5, row.loyer > 0 ? PDF_COLORS.navy : PDF_COLORS.gris); tx += tblCols[1].w;
+      txt(fe(row.eco), tx + 2, Y + 5, 7.5, row.isPost ? [5,150,105] : PDF_COLORS.teal); tx += tblCols[2].w;
+      txt(fe(row.loyerCum), tx + 2, Y + 5, 7.5, PDF_COLORS.gris); tx += tblCols[3].w;
+      txt(fe(row.ecoCum), tx + 2, Y + 5, 7.5, PDF_COLORS.gris); tx += tblCols[4].w;
+      const racCol = row.rac >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge;
+      txt((row.rac >= 0 ? '+' : '') + fe(row.rac), tx + 2, Y + 5, 7.5, racCol, true); tx += tblCols[5].w;
+      const roiCol = row.roi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge;
+      txt((row.roi >= 0 ? '+' : '') + fe(row.roi), tx + 2, Y + 5, 7.5, roiCol, true);
       Y += 7;
     });
-    Y += 4;
-    rect(MARG, Y, CONTENU, 12, PDF_COLORS.teal);
-    const finMsg = 'Economies totales : ' + fe(d.ecoTotal) + '   Loyers totaux : ' + fe(Math.round(d.totalLoyers)) + '   Payback : ' + (d.paybackMois > 120 ? '> 10 ans' : d.paybackMois + ' mois');
-    txt(finMsg, W/2, Y + 8, 7.5, PDF_COLORS.blanc, false, 'center');
-    Y += 12;
 
-    // Footer page 4
+    // Ligne totale
+    Y += 2;
+    rect(MARG, Y, CONTENU, 9, PDF_COLORS.teal);
+    tx = MARG;
+    txt('TOTAL 12 ANS', tx + 2, Y + 6, 8, PDF_COLORS.blanc, true); tx += tblCols[0].w;
+    txt(fe(loyerCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[1].w;
+    txt(fe(ecoCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[2].w;
+    tx += tblCols[3].w + tblCols[4].w;
+    const lastRac = chartData[chartData.length-1]?.rac || 0;
+    const lastRoi = chartData[chartData.length-1]?.roi || 0;
+    txt((lastRac >= 0 ? '+' : '') + fe(lastRac), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[5].w;
+    txt((lastRoi >= 0 ? '+' : '') + fe(lastRoi), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true);
+    Y += 14;
+
+    // Note années post-financement
+    txt('* Annees post-financement : plus de loyer, economies nettes = gain pur.', MARG, Y, 7, PDF_COLORS.gris);
+    Y += 10;
+
+    // ── Bilan ROI final ──
+    checkPageBreak(20);
+    rect(MARG, Y, CONTENU, 18, lastRoi >= 0 ? PDF_COLORS.vertClair : [254,226,226]);
+    rect(MARG, Y, 3, 18, lastRoi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge);
+    const roiLabel = lastRoi >= 0
+      ? 'PROJET RENTABLE : gain net de +' + fe(lastRoi) + ' sur 12 ans.'
+      : 'ATTENTION : deficit net de ' + fe(Math.abs(lastRoi)) + ' sur 12 ans.';
+    txt(roiLabel, MARG + 8, Y + 7, 9, lastRoi >= 0 ? PDF_COLORS.teal : PDF_COLORS.rouge, true);
+    txt('Economies totales : ' + fe(d.ecoTotal) + '   Loyers totaux : ' + fe(Math.round(d.totalLoyers)) + '   Payback : ' + (d.paybackMois > 120 ? '> 10 ans' : d.paybackMois + ' mois'), MARG + 8, Y + 14, 7.5, PDF_COLORS.gris);
+    Y += 22;
+
+    // Footer
     drawFooter();
 
 
