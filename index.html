@@ -6156,10 +6156,13 @@ function toggleNotifPanel() {
   if (!panel) return;
   const isOpen = panel.classList.toggle('open');
   if (isOpen) {
-    // Positionner sous le bouton actif (header ou topbar sim)
-    const btn = document.getElementById('notif-bell-btn-sim')?.offsetParent !== null
-      ? document.getElementById('notif-bell-btn-sim')
-      : document.getElementById('notif-bell-btn');
+    // Positionner sous le bouton actif :
+    // Le simulateur utilise position:fixed donc offsetParent === null pour ses enfants,
+    // on vérifie plutôt si le topbar simulateur est visible (getBoundingClientRect width > 0)
+    const btnSim = document.getElementById('notif-bell-btn-sim');
+    const btnGlobal = document.getElementById('notif-bell-btn');
+    const simVisible = btnSim && btnSim.getBoundingClientRect().width > 0;
+    const btn = simVisible ? btnSim : btnGlobal;
     if (btn) {
       const r = btn.getBoundingClientRect();
       panel.style.top = (r.bottom + 8) + 'px';
