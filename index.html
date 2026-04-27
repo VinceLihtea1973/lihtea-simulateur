@@ -11199,7 +11199,7 @@ async function exporterPDF(previewOnly = false) {
     rect(0, 0, W, H, PDF_COLORS.navy);
     rect(0, 0, W, 4, PDF_COLORS.teal);
     doc.setFillColor(...PDF_COLORS.teal); doc.circle(W/2, 68, 18, 'F');
-    txt('L', W/2 - 5.5, 74, 26, PDF_COLORS.navy, true);
+    txt('L', W/2, 75, 26, PDF_COLORS.navy, true, 'center');
     txt('LIHTEA', W/2, 100, 30, PDF_COLORS.blanc, true, 'center');
     txt('EQUIPMENT FINANCE & ADVISORY', W/2, 110, 9, PDF_COLORS.tealLight, false, 'center');
     rect(W/2 - 25, 118, 50, 0.6, PDF_COLORS.teal);
@@ -11210,9 +11210,9 @@ async function exporterPDF(previewOnly = false) {
     txt('PREPARE POUR', MARG + 24, 172, 7.5, PDF_COLORS.tealLight, true);
     txt(d.nomClient || 'Entreprise cliente', MARG + 24, 183, 15, PDF_COLORS.blanc, true);
     txt(d.typeLabel.substring(0, 55), MARG + 24, 191, 8.5, PDF_COLORS.tealLight);
-    txt('PREPARE PAR', W - MARG - 15, 172, 7.5, PDF_COLORS.tealLight, true, 'right');
-    txt('Lihtea', W - MARG - 15, 183, 11, PDF_COLORS.blanc, true, 'right');
-    txt('lihtea.com', W - MARG - 15, 191, 8, PDF_COLORS.tealLight, false, 'right');
+    txt('PREPARE PAR', W/2 + 8, 172, 7.5, PDF_COLORS.tealLight, true);
+    txt('Lihtea SARL', W/2 + 8, 183, 11, PDF_COLORS.blanc, true);
+    txt('lihtea.fr', W/2 + 8, 191, 8, PDF_COLORS.tealLight);
     const kpis = [['Investissement HT', fe(d.inv)], ['Aides mobilisees', fe(d.totalAides)], ['Gain net ' + d.duree + ' ans', (d.roi >= 0 ? '+' : '') + fe(d.roi)]];
     kpis.forEach(([label, val], i) => {
       const kx = MARG + 15 + i * ((CONTENU - 30) / 3);
@@ -11396,7 +11396,7 @@ async function exporterPDF(previewOnly = false) {
     }
     Y += 2;
     rect(MARG, Y, CONTENU, 9, PDF_COLORS.navy);
-    txt('TOTAL ' + d.duree + ' ANS', MARG + 3, Y + 6.5, 8, PDF_COLORS.blanc, true);
+    txt('TOTAL', MARG + 3, Y + 6.5, 8, PDF_COLORS.blanc, true);
     const soldeTotal2 = Math.round(d.ecoTotal - d.totalLoyers);
     txt(fe(Math.round(d.totalLoyers)), colsAn[1].x + 2, Y + 6.5, 7.5, PDF_COLORS.tealLight, true);
     txt(fe(Math.round(d.ecoTotal)), colsAn[4].x + 2, Y + 6.5, 7.5, PDF_COLORS.tealLight, true);
@@ -11457,7 +11457,7 @@ async function exporterPDF(previewOnly = false) {
     Y += 2;
     rect(MARG, Y, CONTENU, 9, PDF_COLORS.teal);
     tx = MARG;
-    txt('TOTAL 12 ANS', tx + 2, Y + 6, 8, PDF_COLORS.blanc, true); tx += tblCols[0].w;
+    txt('TOTAL', tx + 2, Y + 6, 8, PDF_COLORS.blanc, true); tx += tblCols[0].w;
     txt(fe(loyerCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[1].w;
     txt(fe(ecoCum), tx + 2, Y + 6, 8, PDF_COLORS.tealLight, true); tx += tblCols[2].w;
     tx += tblCols[3].w + tblCols[4].w;
