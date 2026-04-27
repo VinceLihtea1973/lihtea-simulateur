@@ -9273,10 +9273,21 @@ const ACT_RESULTS = [
 // Champ DB : date_planifiee (table activites)
 // Note : on inclut les activités 'realisee' ayant une date_planifiee — cas normal
 // quand l'utilisateur log un contact (realisee) et fixe une relance (date_planifiee).
+// Le store _pendingActivities est consulté en plus des activités du prospect
+// pour garantir que les relances récemment ajoutées apparaissent même si le cache
+// n'a pas encore reçu l'injection optimiste.
 function getNextRelance(prospect) {
-  const acts = (prospect.activites || []).filter(
-    a => a.date_planifiee && a.statut !== 'annulee'
-  );
+  const pending = (_pendingActivities && _pendingActivities[prospect.id]) || [];
+  const combined = [...(prospect.activites || []), ...pending];
+  // Dédupliquer par id
+  const seen = new Set();
+  const acts = combined.filter(a => {
+    if (!a.date_planifiee || a.statut === 'annulee') return false;
+    const key = a.id || (a.date_planifiee + '|' + a.prospect_id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   if (!acts.length) return null;
   // Trier par date_planifiee ASC → retourner la prochaine relance la plus proche
   acts.sort((a, b) => new Date(a.date_planifiee) - new Date(b.date_planifiee));
@@ -9589,26 +9600,36 @@ async function logActivity(prospectId) {
     const actData = await res.json().catch(() => null);
     const createdAct = actData?.data || { ...body, id: '_opt_' + Date.now(), created_at: new Date().toISOString() };
 
-    // ── Mise à jour optimiste du cache dashboard ──────────────────────────────
-    // Injection directe dans le cache — pas besoin de GET /activites.
-    // Si le cache est absent, on le reconstruit après le POST pour que
-    // "Relances du jour" apparaisse immédiatement au prochain render.
+    // ── Mise à jour optimiste — double mécanisme ─────────────────────────────
+    // 1. Store local _pendingActivities : safety-net garanti, indépendant du cache.
+    //    getNextRelance() le consulte systématiquement lors du render du dashboard.
+    if (!_pendingActivities[prospectId]) _pendingActivities[prospectId] = [];
+    // Éviter les doublons si l'activité est déjà dans le store
+    if (!_pendingActivities[prospectId].some(a => a.id === createdAct.id)) {
+      _pendingActivities[prospectId].push(createdAct);
+    }
+
+    // 2. Injection directe dans le cache si disponible (path rapide)
     if (_dashCache) {
       const pidx = _dashCache.prospects.findIndex(p => p.id === prospectId);
       if (pidx >= 0) {
-        const updatedProspect = {
-          ..._dashCache.prospects[pidx],
-          activites: [...(_dashCache.prospects[pidx].activites || []), createdAct],
-          updated_at: new Date().toISOString(),
-        };
-        _dashCache.prospects = [
-          ..._dashCache.prospects.slice(0, pidx),
-          updatedProspect,
-          ..._dashCache.prospects.slice(pidx + 1),
-        ];
+        const existingActs = _dashCache.prospects[pidx].activites || [];
+        const alreadyIn = existingActs.some(a => a.id === createdAct.id);
+        if (!alreadyIn) {
+          const updatedProspect = {
+            ..._dashCache.prospects[pidx],
+            activites: [...existingActs, createdAct],
+            updated_at: new Date().toISOString(),
+          };
+          _dashCache.prospects = [
+            ..._dashCache.prospects.slice(0, pidx),
+            updatedProspect,
+            ..._dashCache.prospects.slice(pidx + 1),
+          ];
+        }
       }
     } else {
-      // Cache absent — forcer un fetch frais pour que le dashboard soit à jour
+      // Cache absent — forcer un fetch (le store _pendingActivities prendra le relais)
       _fetchDashData().catch(() => {});
     }
 
@@ -12629,9 +12650,17 @@ function openProspectFromDash(id) {
 let _dashCache = null; // { prospects, simulations, ts }
 const _DASH_TTL = 60000; // 60s avant refresh automatique
 let _dashFetching = false;
+let _dashFetchPromise = null; // évite les races concurrentes
+
+// Store local des activités récemment créées — clé = prospectId
+// Utilisé comme safety-net par getNextRelance() si le cache n'a pas encore reçu l'injection.
+// Persiste pour toute la session (le serveur n'expose pas les activités via GET /prospects).
+let _pendingActivities = {}; // { [prospectId]: Activity[] }
 
 async function _fetchDashData() {
-  if (_dashFetching) return;
+  // Si un fetch est déjà en cours, retourner la même promesse plutôt que undefined
+  if (_dashFetchPromise) return _dashFetchPromise;
+  if (_dashFetching) return null;
   _dashFetching = true;
   try {
     const [prospRes, simRes] = await Promise.all([
@@ -12640,22 +12669,31 @@ async function _fetchDashData() {
     ]);
     const allProspects = (await prospRes.json())?.data || [];
     const allSims      = (await simRes.json())?.data  || [];
-    // Les activités sont injectées de façon optimiste lors du logContact().
-    // On préserve les activites déjà présentes dans le cache si elles existent.
+    // Les activités sont injectées de façon optimiste (logActivity) et via _pendingActivities.
+    // On préserve les activités déjà présentes dans le cache ET le store local.
     const prevActsByProspect = {};
     if (_dashCache) {
       for (const p of _dashCache.prospects) {
         if (p.activites?.length) prevActsByProspect[p.id] = p.activites;
       }
     }
-    const enrichedProspects = allProspects.map(p => ({
-      ...p,
-      activites: prevActsByProspect[p.id] || p.activites || [],
-    }));
+    const enrichedProspects = allProspects.map(p => {
+      const cached  = prevActsByProspect[p.id] || p.activites || [];
+      const pending = _pendingActivities[p.id] || [];
+      // Fusionner en dédupliquant par id
+      const seen = new Set();
+      const activites = [...cached, ...pending].filter(a => {
+        if (seen.has(a.id)) return false;
+        seen.add(a.id);
+        return true;
+      });
+      return { ...p, activites };
+    });
     _dashCache = { prospects: enrichedProspects, simulations: allSims, ts: Date.now() };
     return _dashCache;
   } finally {
     _dashFetching = false;
+    _dashFetchPromise = null;
   }
 }
 
@@ -12721,6 +12759,7 @@ async function renderGlobalDashboard() {
     } else {
       // Fetch bloquant (premier chargement)
       const data = await _fetchDashData();
+      if (!data) return; // fetch déjà en cours — on attendra le re-render automatique
       allProspects = data.prospects;
       allSims      = data.simulations;
     }
