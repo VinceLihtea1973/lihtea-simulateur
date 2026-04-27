@@ -394,6 +394,7 @@
       --c-bg: #0c1829;
       --c-surface: #132035;
       --c-border: #1e3352;
+      --c-sim-panel-bg: #0a1829;
       --c-border-strong: #2a4570;
       --c-text: #e2e8f0;
       --c-text-2: #94a3b8;
@@ -453,6 +454,23 @@
     [data-theme="dark"] .org-card-actions .btn-toggle-off { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
     [data-theme="dark"] .org-card-actions .btn-del:hover { background: var(--c-red-bg); }
     [data-theme="dark"] .equip-edit-hint { background: var(--c-teal-bg); }
+
+    /* ── Simulator parameter panel — dark mode ── */
+    [data-theme="dark"] #sim-params-panel { background: var(--c-sim-panel-bg) !important; }
+    [data-theme="dark"] #sim-params-panel .card { background: #132035 !important; border-color: #1e3352 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-field { background: #0c1829 !important; border-color: #1e3352 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-field-val { color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-field-label { color: #64748b !important; }
+    [data-theme="dark"] #sim-params-panel .sim-card-title { color: #93c5fd !important; }
+    [data-theme="dark"] #sim-params-panel .sim-card-sub { color: #64748b !important; }
+    [data-theme="dark"] #sim-params-panel .sp-inv-input { background: rgba(13,148,136,0.12) !important; border-color: rgba(20,184,166,0.25) !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-result-card { background: rgba(13,148,136,0.1) !important; border-color: rgba(20,184,166,0.2) !important; }
+    [data-theme="dark"] #sim-params-panel #bareme-info-field { background: rgba(13,148,136,0.1) !important; border-color: rgba(20,184,166,0.2) !important; }
+    [data-theme="dark"] #sim-params-panel select,
+    [data-theme="dark"] #sim-params-panel input[type="text"],
+    [data-theme="dark"] #sim-params-panel input[type="number"] { background: #0c1829 !important; color: #e2e8f0 !important; border-color: #1e3352 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-divider { background: #1e3352 !important; }
+    [data-theme="dark"] #sim-topbar-desktop { background: #0f2236 !important; border-color: #1e3352 !important; }
 
     /* ─── CONFIDENCE INDICATORS ─── */
     .confidence-badge {
@@ -4216,7 +4234,7 @@
         overflow-y: auto;
         overflow-x: hidden;
         border-right: 1px solid var(--c-border);
-        background: #eef2f7;
+        background: var(--c-sim-panel-bg, #eef2f7);
         width: 100% !important;
         min-width: 0 !important;
         padding: 12px 12px 4px !important;
@@ -4228,6 +4246,7 @@
         margin: 0 8px 10px 8px !important;
         box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
         padding: 12px 14px !important;
+        background: var(--c-surface) !important;
       }
       #sim-params-panel .sim-card-header { padding: 0 0 6px 0; }
       #sim-params-panel .field { margin-bottom: 8px; }
