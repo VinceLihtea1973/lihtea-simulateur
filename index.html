@@ -11502,19 +11502,14 @@ async function exporterPDF(previewOnly = false) {
     // Badge confidentiel
     rect(W - MARG - 28, 7.5, 28, 7, [20, 55, 85]);
     txt('CONFIDENTIEL', W - MARG - 14, 12.5, 5.5, PDF_COLORS.tealLight, true, 'center');
-    // Separator
-    doc.setDrawColor(255, 255, 255); doc.setGlobalAlpha(0.08);
-    doc.setLineWidth(0.3); doc.line(0, 26, W, 26);
-    doc.setGlobalAlpha(1);
+    // Separator (solid navyLight line)
+    doc.setDrawColor(...[30, 65, 95]);
+    doc.setLineWidth(0.4); doc.line(0, 26, W, 26);
 
     Y = 36;
 
     // ── Section label + titre ──
-    doc.setFontSize(7); doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...PDF_COLORS.teal);
-    doc.setCharSpace(2.5);
-    doc.text('NOS ENGAGEMENTS', MARG, Y);
-    doc.setCharSpace(0);
+    txt('NOS ENGAGEMENTS', MARG, Y, 7, PDF_COLORS.teal, true);
     Y += 8;
     txt('Renouveler. Financer. Subventionner.', MARG, Y, 17, PDF_COLORS.blanc, true);
     Y += 8;
@@ -11554,10 +11549,7 @@ async function exporterPDF(previewOnly = false) {
       // Num icône centré
       txt(card.num, cx + 9, cy + 13, 7, PDF_COLORS.teal, true, 'center');
       // Label tag teal
-      doc.setFontSize(6); doc.setFont('helvetica', 'bold'); doc.setTextColor(...PDF_COLORS.teal);
-      doc.setCharSpace(1.2);
-      doc.text(card.num + ' — ' + card.tag, cx + 3, cy + 24);
-      doc.setCharSpace(0);
+      txt(card.num + ' — ' + card.tag, cx + 3, cy + 24, 6, PDF_COLORS.teal, true);
       // Titre (2 lignes)
       const tLines = card.title.split('\n');
       tLines.forEach((l, li) => txt(l, cx + 3, cy + 32 + li * 5.5, 8.5, PDF_COLORS.blanc, true));
@@ -11581,7 +11573,7 @@ async function exporterPDF(previewOnly = false) {
     statsD.forEach((s, i) => {
       const sx = MARG + i * sW + sW / 2;
       // Séparateur vertical (sauf premier)
-      if (i > 0) { doc.setDrawColor(255,255,255); doc.setGlobalAlpha(0.1); doc.setLineWidth(0.3); doc.line(MARG + i*sW, Y+3, MARG + i*sW, Y+17); doc.setGlobalAlpha(1); }
+      if (i > 0) { doc.setDrawColor(...[30, 65, 95]); doc.setLineWidth(0.4); doc.line(MARG + i*sW, Y+3, MARG + i*sW, Y+17); }
       txt(s.val, sx, Y + 9, 12, PDF_COLORS.teal, true, 'center');
       txt(s.lbl, sx, Y + 15.5, 6, PDF_COLORS.gris, false, 'center');
     });
