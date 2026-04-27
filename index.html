@@ -9091,7 +9091,9 @@ function _pipelineDragEnd() { document.querySelectorAll('.pipeline-kanban-card')
 function _kbPhone(prospectId, triggerEl) {
   // Remove any existing popover
   document.getElementById('_kb-phone-pop')?.remove();
-  const c = (_pipelineClients || []).find(p => p.id === prospectId);
+  // Chercher dans _pipelineClients (pipeline) ou _dashCache (dashboard)
+  const c = (_pipelineClients || []).find(p => p.id === prospectId)
+         || (_dashCache?.prospects || []).find(p => p.id === prospectId);
   if (!c) return;
 
   const contactName = [c.contact_prenom, c.contact_nom].filter(Boolean).join(' ') || '—';
