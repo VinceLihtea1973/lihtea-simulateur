@@ -560,6 +560,59 @@
     [data-theme="dark"] #sim-params-panel .sp-divider { background: #1e3352 !important; }
     [data-theme="dark"] #sim-topbar-desktop { background: #0f2236 !important; border-color: #1e3352 !important; }
 
+    /* ─── NOTIFICATIONS ─── */
+    #notif-bell-btn {
+      position: relative; background: none; border: 1px solid var(--c-border);
+      border-radius: 8px; width: 36px; height: 36px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--c-text-2); transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    #notif-bell-btn:hover { background: var(--c-surface-2); color: var(--c-teal); }
+    #notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #ef4444; color: #fff; font-size: 9px; font-weight: 800;
+      min-width: 16px; height: 16px; border-radius: 8px; padding: 0 3px;
+      display: none; align-items: center; justify-content: center;
+      line-height: 1; pointer-events: none;
+    }
+    #notif-panel {
+      position: fixed; top: 56px; right: 16px; width: 340px; max-height: 480px;
+      background: var(--c-surface); border: 1px solid var(--c-border);
+      border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: none; flex-direction: column; overflow: hidden; z-index: 9999;
+    }
+    #notif-panel.open { display: flex; }
+    .notif-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--c-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .notif-header-title { font-size: 13px; font-weight: 700; color: var(--c-text); }
+    .notif-mark-all {
+      font-size: 11px; color: var(--c-teal); cursor: pointer; background: none;
+      border: none; padding: 0; font-family: inherit; font-weight: 600;
+    }
+    .notif-mark-all:hover { text-decoration: underline; }
+    #notif-list { overflow-y: auto; flex: 1; }
+    .notif-item {
+      padding: 11px 16px; border-bottom: 1px solid var(--c-border);
+      display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+      transition: background 0.1s;
+    }
+    .notif-item:hover { background: var(--c-surface-2); }
+    .notif-item.unread { background: rgba(20,184,166,0.06); }
+    .notif-item.unread:hover { background: rgba(20,184,166,0.10); }
+    .notif-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--c-teal);
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .notif-item:not(.unread) .notif-dot { background: transparent; }
+    .notif-item-title { font-size: 12px; font-weight: 700; color: var(--c-text); margin-bottom: 2px; }
+    .notif-item-body { font-size: 11px; color: var(--c-text-2); line-height: 1.4; }
+    .notif-item-time { font-size: 10px; color: var(--c-text-3); margin-top: 3px; }
+    .notif-empty { padding: 32px 16px; text-align: center; color: var(--c-text-3); font-size: 12px; }
+    [data-theme="dark"] #notif-panel { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+
     /* ─── CONFIDENCE INDICATORS ─── */
     .confidence-badge {
       display: inline-flex; align-items: center; gap: 4px;
@@ -4797,7 +4850,20 @@
         <button class="sim-tb-btn" onclick="if(typeof exporterExcel==='function')exporterExcel()">Export Excel</button>
         <button class="sim-tb-btn" onclick="if(typeof genererProposition==='function')genererProposition()">Générer la proposition</button>
         <button class="sim-tb-btn primary" onclick="if(typeof enregistrerEtude==='function')enregistrerEtude()">Enregistrer</button>
+        <button id="notif-bell-btn" onclick="toggleNotifPanel()" title="Notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span id="notif-badge"></span>
+        </button>
       </div>
+    </div>
+
+    <!-- Panel notifications -->
+    <div id="notif-panel">
+      <div class="notif-header">
+        <span class="notif-header-title">Notifications</span>
+        <button class="notif-mark-all" onclick="marquerToutLu()">Tout marquer lu</button>
+      </div>
+      <div id="notif-list"><div class="notif-empty">Aucune notification</div></div>
     </div>
 
     <div id="sim-params-panel">
@@ -5999,6 +6065,119 @@ const ORGANISMES_DEFAUT = [
 
 let organismesData = (function(){ try { const v = localStorage.getItem('gef_organismes'); return v ? JSON.parse(v) : JSON.parse(JSON.stringify(ORGANISMES_DEFAUT)); } catch(e) { return JSON.parse(JSON.stringify(ORGANISMES_DEFAUT)); } })();
 
+// ═══ NOTIFICATIONS IN-APP ═══
+const NOTIF_HEADERS = () => ({
+  'apikey': SUPABASE_ANON,
+  'Authorization': 'Bearer ' + SUPABASE_ANON,
+  'Content-Type': 'application/json',
+});
+
+async function notifier(type, title, body, metadata = {}) {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/notifications', {
+      method: 'POST',
+      headers: { ...NOTIF_HEADERS(), 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ type, title, body, metadata, lu: false }),
+    });
+    await chargerNotifications();
+  } catch(e) { console.warn('[notifier]', e); }
+}
+
+async function chargerNotifications() {
+  try {
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/notifications?order=created_at.desc&limit=30',
+      { headers: NOTIF_HEADERS() }
+    );
+    if (!res.ok) return;
+    const notifs = await res.json();
+    afficherNotifications(notifs);
+    const unread = notifs.filter(n => !n.lu).length;
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      badge.textContent = unread > 9 ? '9+' : unread;
+      badge.style.display = unread > 0 ? 'flex' : 'none';
+    }
+  } catch(e) { console.warn('[chargerNotifications]', e); }
+}
+
+function afficherNotifications(notifs) {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  if (!notifs.length) {
+    list.innerHTML = '<div class="notif-empty">Aucune notification pour le moment</div>';
+    return;
+  }
+  list.innerHTML = notifs.map(n => {
+    const ago = tempsEcoule(n.created_at);
+    const cls = n.lu ? 'notif-item' : 'notif-item unread';
+    return `<div class="${cls}" onclick="marquerLu('${n.id}')">
+      <div class="notif-dot"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="notif-item-title">${escH(n.title)}</div>
+        ${n.body ? `<div class="notif-item-body">${escH(n.body)}</div>` : ''}
+        <div class="notif-item-time">${ago}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escH(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function tempsEcoule(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return "À l'instant";
+  if (m < 60) return `Il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `Il y a ${h}h`;
+  return `Il y a ${Math.floor(h / 24)}j`;
+}
+
+async function marquerLu(id) {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/notifications?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { ...NOTIF_HEADERS(), 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ lu: true }),
+    });
+    await chargerNotifications();
+  } catch(e) {}
+}
+
+async function marquerToutLu() {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/notifications?lu=eq.false', {
+      method: 'PATCH',
+      headers: { ...NOTIF_HEADERS(), 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ lu: true }),
+    });
+    await chargerNotifications();
+  } catch(e) {}
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) chargerNotifications();
+}
+
+// Fermer le panel si clic hors
+document.addEventListener('click', e => {
+  const panel = document.getElementById('notif-panel');
+  const btn = document.getElementById('notif-bell-btn');
+  if (panel && panel.classList.contains('open') && !panel.contains(e.target) && !btn?.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+// Polling toutes les 30 secondes
+setTimeout(() => {
+  chargerNotifications();
+  setInterval(chargerNotifications, 30000);
+}, 2000);
+
 // ═══ SUPABASE SYNC — Charge les données depuis admin.lihtea.com ═══
 const SUPABASE_URL = 'https://zjhiwwbabsggzhcfhyqb.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqaGl3d2JhYnNnZ3poY2ZoeXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQwMzIsImV4cCI6MjA4OTg1MDAzMn0.okmdU-XNarF70eTrrqu4xjNNVrVO-Nd27FUm7sGJ97U';
@@ -7070,6 +7249,8 @@ async function enregistrerEtude() {
       // On reset seulement le brouillon — l'auto-save ne doit plus écraser l'étude enregistrée
       _currentBrouillonId = null;
       showToast('✓ Étude enregistrée — marquée comme référence', 'success');
+      const d2 = lireParametres();
+      notifier('etude', '📊 Étude enregistrée', d2.nomClient + ' — ' + Math.round(d2.inv).toLocaleString('fr-FR') + ' EUR · ' + d2.typeLabel.substring(0,40), { client: d2.nomClient, inv: d2.inv });
     } else {
       showToast('Erreur lors de l\'enregistrement', 'error');
     }
@@ -11602,6 +11783,7 @@ async function exporterPDF(previewOnly = false) {
 
     // Sauvegarder la proposition dans l'historique AVANT le téléchargement
     sauvegarderProposition(d.nomClient || 'Sans nom', d.inv, d.totalAides, d.coutNet, 'pdf', _pdfBlobForStorage, nomFichier);
+    notifier('proposition', '📄 Proposition générée', (d.nomClient || 'Client') + ' — ' + Math.round(d.inv).toLocaleString('fr-FR') + ' EUR · Aides : ' + Math.round(d.totalAides).toLocaleString('fr-FR') + ' EUR', { client: d.nomClient, inv: d.inv, aides: d.totalAides });
 
     doc.save(nomFichier);
 
