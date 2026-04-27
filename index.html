@@ -391,93 +391,144 @@
 
     /* ─── DARK THEME VARIABLES ─── */
     [data-theme="dark"] {
-      --c-bg: #0c1829;
-      --c-surface: #132035;
-      --c-border: #1e3352;
-      --c-sim-panel-bg: #0a1829;
-      --c-border-strong: #2a4570;
-      --c-text: #e2e8f0;
-      --c-text-2: #94a3b8;
-      --c-text-3: #64748b;
-      --c-navy: #93c5fd;
-      --c-navy-light: #1e3a5f;
-      --c-navy-soft: #264a6a;
-      --c-teal-bg: rgba(13,148,136,0.15);
+      /* ── Revolut-style dark palette ── */
+      --c-bg:      #0d0f1a;   /* quasi-noir avec teinte bleue */
+      --c-surface: #161929;   /* cartes / panneaux */
+      --c-surface2:#1e2235;   /* surface secondaire */
+      --c-border:  rgba(255,255,255,0.08);
+      --c-border-strong: rgba(255,255,255,0.15);
+      --c-sim-panel-bg: #0b0d1a;
+
+      /* Textes — haute lisibilité */
+      --c-text:   #ffffff;
+      --c-text-2: rgba(255,255,255,0.65);
+      --c-text-3: rgba(255,255,255,0.38);
+
+      /* Brand */
+      --c-navy:       #7eb8f7;
+      --c-navy-light: rgba(126,184,247,0.12);
+      --c-navy-soft:  rgba(126,184,247,0.08);
+
+      /* Teal Lihtea */
+      --c-teal:        #14b8a6;
+      --c-teal-bright: #2dd4bf;
+      --c-teal-bg:     rgba(20,184,166,0.12);
       --c-teal-border: rgba(20,184,166,0.25);
-      --c-green: #34d399;
-      --c-green-bg: rgba(5,150,105,0.15);
-      --c-blue: #60a5fa;
-      --c-blue-bg: rgba(37,99,235,0.15);
-      --c-amber: #fbbf24;
-      --c-amber-bg: rgba(217,119,6,0.15);
-      --c-amber-border: rgba(217,119,6,0.35);
-      --c-red: #f87171;
-      --c-red-bg: rgba(220,38,38,0.15);
-      --c-red-border: rgba(220,38,38,0.35);
-      --c-purple: #a78bfa;
-      --c-purple-bg: rgba(124,58,237,0.15);
-      --c-gold-light: rgba(212,168,67,0.12);
-      --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.35);
+
+      /* Sémantiques */
+      --c-green:        #34d399;
+      --c-green-bg:     rgba(52,211,153,0.12);
+      --c-blue:         #60a5fa;
+      --c-blue-bg:      rgba(96,165,250,0.12);
+      --c-amber:        #fbbf24;
+      --c-amber-bg:     rgba(251,191,36,0.12);
+      --c-amber-border: rgba(251,191,36,0.28);
+      --c-red:          #f87171;
+      --c-red-bg:       rgba(248,113,113,0.12);
+      --c-red-border:   rgba(248,113,113,0.28);
+      --c-purple:       #a78bfa;
+      --c-purple-bg:    rgba(167,139,250,0.12);
+      --c-gold-light:   rgba(212,168,67,0.10);
+
+      --shadow:    0 1px 4px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
     }
-    [data-theme="dark"] body::before { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(13,148,136,0.06), transparent), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(15,43,70,0.06), transparent); }
-    [data-theme="dark"] .header-sticky { background: rgba(19,32,53,0.97); border-bottom-color: var(--c-border); }
+    /* ═══ DARK MODE — STYLE REVOLUT ═══════════════════════════════════════ */
+    [data-theme="dark"] body { background: var(--c-bg); color: var(--c-text); }
+    [data-theme="dark"] body::before { opacity: 0; }
+
+    /* Layout */
+    [data-theme="dark"] .header-sticky { background: rgba(13,15,26,0.96) !important; border-bottom: 1px solid var(--c-border) !important; backdrop-filter: blur(12px); }
     [data-theme="dark"] .header-page-title { color: var(--c-text); }
-    [data-theme="dark"] .header-page-sep { color: var(--c-border); }
-    [data-theme="dark"] .sidebar { background: #0a1e33; border-right-color: var(--c-border); }
-    [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background: var(--c-bg); color: var(--c-text); border-color: var(--c-border); }
-    [data-theme="dark"] .tab-btn { background: var(--c-bg); color: var(--c-text-2); border-color: var(--c-border); }
-    [data-theme="dark"] .tab-btn.active { background: var(--c-teal); color: white; }
-    [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
-    [data-theme="dark"] .scoring-aide { background: var(--c-surface); border-color: var(--c-border); }
+    [data-theme="dark"] .sidebar { background: #0d0f1a !important; border-right: 1px solid var(--c-border) !important; }
+    [data-theme="dark"] .sidebar-item { color: var(--c-text-2) !important; }
+    [data-theme="dark"] .sidebar-item.active { color: #fff !important; background: rgba(20,184,166,0.15) !important; }
+    [data-theme="dark"] .sidebar-item-label { color: inherit !important; }
+    [data-theme="dark"] .main-content { background: var(--c-bg); }
     [data-theme="dark"] .export-bar,
-    [data-theme="dark"] .export-bar-sticky { background: rgba(19,32,53,0.97); border-top-color: var(--c-border); }
+    [data-theme="dark"] .export-bar-sticky { background: rgba(13,15,26,0.96) !important; border-top: 1px solid var(--c-border) !important; }
 
-    /* ─── DARK MODE: element-level overrides ─── */
-    /* Prospect/client table header — navy var becomes light blue in dark, use solid dark instead */
-    [data-theme="dark"] .prospect-table th { background: #1a2f4a; color: rgba(255,255,255,0.75); }
-    /* Client drawer cards */
-    [data-theme="dark"] .client-drawer-kpi-card { background: var(--c-surface); border-color: var(--c-border); }
-    [data-theme="dark"] .client-drawer-sim-row { background: var(--c-surface); border-color: var(--c-border); }
+    /* Inputs, selects */
+    [data-theme="dark"] input,
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea { background: var(--c-surface2) !important; color: var(--c-text) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] input::placeholder { color: var(--c-text-3) !important; }
+    [data-theme="dark"] .filter-select { background: var(--c-surface) !important; color: var(--c-text-2) !important; border-color: var(--c-border) !important; }
+
+    /* Cards & surfaces */
+    [data-theme="dark"] .card { background: var(--c-surface) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    [data-theme="dark"] .tab-btn { background: var(--c-surface) !important; color: var(--c-text-2) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .tab-btn.active { background: var(--c-teal) !important; color: #fff !important; }
+    [data-theme="dark"] .scoring-aide { background: var(--c-surface) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .saved-sim-card { background: var(--c-surface) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    [data-theme="dark"] .crm-kpi-card { background: var(--c-surface) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .crm-kpi-val { color: var(--c-text) !important; }
+    [data-theme="dark"] .crm-kpi-label { color: var(--c-text-3) !important; }
+
+    /* Tables */
+    [data-theme="dark"] .prospect-table { color: var(--c-text); }
+    [data-theme="dark"] .prospect-table th { background: var(--c-surface2) !important; color: var(--c-text-3) !important; letter-spacing: 0.08em; }
+    [data-theme="dark"] .prospect-table td { color: var(--c-text) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .prospect-table tbody tr:hover td { background: rgba(255,255,255,0.04) !important; }
+    [data-theme="dark"] .prospect-table-wrap { background: var(--c-surface); border-radius: 12px; border: 1px solid var(--c-border); overflow: hidden; }
+
+    /* Pipeline kanban */
+    [data-theme="dark"] .pipeline-kanban-card { background: var(--c-surface) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    [data-theme="dark"] .pipeline-col-body { background: var(--c-surface2) !important; border-color: var(--c-border) !important; }
+
+    /* Client drawer */
+    [data-theme="dark"] .client-drawer-kpi-card { background: var(--c-surface2) !important; border-color: var(--c-border) !important; color: var(--c-text) !important; }
+    [data-theme="dark"] .client-drawer-sim-row { background: var(--c-surface) !important; border-color: var(--c-border) !important; }
+    [data-theme="dark"] .drawer-tab-btn { color: var(--c-text-2) !important; }
+    [data-theme="dark"] .drawer-tab-btn.active { color: var(--c-teal) !important; border-color: var(--c-teal) !important; }
+    [data-theme="dark"] .info-field .if-val { color: var(--c-text) !important; }
+    [data-theme="dark"] .if-label { color: var(--c-text-3) !important; }
+
+    /* Modals */
+    [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.75) !important; }
+    [data-theme="dark"] .modal-content { background: var(--c-surface) !important; color: var(--c-text) !important; border: 1px solid var(--c-border) !important; }
+
     /* Dossier alerts */
-    [data-theme="dark"] .dossier-alert-critique { background: var(--c-red-bg); border-color: var(--c-red-border); border-left-color: #dc2626; color: #fca5a5; }
-    [data-theme="dark"] .dossier-alert-warn { background: var(--c-amber-bg); border-color: var(--c-amber-border); border-left-color: #d97706; color: #fde68a; }
-    [data-theme="dark"] .dossier-alert-info { background: rgba(13,148,136,0.12); border-color: rgba(20,184,166,0.25); border-left-color: var(--c-teal); color: #5eead4; }
-    /* Dossier tags */
-    [data-theme="dark"] .dossier-tag-critique { background: var(--c-red-bg); color: #fca5a5; }
-    [data-theme="dark"] .dossier-tl-alerte-tag { background: var(--c-red-bg); color: #fca5a5; }
-    /* Auth error box */
-    [data-theme="dark"] .auth-error { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
-    /* Admin danger buttons */
-    [data-theme="dark"] .admin-btn-danger { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
-    [data-theme="dark"] .admin-btn-danger:hover { background: rgba(220,38,38,0.2); }
-    [data-theme="dark"] .admin-btn-icon.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
-    [data-theme="dark"] .equip-btn-del:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
-    [data-theme="dark"] .saved-sim-btn.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
-    [data-theme="dark"] .contact-action-btn.danger:hover { background: var(--c-red-bg); border-color: var(--c-red-border); }
-    [data-theme="dark"] .org-card-actions .btn-toggle-off { background: var(--c-red-bg); border-color: var(--c-red-border); color: #fca5a5; }
-    [data-theme="dark"] .org-card-actions .btn-del:hover { background: var(--c-red-bg); }
-    [data-theme="dark"] .equip-edit-hint { background: var(--c-teal-bg); }
+    [data-theme="dark"] .dossier-alert-critique { background: var(--c-red-bg) !important; border-color: var(--c-red-border) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .dossier-alert-warn { background: var(--c-amber-bg) !important; border-color: var(--c-amber-border) !important; color: var(--c-amber) !important; }
+    [data-theme="dark"] .dossier-alert-info { background: var(--c-teal-bg) !important; border-color: var(--c-teal-border) !important; color: var(--c-teal) !important; }
+    [data-theme="dark"] .dossier-tag-critique { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .dossier-tl-alerte-tag { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .auth-error { background: var(--c-red-bg) !important; border-color: var(--c-red-border) !important; color: var(--c-red) !important; }
 
-    /* ── Dark mode global — catch-all pour textes et tableaux ── */
-    [data-theme="dark"] table td,
-    [data-theme="dark"] table th { color: inherit; }
-    [data-theme="dark"] .prospect-table td { color: var(--c-text); }
-    [data-theme="dark"] .pipeline-kanban-card { background: var(--c-surface) !important; }
+    /* Badges scoring */
+    [data-theme="dark"] .scoring-badge.orange { background: var(--c-amber-bg) !important; color: var(--c-amber) !important; }
+    [data-theme="dark"] .scoring-badge.red { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .timeline-tag.alerte { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .scoring-check.fail { background: var(--c-red-bg) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .scoring-check.warn { background: var(--c-amber-bg) !important; color: var(--c-amber) !important; }
+    [data-theme="dark"] .org-badge-calc { background: var(--c-green-bg) !important; color: var(--c-green) !important; }
+    [data-theme="dark"] .org-badge-info { background: var(--c-blue-bg) !important; color: var(--c-blue) !important; }
+    [data-theme="dark"] .org-badge-off { background: rgba(255,255,255,0.06) !important; color: var(--c-text-3) !important; }
+    [data-theme="dark"] .org-card-actions .btn-toggle-on { background: var(--c-green-bg) !important; color: var(--c-green) !important; border-color: rgba(52,211,153,0.3) !important; }
+    [data-theme="dark"] .admin-taux-badge.high { background: var(--c-amber-bg) !important; color: var(--c-amber) !important; }
+    [data-theme="dark"] .dlbadge-collect { background: var(--c-amber-bg) !important; color: var(--c-amber) !important; }
+    [data-theme="dark"] .dlbadge-sign { background: rgba(244,114,182,0.12) !important; color: #f9a8d4 !important; }
+    [data-theme="dark"] .dlbadge-template { background: var(--c-purple-bg) !important; color: var(--c-purple) !important; }
+    [data-theme="dark"] #drawer-admin-badge { background: var(--c-amber-bg) !important; color: var(--c-amber) !important; }
 
-    /* ── Badges & tags — dark mode ── */
-    [data-theme="dark"] .scoring-badge { color: var(--c-text) !important; }
-    [data-theme="dark"] .scoring-badge.orange { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
-    [data-theme="dark"] .scoring-badge.red { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
-    [data-theme="dark"] .timeline-tag.alerte { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
-    [data-theme="dark"] .dossier-tl-alerte-tag { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
-    [data-theme="dark"] .dossier-tag-critique { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
-    [data-theme="dark"] .scoring-check.fail { background: rgba(220,38,38,0.18) !important; color: #f87171 !important; }
-    [data-theme="dark"] .scoring-check.warn { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
-    [data-theme="dark"] .org-badge-calc { background: rgba(5,150,105,0.18) !important; color: #34d399 !important; }
-    [data-theme="dark"] .org-badge-info { background: rgba(37,99,235,0.18) !important; color: #60a5fa !important; }
-    [data-theme="dark"] .org-badge-off { background: rgba(100,116,139,0.18) !important; color: var(--c-text-3) !important; }
+    /* Danger buttons */
+    [data-theme="dark"] .admin-btn-danger,
+    [data-theme="dark"] .equip-btn-del:hover,
+    [data-theme="dark"] .saved-sim-btn.danger:hover,
+    [data-theme="dark"] .contact-action-btn.danger:hover,
+    [data-theme="dark"] .admin-btn-icon.danger:hover { background: var(--c-red-bg) !important; border-color: var(--c-red-border) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .org-card-actions .btn-toggle-off { background: var(--c-red-bg) !important; border-color: var(--c-red-border) !important; color: var(--c-red) !important; }
+    [data-theme="dark"] .org-card-actions .btn-del:hover { background: var(--c-red-bg) !important; }
+    [data-theme="dark"] .equip-edit-hint { background: var(--c-teal-bg) !important; }
+
+    /* Textes généraux */
+    [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3 { color: var(--c-text) !important; }
+    [data-theme="dark"] .section-label { color: var(--c-text-3) !important; }
+    [data-theme="dark"] .crm-page-header h1 { color: var(--c-text) !important; }
+    [data-theme="dark"] .crm-page-header p { color: var(--c-text-3) !important; }
+    [data-theme="dark"] .pkc-name { color: var(--c-text) !important; }
     [data-theme="dark"] .org-card-actions .btn-toggle-on { background: rgba(5,150,105,0.18) !important; color: #34d399 !important; border-color: rgba(5,150,105,0.3) !important; }
     [data-theme="dark"] .admin-taux-badge.high { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
     [data-theme="dark"] .dlbadge-collect { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
