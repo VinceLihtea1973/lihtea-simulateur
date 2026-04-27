@@ -4862,15 +4862,6 @@
       </div>
     </div>
 
-    <!-- Panel notifications -->
-    <div id="notif-panel">
-      <div class="notif-header">
-        <span class="notif-header-title">Notifications</span>
-        <button class="notif-mark-all" onclick="marquerToutLu()">Tout marquer lu</button>
-      </div>
-      <div id="notif-list"><div class="notif-empty">Aucune notification</div></div>
-    </div>
-
     <div id="sim-params-panel">
       <!-- ── Bloc client (navy) ── -->
       <div id="sim-client-card" class="card" style="padding:16px 18px;margin-bottom:16px;background:linear-gradient(135deg,#0f2b46 0%,#1a3d5c 100%);border:1px solid rgba(255,255,255,0.08);border-radius:10px;">
@@ -6164,7 +6155,18 @@ function toggleNotifPanel() {
   const panel = document.getElementById('notif-panel');
   if (!panel) return;
   const isOpen = panel.classList.toggle('open');
-  if (isOpen) chargerNotifications();
+  if (isOpen) {
+    // Positionner sous le bouton actif (header ou topbar sim)
+    const btn = document.getElementById('notif-bell-btn-sim')?.offsetParent !== null
+      ? document.getElementById('notif-bell-btn-sim')
+      : document.getElementById('notif-bell-btn');
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      panel.style.top = (r.bottom + 8) + 'px';
+      panel.style.right = (window.innerWidth - r.right) + 'px';
+    }
+    chargerNotifications();
+  }
 }
 
 // Fermer le panel si clic hors
@@ -16464,6 +16466,15 @@ function renderAnnualTable(fluxCumule, ecoAn, a, duree, HORIZON) {
       <button class="crm-modal-btn-main" onclick="saveAnyContactModal()">✓ Enregistrer</button>
     </div>
   </div>
+</div>
+
+<!-- Panel notifications — au top level du DOM pour échapper aux stacking contexts -->
+<div id="notif-panel">
+  <div class="notif-header">
+    <span class="notif-header-title">Notifications</span>
+    <button class="notif-mark-all" onclick="marquerToutLu()">Tout marquer lu</button>
+  </div>
+  <div id="notif-list"><div class="notif-empty">Aucune notification</div></div>
 </div>
 
 </body>
