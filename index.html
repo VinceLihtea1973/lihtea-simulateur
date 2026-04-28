@@ -2021,22 +2021,23 @@
       background: #0f2b46;
       color: #fff;
       border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 20px; font-weight: 700;
+      padding: 5px 12px;
+      font-size: 15px; font-weight: 700;
       font-family: var(--font-mono);
-      margin-bottom: 8px; line-height: 1.3;
+      margin-bottom: 8px; line-height: 1.4;
     }
     .sp-field input[type="range"] { width: 100%; margin: 0; }
-    /* Input investissement — même style exactement */
+    /* Input investissement — même style exactement, !important pour forcer sur <input> */
     .sp-inv-input {
       width: 100%; box-sizing: border-box;
-      background: #0f2b46;
-      color: #fff;
-      border: none;
-      border-radius: 8px; padding: 6px 14px;
-      font-size: 20px; font-weight: 700; font-family: var(--font-mono);
+      background: #0f2b46 !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 8px; padding: 5px 12px;
+      font-size: 15px !important; font-weight: 700 !important;
+      font-family: var(--font-mono) !important;
       text-align: left; outline: none;
-      margin-bottom: 8px; cursor: text; line-height: 1.3;
+      margin-bottom: 8px; cursor: text; line-height: 1.4;
     }
     .sp-inv-input:focus {
       box-shadow: 0 0 0 2px rgba(45,212,191,0.4);
