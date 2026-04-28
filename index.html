@@ -4985,29 +4985,31 @@
         <div class="sp-grid-2">
           <div class="sp-field">
             <div class="sp-field-label">Investissement HT</div>
-            <input type="text" id="inv-number" inputmode="numeric" autocomplete="off"
-              value="250 000" class="sp-inv-input"
+            <div class="sp-field-val" id="inv-number" contenteditable="true"
+              style="cursor:text;outline:none;"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
               oninput="
-                const raw=this.value.replace(/[^\d]/g,'');
+                const raw=this.textContent.replace(/[^\d]/g,'');
                 const v=Math.max(20000,Math.min(2000000,parseInt(raw)||20000));
                 document.getElementById('inv').value=v;
-                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
+                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+' €';
                 recalculer();
               "
               onblur="
-                const raw=this.value.replace(/[^\d]/g,'');
+                const raw=this.textContent.replace(/[^\d]/g,'');
                 const v=Math.max(20000,Math.min(2000000,parseInt(raw)||20000));
-                this.value=v.toLocaleString('fr-FR');
+                this.textContent=v.toLocaleString('fr-FR');
                 document.getElementById('inv').value=v;
-                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+'\u202f€';
+                document.getElementById('inv-display').textContent=v.toLocaleString('fr-FR')+' €';
                 recalculer();
               "
-              onfocus="this.select();">
+              onfocus="const r=document.createRange();r.selectNodeContents(this);const s=window.getSelection();s.removeAllRanges();s.addRange(r);"
+            >250 000</div>
             <input type="range" id="inv" min="20000" max="2000000" step="5000" value="250000"
                    oninput="
                      const formatted=Number(this.value).toLocaleString('fr-FR');
-                     document.getElementById('inv-number').value=formatted;
-                     document.getElementById('inv-display').textContent=formatted+'\u202f€';
+                     document.getElementById('inv-number').textContent=formatted;
+                     document.getElementById('inv-display').textContent=formatted+' €';
                      recalculer();
                    ">
             <span id="inv-display" style="display:none;">250 000 €</span>
@@ -11031,7 +11033,7 @@ function startSimForClient(raison, siren, params) {
     };
     const setNum = (id, val) => {
       const el = document.getElementById(id);
-      if (el && val != null && !isNaN(val)) el.value = Number(val).toLocaleString('fr-FR');
+      if (el && val != null && !isNaN(val)) { const _f=Number(val).toLocaleString('fr-FR'); el.value=_f; el.textContent=_f; }
     };
     if (params.investissement != null) { setSlider('inv', params.investissement); setNum('inv-number', params.investissement); }
     if (params.consommation != null) setSlider('conso', params.consommation);
@@ -11083,7 +11085,7 @@ async function genererPropositionDepuisDrawer(paramsKey, clientNom, siren) {
   };
   const setNum = (id, val) => {
     const el = document.getElementById(id);
-    if (el && val != null && !isNaN(val)) el.value = Number(val).toLocaleString('fr-FR');
+    if (el && val != null && !isNaN(val)) { const _f=Number(val).toLocaleString('fr-FR'); el.value=_f; el.textContent=_f; }
   };
   if (params.investissement != null) { setSlider('inv', params.investissement); setNum('inv-number', params.investissement); }
   if (params.consommation != null) setSlider('conso', params.consommation);
@@ -15442,7 +15444,7 @@ function resetSimulateur() {
 
   // Reset the inv text input explicitly (slider oninput may not fire reliably on programmatic dispatch)
   const invNumber = document.getElementById('inv-number');
-  if (invNumber) invNumber.value = (250000).toLocaleString('fr-FR');
+  if (invNumber) { invNumber.value=(250000).toLocaleString('fr-FR'); invNumber.textContent=(250000).toLocaleString('fr-FR'); }
 
   // Reset taille to PME (default)
   const tailleEl = document.getElementById('taille');
