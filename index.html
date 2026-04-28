@@ -547,11 +547,13 @@
     [data-theme="dark"] #sim-params-panel { background: var(--c-sim-panel-bg) !important; }
     [data-theme="dark"] #sim-params-panel .card:not(#sim-client-card) { background: #132035 !important; border-color: #1e3352 !important; }
     [data-theme="dark"] #sim-params-panel .sp-field { background: #0c1829 !important; border-color: #1e3352 !important; }
-    [data-theme="dark"] #sim-params-panel .sp-field-val { color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-field-val { background: #1e3352 !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-inv-input { background: #1e3352 !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel input[type="range"] { background: linear-gradient(to right,#0d9488 50%,#1e3352 50%) !important; }
     [data-theme="dark"] #sim-params-panel .sp-field-label { color: #64748b !important; }
     [data-theme="dark"] #sim-params-panel .sim-card-title { color: #93c5fd !important; }
     [data-theme="dark"] #sim-params-panel .sim-card-sub { color: #64748b !important; }
-    [data-theme="dark"] #sim-params-panel .sp-inv-input { background: rgba(13,148,136,0.12) !important; border-color: rgba(20,184,166,0.25) !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] #sim-params-panel .sp-inv-input { background: #1e3352 !important; border: none !important; color: #e2e8f0 !important; }
     [data-theme="dark"] #sim-params-panel .sp-result-card { background: rgba(13,148,136,0.1) !important; border-color: rgba(20,184,166,0.2) !important; }
     [data-theme="dark"] #sim-params-panel #bareme-info-field { background: rgba(13,148,136,0.1) !important; border-color: rgba(20,184,166,0.2) !important; }
     [data-theme="dark"] #sim-params-panel select,
@@ -717,6 +719,10 @@
       cursor: pointer;
       transition: background 0.2s;
     }
+    /* Sliders dans le panel paramètres : track teal progressif */
+    #sim-params-panel input[type="range"] {
+      background: linear-gradient(to right, #0d9488 50%, #e2e8f0 50%);
+    }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 18px;
@@ -727,6 +733,14 @@
       box-shadow: 0 0 0 1px var(--c-navy), 0 2px 6px rgba(15,43,70,0.3);
       cursor: pointer;
       transition: transform 0.15s var(--ease-spring), box-shadow 0.15s;
+    }
+    /* Thumb teal dans le panel paramètres */
+    #sim-params-panel input[type="range"]::-webkit-slider-thumb {
+      background: #0d9488;
+      box-shadow: 0 0 0 1px #0d9488, 0 2px 6px rgba(13,148,136,0.35);
+    }
+    #sim-params-panel input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 1px #0d9488, 0 3px 10px rgba(13,148,136,0.45);
     }
     input[type="range"]::-webkit-slider-thumb:hover {
       transform: scale(1.15);
@@ -2001,19 +2015,28 @@
       margin-bottom: 3px; line-height: 1.2;
     }
     .sp-field-val {
-      font-size: 20px; font-weight: 800;
-      color: var(--c-navy); font-family: var(--font-mono);
-      margin-bottom: 4px; line-height: 1;
+      display: inline-block;
+      background: #0f2b46;
+      color: #fff;
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: 18px; font-weight: 700;
+      font-family: var(--font-mono);
+      margin-bottom: 8px; line-height: 1.3;
     }
     .sp-field input[type="range"] { width: 100%; margin: 0; }
     .sp-inv-input {
       width: 100%; box-sizing: border-box;
-      border: 1px solid var(--c-teal-border);
-      background: var(--c-teal-bg);
-      border-radius: 5px; padding: 3px 6px;
-      font-size: 20px; font-weight: 700; font-family: var(--font-mono);
-      color: var(--c-navy); text-align: right; outline: none;
-      margin-bottom: 4px;
+      background: #0f2b46;
+      color: #fff;
+      border: none;
+      border-radius: 8px; padding: 5px 14px;
+      font-size: 18px; font-weight: 700; font-family: var(--font-mono);
+      text-align: left; outline: none;
+      margin-bottom: 8px; cursor: text;
+    }
+    .sp-inv-input:focus {
+      box-shadow: 0 0 0 2px rgba(45,212,191,0.4);
     }
     .sp-divider { height: 1px; background: var(--c-border); margin: 8px 0; }
     .sp-result-card {
@@ -14164,6 +14187,26 @@ function makeFieldValuesEditable() {
     });
   }
 })();
+
+// ═══════════════════════════════════════════════════════════
+// SLIDER FILL — track teal progressif dans le panel paramètres
+// ═══════════════════════════════════════════════════════════
+function _updateSliderFill(el) {
+  const min = parseFloat(el.min) || 0;
+  const max = parseFloat(el.max) || 100;
+  const val = parseFloat(el.value) || 0;
+  const pct = Math.round(((val - min) / (max - min)) * 100);
+  el.style.background = `linear-gradient(to right,#0d9488 ${pct}%,#e2e8f0 ${pct}%)`;
+}
+function initSliderFills() {
+  const panel = document.getElementById('sim-params-panel');
+  if (!panel) return;
+  panel.querySelectorAll('input[type="range"]').forEach(el => {
+    _updateSliderFill(el);
+    el.addEventListener('input', () => _updateSliderFill(el));
+  });
+}
+document.addEventListener('DOMContentLoaded', initSliderFills);
 
 // ═══════════════════════════════════════════════════════════
 // TOAST NOTIFICATION SYSTEM
